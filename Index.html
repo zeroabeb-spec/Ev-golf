@@ -1,0 +1,2878 @@
+<!DOCTYPE html>
+<html lang="am" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV-Golf Carts Ethiopia | የኤሌክትሪክ ጎልፍ ካርቶች ሽያጭ</title>
+<meta name="description" content="ዘመናዊ የኤሌክትሪክ ጎልፍ ካርቶች ሽያጭ በኢትዮጵያ። 7 እስከ 23 መቀመጫ፣ 5 ዓመት ዋስትና፣ ነጻ ማድረስ።">
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M36 8 L18 36 h12 l-4 20 22-30 H34 z' fill='%2310b981'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Leaflet (Free Map) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Cloudinary -->
+<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { primary: '#059669', darkBg: '#0f172a' },
+  fontFamily: {
+    sans: ['Inter','Noto Sans Ethiopic','system-ui','sans-serif'],
+    mono: ['JetBrains Mono','ui-monospace','monospace']
+  }
+}}}
+
+/* ==================================================================
+   ⚙️ CONFIGURATION — የእርስዎ መረጃዎች ተሞልተዋል
+   ================================================================== */
+const CONFIG = {
+  // 🗄️ Supabase
+  supabase: {
+    url: 'https://gifccgwxfuirhrngabbv.supabase.co',
+    anonKey: 'sb_publishable_4k7Hj6TuMbCubUZInT--Gg_uGy7Xrye',
+    storageBucket: 'ev-golf',
+    enabled: true
+  },
+
+  // ☁️ Cloudinary
+  cloudinary: {
+    cloudName: 'azdf4lwt',
+    uploadPreset: 'ev_golf_unsigned',
+    enabled: true
+  },
+
+  // ✈️ Telegram Bot
+  telegram: {
+    botToken: '8934767624:AAHpvF2GDL04SmGM8FctJSfJxSitsrbmhXQ',
+    chatIds: ['586949881366288', '8266834331'],
+    enabled: true
+  },
+
+  // 📊 Google Analytics (optional)
+  analytics: {
+    measurementId: 'G-XXXXXXXXXX',
+    enabled: false
+  },
+
+  // 🔐 Admin Password
+  adminPassword: 'admin123'
+};
+
+// Supabase Client
+let supabase = null;
+if (CONFIG.supabase.enabled && CONFIG.supabase.url && window.supabase) {
+  try {
+    supabase = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+    console.log('✅ Supabase connected');
+  } catch (err) {
+    console.error('❌ Supabase init failed:', err);
+    CONFIG.supabase.enabled = false;
+  }
+}
+</script>
+
+<style>
+section[id]{scroll-margin-top:5rem}
+.nav-link.is-active{color:#34d399}
+html{-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#f1f5f9}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:9999px}
+::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.fade-up{animation:fadeUp .45s ease both}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.float-anim{animation:float 4s ease-in-out infinite}
+@keyframes floatSlow{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(2deg)}}
+.float-slow{animation:floatSlow 6s ease-in-out infinite}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+.spin-slow{animation:spinSlow 1s linear infinite}
+@keyframes pulseGlow{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.65;transform:scale(1.05)}}
+.pulse-glow{animation:pulseGlow 4s ease-in-out infinite}
+@keyframes shine{0%{background-position:-200% center}100%{background-position:200% center}}
+.shine-text{background:linear-gradient(90deg,#34d399 0%,#a7f3d0 50%,#34d399 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 3s linear infinite}
+details.faq>summary{list-style:none;cursor:pointer}
+details.faq>summary::-webkit-details-marker{display:none}
+details.faq[open] .faq-chevron{transform:rotate(180deg)}
+.loader-hidden{opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+.no-scroll{overflow:hidden}
+.status-pending{background:#fef3c7;color:#92400e}
+.status-confirmed{background:#dbeafe;color:#1e40af}
+.status-delivered{background:#d1fae5;color:#065f46}
+.status-cancelled{background:#fee2e2;color:#991b1b}
+.stock-in{background:#d1fae5;color:#065f46}
+.stock-low{background:#fef3c7;color:#92400e}
+.stock-out{background:#fee2e2;color:#991b1b}
+.float-tip{position:absolute;left:3.5rem;white-space:nowrap;background:#0f172a;color:#fff;padding:.35rem .75rem;border-radius:.5rem;font-size:.75rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s}
+.group:hover .float-tip{opacity:1}
+.gallery-thumb.active{border-color:#059669!important;opacity:1}
+.gallery-thumb{opacity:.65;transition:opacity .2s}
+.gallery-thumb:hover{opacity:1}
+.file-upload{border:2px dashed #cbd5e1;border-radius:.75rem;padding:1rem;text-align:center;transition:all .2s;cursor:pointer;background:#f8fafc}
+.file-upload:hover{border-color:#10b981;background:#ecfdf5}
+.file-upload.has-file{border-color:#10b981;background:#ecfdf5;border-style:solid}
+.step-indicator{width:2rem;height:2rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;transition:all .3s}
+.step-active{background:#059669;color:#fff;box-shadow:0 0 0 4px rgba(5,150,105,.2)}
+.step-done{background:#059669;color:#fff}
+.step-inactive{background:#e2e8f0;color:#94a3b8}
+.pay-account{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac}
+.copy-btn{transition:all .2s}
+.copy-btn:hover{background:#059669;color:#fff}
+.copy-btn.copied{background:#059669;color:#fff}
+.hero-grid-bg{background-image:linear-gradient(rgba(16,185,129,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.08) 1px,transparent 1px);background-size:40px 40px}
+.account-number{
+  font-family:'JetBrains Mono','ui-monospace',monospace;
+  font-size:1rem;
+  font-weight:700;
+  letter-spacing:.03em;
+  color:#0f172a;
+  line-height:1.4;
+  word-break:break-all;
+  user-select:all;
+}
+@media (min-width:640px){ .account-number{font-size:1.05rem;} }
+.photo-tile{position:relative;overflow:hidden;border-radius:.65rem;border:1px solid #e2e8f0;aspect-ratio:1/1;background:#f1f5f9}
+.photo-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-tile .del-btn{position:absolute;top:.3rem;right:.3rem;width:1.5rem;height:1.5rem;border-radius:9999px;background:#ef4444;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;box-shadow:0 4px 10px rgba(0,0,0,.2);transition:all .15s}
+.photo-tile .del-btn:hover{background:#dc2626;transform:scale(1.1)}
+.photo-tile .primary-badge{position:absolute;top:.3rem;left:.3rem;background:#059669;color:#fff;font-size:.55rem;font-weight:800;padding:.15rem .4rem;border-radius:9999px;letter-spacing:.05em}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.pulse-dot{animation:pulse-dot 1.5s infinite}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+<!-- LOADING -->
+<div id="pageLoader" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900 transition-opacity duration-500">
+  <div class="text-center">
+    <div class="relative mx-auto h-16 w-16">
+      <div class="absolute inset-0 rounded-full border-4 border-slate-700"></div>
+      <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 spin-slow"></div>
+      <div class="absolute inset-0 flex items-center justify-center"><i class="fa-solid fa-bolt text-xl text-emerald-400"></i></div>
+    </div>
+    <p class="mt-4 text-xs font-semibold tracking-widest text-slate-400">EV-GOLF ETHIOPIA</p>
+    <p id="loaderStatus" class="mt-2 text-[10px] text-slate-500"></p>
+  </div>
+</div>
+
+<a href="#cars" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[80] focus:rounded-lg focus:bg-emerald-600 focus:px-4 focus:py-2 focus:text-white">ወደ ዋና ይዘት ዝለል</a>
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/95 text-white shadow-lg backdrop-blur">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between gap-3">
+      <a href="#home" class="flex shrink-0 items-center gap-2">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15">
+          <i class="fa-solid fa-bolt text-lg text-emerald-400"></i>
+        </span>
+        <span class="text-base font-extrabold tracking-tight sm:text-lg">EV-Golf Ethiopia</span>
+      </a>
+      <nav class="hidden items-center gap-0.5 lg:flex">
+        <a href="#home" data-nav="home" class="nav-link rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400" data-i18n="nav_home">መነሻ</a>
+        <a href="#cars" data-nav="cars" class="nav-link rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400" data-i18n="nav_cars">መኪኖች</a>
+        <a href="#features" data-nav="features" class="nav-link rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400" data-i18n="nav_features">ጥቅሞች</a>
+        <a href="#warranty" data-nav="warranty" class="nav-link rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400" data-i18n="nav_warranty">ዋስትና</a>
+        <a href="#faq" data-nav="faq" class="nav-link rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400" data-i18n="nav_faq">ጥያቄዎች</a>
+        <a href="#contact" data-nav="contact" class="nav-link rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400" data-i18n="nav_contact">አድራሻ</a>
+      </nav>
+      <div class="hidden items-center gap-2 md:flex">
+        <div class="flex items-center rounded-xl border border-slate-700 bg-slate-800/60 p-0.5">
+          <button type="button" data-lang="am" class="lang-btn rounded-lg px-2.5 py-1.5 text-xs font-bold">አማ</button>
+          <button type="button" data-lang="en" class="lang-btn rounded-lg px-2.5 py-1.5 text-xs font-bold">EN</button>
+        </div>
+        <a href="#cars" class="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-500" data-i18n="cta_order">አሁኑኑ ይዘዙ</a>
+      </div>
+      <div class="flex items-center gap-2 md:hidden">
+        <div class="flex items-center rounded-lg border border-slate-700 bg-slate-800/60 p-0.5">
+          <button type="button" data-lang="am" class="lang-btn rounded-md px-2 py-1 text-[10px] font-bold">አማ</button>
+          <button type="button" data-lang="en" class="lang-btn rounded-md px-2 py-1 text-[10px] font-bold">EN</button>
+        </div>
+        <button id="menuBtn" type="button" class="rounded-lg p-2 text-2xl focus:outline-none" aria-controls="mobileMenu" aria-expanded="false">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <nav id="mobileMenu" class="hidden border-t border-slate-800 bg-slate-900/98 backdrop-blur lg:hidden">
+    <div class="space-y-1 px-4 pb-5 pt-3">
+      <a href="#home" class="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400"><i class="fa-solid fa-house w-5 text-emerald-500"></i><span data-i18n="nav_home">መነሻ</span></a>
+      <a href="#cars" class="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400"><i class="fa-solid fa-car-side w-5 text-emerald-500"></i><span data-i18n="nav_cars">መኪኖች</span></a>
+      <a href="#features" class="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400"><i class="fa-solid fa-star w-5 text-emerald-500"></i><span data-i18n="nav_features">ጥቅሞች</span></a>
+      <a href="#warranty" class="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400"><i class="fa-solid fa-shield-halved w-5 text-emerald-500"></i><span data-i18n="nav_warranty">ዋስትና</span></a>
+      <a href="#faq" class="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400"><i class="fa-solid fa-circle-question w-5 text-emerald-500"></i><span data-i18n="nav_faq">ጥያቄዎች</span></a>
+      <a href="#contact" class="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400"><i class="fa-solid fa-location-dot w-5 text-emerald-500"></i><span data-i18n="nav_contact">አድራሻ</span></a>
+      <a href="#cars" class="mt-2 block rounded-xl bg-emerald-600 px-3 py-3 text-center text-sm font-bold text-white"><span data-i18n="cta_order">አሁኑኑ ይዘዙ</span></a>
+      <div class="mt-2 border-t border-slate-800 pt-3">
+        <a href="#admin" onclick="openAdminGate(event)" class="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-500 hover:text-emerald-400">
+          <i class="fa-solid fa-lock"></i> Admin Panel
+        </a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section id="home" class="relative overflow-hidden bg-slate-950 text-white">
+  <div class="hero-grid-bg absolute inset-0 opacity-40"></div>
+  <div class="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-emerald-500/20 blur-[100px] pulse-glow"></div>
+  <div class="pointer-events-none absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-cyan-500/15 blur-[100px] pulse-glow" style="animation-delay:1s"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+    <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div class="space-y-6">
+        <div class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-300 backdrop-blur-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+          </span>
+          <span data-i18n="hero_badge">አዲስ የ 2026 ሞዴሎች ደርሰዋል</span>
+        </div>
+
+        <h1 class="text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">
+          <span data-i18n="hero_title_1">ዘመናዊ የኤሌክትሪክ </span>
+          <br>
+          <span class="shine-text" data-i18n="hero_title_2">ጎልፍ ካርቶች</span>
+        </h1>
+
+        <p class="max-w-lg text-base leading-relaxed text-slate-300 sm:text-lg" data-i18n="hero_desc">
+          ለሪዞርቶች፣ ለሆቴሎች፣ ለፋብሪካዎችና ለግል አገልግሎት — ነጻ ማድረስ በመላው ኢትዮጵያ።
+        </p>
+
+        <div class="flex flex-wrap gap-2">
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 backdrop-blur-sm ring-1 ring-white/10">
+            <i class="fa-solid fa-truck-fast text-emerald-400"></i><span data-i18n="chip_delivery">ነጻ ማድረስ</span>
+          </span>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 backdrop-blur-sm ring-1 ring-white/10">
+            <i class="fa-solid fa-shield-halved text-emerald-400"></i><span data-i18n="chip_warranty">5 ዓመት ዋስትና</span>
+          </span>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 backdrop-blur-sm ring-1 ring-white/10">
+            <i class="fa-solid fa-bolt text-emerald-400"></i><span data-i18n="chip_electric">100% ኤሌክትሪክ</span>
+          </span>
+        </div>
+
+        <div class="flex flex-col gap-3 pt-2 sm:flex-row">
+          <a href="#cars" class="rounded-xl bg-emerald-600 px-7 py-3.5 text-center font-bold text-white shadow-2xl shadow-emerald-600/30 transition hover:-translate-y-0.5 hover:bg-emerald-500">
+            <i class="fa-solid fa-car-side mr-2"></i><span data-i18n="hero_btn_1">መኪኖችን ይመልከቱ</span>
+          </a>
+          <a href="#contact" class="rounded-xl border border-white/20 bg-white/5 px-7 py-3.5 text-center font-bold text-white backdrop-blur-sm transition hover:bg-white/10">
+            <i class="fa-solid fa-phone mr-2"></i><span data-i18n="hero_btn_2">ያግኙን</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <div class="float-anim absolute -right-2 -top-4 z-10 hidden rounded-2xl border border-emerald-500/30 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-md sm:block">
+          <div class="flex items-center gap-2">
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400"><i class="fa-solid fa-bolt"></i></div>
+            <div>
+              <p class="text-[10px] font-semibold uppercase text-slate-400" data-i18n="hero_badge_range">ርቀት</p>
+              <p class="text-sm font-black text-white">600 km</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="float-slow absolute -bottom-4 -left-4 z-10 hidden rounded-2xl border border-cyan-500/30 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-md sm:block">
+          <div class="flex items-center gap-2">
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/20 text-cyan-400"><i class="fa-solid fa-users"></i></div>
+            <div>
+              <p class="text-[10px] font-semibold uppercase text-slate-400" data-i18n="hero_badge_seats">መቀመጫ</p>
+              <p class="text-sm font-black text-white">7 – 23</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-800/90 to-slate-900/90 p-2 shadow-2xl backdrop-blur">
+          <div class="relative overflow-hidden rounded-2xl bg-slate-900">
+            <img id="heroCarImg" src="" alt="Electric golf cart" class="h-64 w-full object-cover sm:h-96">
+            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent p-5">
+              <p id="heroCarName" class="text-lg font-black text-white"></p>
+              <div class="mt-2 flex items-center gap-3 text-xs">
+                <span class="flex items-center gap-1 text-emerald-400"><i class="fa-solid fa-road"></i><span id="heroCarRange"></span></span>
+                <span class="flex items-center gap-1 text-cyan-400"><i class="fa-solid fa-users"></i><span id="heroCarSeats"></span></span>
+                <span class="flex items-center gap-1 text-amber-400"><i class="fa-solid fa-gauge-high"></i><span id="heroCarSpeed"></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-3 gap-2">
+          <div class="rounded-xl border border-white/10 bg-white/5 p-3 text-center backdrop-blur">
+            <p class="text-lg font-black text-white">5<span class="text-xs font-bold text-emerald-400">y</span></p>
+            <p class="text-[10px] font-semibold text-slate-400" data-i18n="hero_stat_warranty">ዋስትና</p>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-white/5 p-3 text-center backdrop-blur">
+            <p class="text-lg font-black text-white">100<span class="text-xs font-bold text-emerald-400">%</span></p>
+            <p class="text-[10px] font-semibold text-slate-400" data-i18n="hero_stat_electric">ኤሌክትሪክ</p>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-white/5 p-3 text-center backdrop-blur">
+            <p class="text-lg font-black text-white">0<span class="text-xs font-bold text-emerald-400">ETB</span></p>
+            <p class="text-[10px] font-semibold text-slate-400" data-i18n="hero_stat_delivery">ማድረስ</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute -bottom-1 left-0 right-0">
+    <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="h-8 w-full">
+      <path d="M0 60V30C240 0 480 30 720 30C960 30 1200 0 1440 30V60H0Z" fill="#f8fafc"/>
+    </svg>
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<section id="cars" class="relative z-10 mx-auto -mt-4 max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="rounded-2xl border border-slate-100 bg-white p-3 shadow-xl sm:p-4">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <button type="button" id="toggleFilters" class="relative flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700" aria-controls="filterPanel" aria-expanded="false">
+        <i class="fa-solid fa-filter"></i>
+        <span data-i18n="filter_toggle">ማጣሪያዎች</span>
+        <span id="activeFilterBadge" class="hidden h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-600 px-1.5 text-[10px] font-bold text-white">0</span>
+      </button>
+      <p class="shrink-0 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-700">
+        <span id="resultCount">0</span> <span data-i18n="result_suffix">መኪኖች</span>
+      </p>
+    </div>
+    <div id="filterPanel" class="hidden overflow-hidden border-t border-slate-100 pt-3">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div>
+          <label for="seatFilter" class="mb-1.5 block text-xs font-bold text-slate-500" data-i18n="filter_seats">የመቀመጫ ብዛት</label>
+          <select id="seatFilter" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500">
+            <option value="all" data-i18n="filter_seats_all">ሁሉም</option>
+            <option value="7">7 መቀመጫ</option>
+            <option value="10">10 መቀመጫ</option>
+            <option value="14">14 መቀመጫ</option>
+            <option value="17">17 መቀመጫ</option>
+            <option value="23">23 መቀመጫ</option>
+          </select>
+        </div>
+        <div>
+          <label for="priceFilter" class="mb-1.5 block text-xs font-bold text-slate-500" data-i18n="filter_price">የዋጋ ክልል</label>
+          <select id="priceFilter" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500">
+            <option value="all" data-i18n="filter_price_all">ሁሉም ዋጋ</option>
+            <option value="0-1000000">ከ 1M በታች</option>
+            <option value="1000000-1500000">1M – 1.5M</option>
+            <option value="1500000-99999999">ከ 1.5M በላይ</option>
+          </select>
+        </div>
+        <div>
+          <label for="sortFilter" class="mb-1.5 block text-xs font-bold text-slate-500" data-i18n="filter_sort">ደርድር በ</label>
+          <select id="sortFilter" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500">
+            <option value="default" data-i18n="sort_default">ነባሪ</option>
+            <option value="low" data-i18n="sort_low">ዋጋ ↑</option>
+            <option value="high" data-i18n="sort_high">ዋጋ ↓</option>
+            <option value="seats" data-i18n="sort_seats">መቀመጫ ↑</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-3 flex justify-end">
+        <button type="button" id="resetBtn" class="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800">
+          <i class="fa-solid fa-rotate-left mr-1"></i><span data-i18n="reset_filters">አጽዳ</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CARS LIST -->
+<section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  <div class="mb-10 text-center">
+    <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl" data-i18n="cars_title">የመኪና ዝርዝሮች</h2>
+    <p class="mt-3 text-slate-500" data-i18n="cars_sub">መርጠው በኦንላይን ማዘዝ ይችላሉ</p>
+  </div>
+  <div id="carsGrid" class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"></div>
+  <div id="emptyState" class="hidden py-20 text-center">
+    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
+      <i class="fa-solid fa-car-burst text-3xl text-slate-300"></i>
+    </div>
+    <p class="mt-5 text-lg font-bold text-slate-700" data-i18n="empty_title">ምንም አልተገኘም</p>
+    <button type="button" onclick="resetFilters()" class="mt-6 rounded-xl bg-emerald-600 px-6 py-2.5 font-semibold text-white hover:bg-emerald-500" data-i18n="empty_btn">አጽዳ</button>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="bg-slate-100 py-14">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="mb-10 text-center">
+      <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl" data-i18n="features_title">ለምን የእኛን ይመርጣሉ?</h2>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-2xl bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-xl text-emerald-600"><i class="fa-solid fa-battery-full"></i></div>
+        <h3 class="mt-4 text-base font-bold" data-i18n="feat_1t">ዘላቂ Li-ion ባትሪ</h3>
+        <p class="mt-2 text-sm text-slate-500" data-i18n="feat_1d">ሙሉ የ 5 ዓመት ዋስትና።</p>
+      </div>
+      <div class="rounded-2xl bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-xl text-emerald-600"><i class="fa-solid fa-truck-fast"></i></div>
+        <h3 class="mt-4 text-base font-bold" data-i18n="feat_delivery_t">ነጻ ማድረስ</h3>
+        <p class="mt-2 text-sm text-slate-500" data-i18n="feat_delivery_d">በመላው ኢትዮጵያ ነጻ እናደርሳለን።</p>
+      </div>
+      <div class="rounded-2xl bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-xl text-emerald-600"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3 class="mt-4 text-base font-bold" data-i18n="feat_3t">አስተማማኝ ደህንነት</h3>
+        <p class="mt-2 text-sm text-slate-500" data-i18n="feat_3d">ትዕዛዝ በሙሉ ደህንነት።</p>
+      </div>
+      <div class="rounded-2xl bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-xl text-emerald-600"><i class="fa-solid fa-headset"></i></div>
+        <h3 class="mt-4 text-base font-bold" data-i18n="feat_4t">የድህረ ሽያጭ ድጋፍ</h3>
+        <p class="mt-2 text-sm text-slate-500" data-i18n="feat_4d">የመለዋወጫ እና ጥገና አገልግሎት።</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WARRANTY -->
+<section id="warranty" class="py-14">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="mb-10 text-center">
+      <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl" data-i18n="warranty_title">የዋስትና እና የርቀት ዝርዝር</h2>
+    </div>
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div class="flex items-center gap-3">
+          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-lg text-emerald-600"><i class="fa-solid fa-shield-halved"></i></span>
+          <h3 class="text-lg font-bold" data-i18n="war_title">የዋስትና ውሎች</h3>
+        </div>
+        <ul class="mt-4 space-y-3 text-sm">
+          <li class="flex items-start gap-3 border-b border-slate-100 pb-3"><i class="fa-solid fa-battery-full mt-0.5 text-emerald-500"></i><div><p class="font-bold text-slate-800">Li-ion ባትሪ — 5 ዓመት / 60,000 ኪሜ</p></div></li>
+          <li class="flex items-start gap-3 border-b border-slate-100 pb-3"><i class="fa-solid fa-gear mt-0.5 text-emerald-500"></i><div><p class="font-bold text-slate-800">ኤሌክትሪክ ሞተር — 2 ዓመት</p></div></li>
+          <li class="flex items-start gap-3 border-b border-slate-100 pb-3"><i class="fa-solid fa-car-side mt-0.5 text-emerald-500"></i><div><p class="font-bold text-slate-800">አጠቃላይ ተሽከርካሪ — 1 ዓመት</p></div></li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-circle-xmark mt-0.5 text-red-500"></i><div><p class="font-bold text-slate-800">የማይሸፍናቸው: የተጠቃሚ ጉዳት፣ ያልተፈቀደ ማሻሻያ</p></div></li>
+        </ul>
+      </div>
+      <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div class="flex items-center gap-3">
+          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-lg text-emerald-600"><i class="fa-solid fa-road"></i></span>
+          <h3 class="text-lg font-bold" data-i18n="range_title">የርቀት መለኪያ ሁኔታ</h3>
+        </div>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check-circle mt-0.5 text-emerald-500"></i><div><p class="font-bold text-slate-800">አዲስ Li-ion ባትሪ (100%)</p></div></li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check-circle mt-0.5 text-emerald-500"></i><div><p class="font-bold text-slate-800">25°C የአየር ሙቀት</p></div></li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check-circle mt-0.5 text-emerald-500"></i><div><p class="font-bold text-slate-800">የተለመደ ጭነት (50%)</p></div></li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i><div><p class="font-bold text-slate-800">ትክክለኛው ርቀት እንደ ጭነት፣ መንገድና ሙቀት ይለያያል</p></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="bg-slate-100 py-14">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <div class="mb-10 text-center">
+      <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl" data-i18n="faq_title">በተደጋጋሚ የሚጠየቁ ጥያቄዎች</h2>
+    </div>
+    <div class="space-y-3">
+      <details class="faq rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <summary class="flex items-center justify-between gap-4"><span class="font-bold text-slate-800" data-i18n="faq_q1">የባትሪ ዋስትና ስንት ዓመት ነው?</span><i class="faq-chevron fa-solid fa-chevron-down text-emerald-500 transition"></i></summary>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600" data-i18n="faq_a1">ሁሉም Li-ion ባትሪዎች 5 ዓመት / 60,000 ኪሜ ዋስትና አላቸው።</p>
+      </details>
+      <details class="faq rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <summary class="flex items-center justify-between gap-4"><span class="font-bold text-slate-800" data-i18n="faq_q2">በአንድ ቻርጅ ስንት ኪሜ ይጓዛል?</span><i class="faq-chevron fa-solid fa-chevron-down text-emerald-500 transition"></i></summary>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600" data-i18n="faq_a2">እንደ ሞዴሉ 200 እስከ 600 ኪሜ።</p>
+      </details>
+      <details class="faq rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <summary class="flex items-center justify-between gap-4"><span class="font-bold text-slate-800" data-i18n="faq_q3">ክፍያ በምን መንገድ?</span><i class="faq-chevron fa-solid fa-chevron-down text-emerald-500 transition"></i></summary>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600" data-i18n="faq_a3">Telebirr፣ CBE Birr፣ Chapa ወይም የባንክ ማስተላለፍ። ትዕዛዙን ለማረጋገጥ 10% ቅድሚያ ክፍያ ያስፈልጋል።</p>
+      </details>
+      <details class="faq rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <summary class="flex items-center justify-between gap-4"><span class="font-bold text-slate-800" data-i18n="faq_q4">ማድረስ ነጻ ነው?</span><i class="faq-chevron fa-solid fa-chevron-down text-emerald-500 transition"></i></summary>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600" data-i18n="faq_a4">አዎ! በመላው ኢትዮጵያ ነጻ እናደርሳለን።</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact" class="border-t border-slate-800 bg-slate-900 py-12 text-slate-400">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
+    <div>
+      <a href="#home" class="flex items-center gap-2 text-white">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15"><i class="fa-solid fa-bolt text-lg text-emerald-400"></i></span>
+        <span class="text-base font-extrabold">EV-Golf Ethiopia</span>
+      </a>
+      <p class="mt-4 text-sm leading-relaxed" data-i18n="foot_about">ዘመናዊ የኤሌክትሪክ ትራንስፖርት መፍትሔዎች።</p>
+      <div class="mt-4 flex gap-2">
+        <a id="footTelegram" href="#" target="_blank" rel="noopener" aria-label="Telegram" class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 hover:bg-emerald-600 hover:text-white"><i class="fa-brands fa-telegram"></i></a>
+        <a id="footFacebook" href="#" aria-label="Facebook" class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 hover:bg-emerald-600 hover:text-white"><i class="fa-brands fa-facebook"></i></a>
+        <a id="footTiktok" href="#" aria-label="TikTok" class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 hover:bg-emerald-600 hover:text-white"><i class="fa-brands fa-tiktok"></i></a>
+        <a id="footWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp" class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 hover:bg-emerald-600 hover:text-white"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4 class="mb-4 font-bold text-white" data-i18n="foot_contact">እኛን ለማግኘት</h4>
+      <ul class="space-y-3 text-sm">
+        <li id="footPhoneLi"><a id="footPhone" href="#" class="flex items-center hover:text-emerald-400"><i class="fa-solid fa-phone mr-3 w-4 text-emerald-400"></i> <span id="footPhoneText"></span></a></li>
+        <li id="footEmailLi"><a id="footEmail" href="#" class="flex items-center hover:text-emerald-400"><i class="fa-solid fa-envelope mr-3 w-4 text-emerald-400"></i> <span id="footEmailText"></span></a></li>
+        <li class="flex items-start"><i class="fa-solid fa-location-dot mr-3 mt-0.5 w-4 text-emerald-400"></i> <span id="footAddress">ቦሌ መንገድ፣ አዲስ አበባ</span></li>
+        <li class="flex items-center"><i class="fa-solid fa-clock mr-3 w-4 text-emerald-400"></i> <span data-i18n="foot_hours">ሰኞ – ቅዳሜ፣ 8:30 – 18:00</span></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="mb-4 font-bold text-white" data-i18n="foot_map">አካባቢያችን</h4>
+      <div id="evMap" style="height:150px;border-radius:12px;overflow:hidden;background:#1e293b;"></div>
+      <div class="mt-4 flex flex-wrap gap-3 text-xs">
+        <button type="button" onclick="openPolicy('privacy')" class="hover:text-emerald-400" data-i18n="foot_privacy">የግላዊነት መመሪያ</button>
+        <button type="button" onclick="openPolicy('terms')" class="hover:text-emerald-400" data-i18n="foot_terms">የአገልግሎት ውል</button>
+      </div>
+    </div>
+  </div>
+  <div class="mx-auto mt-8 max-w-7xl border-t border-slate-800 px-4 pt-5 sm:px-6 lg:px-8">
+    <div class="flex flex-col items-center justify-between gap-3 text-xs sm:flex-row">
+      <p>© <span id="year">2026</span> EV-Golf Carts Ethiopia. <span data-i18n="foot_rights">መብቱ በሕግ የተጠበቀ ነው።</span></p>
+      <button type="button" onclick="openAdminGate(event)" class="flex items-center gap-1.5 text-slate-600 transition hover:text-emerald-400"><i class="fa-solid fa-lock"></i> Admin</button>
+    </div>
+  </div>
+</footer>
+
+<!-- FLOATING BUTTONS -->
+<div id="floatingButtons" class="fixed bottom-6 left-6 z-40 flex flex-col gap-3">
+  <a id="floatPhone" href="#" aria-label="Call" class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-lg text-white shadow-xl transition-all hover:scale-105 hover:bg-emerald-500">
+    <i class="fa-solid fa-phone"></i>
+    <span class="float-tip">Call · ይደውሉልን</span>
+  </a>
+  <a id="floatTelegram" href="#" target="_blank" rel="noopener" aria-label="Telegram" class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-sky-500 text-lg text-white shadow-xl transition-all hover:scale-105 hover:bg-sky-400">
+    <i class="fa-brands fa-telegram"></i>
+    <span class="float-tip">Telegram</span>
+  </a>
+  <a id="floatWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp" class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-green-500 text-lg text-white shadow-xl transition-all hover:scale-105 hover:bg-green-600">
+    <i class="fa-brands fa-whatsapp"></i>
+    <span class="float-tip">WhatsApp</span>
+  </a>
+</div>
+
+<button id="toTop" type="button" aria-label="ወደ ላይ" class="fixed bottom-6 right-6 z-40 hidden h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-xl transition hover:bg-emerald-600">
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<div id="toastContainer" aria-live="polite" class="pointer-events-none fixed bottom-24 left-1/2 z-[70] flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 flex-col items-center gap-2"></div>
+
+<!-- CAR DETAIL MODAL -->
+<div id="detailModal" class="fixed inset-0 z-[55] hidden items-center justify-center bg-black/70 p-3 backdrop-blur-sm sm:p-4">
+  <div id="detailModalBox" class="relative max-h-[95vh] w-full max-w-6xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+    <button type="button" onclick="closeDetail()" aria-label="ዝጋ" class="sticky right-3 top-3 z-20 ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-slate-500 shadow-lg hover:bg-slate-100 hover:text-slate-800">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<!-- ORDER MODAL (3 STEPS) -->
+<div id="orderModal" class="fixed inset-0 z-[55] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+  <div id="orderModalBox" class="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl sm:p-7">
+    <button type="button" onclick="closeModal()" aria-label="ዝጋ" class="absolute right-4 top-4 rounded-lg p-1.5 text-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+
+    <h3 class="text-xl font-bold text-slate-900" data-i18n="modal_title">የግዢ ቅጽ</h3>
+    <p class="mt-1 text-sm text-slate-500"><span data-i18n="modal_selected">የመረጡት፡</span> <span id="modalCarName" class="font-bold text-emerald-600"></span></p>
+    <p id="modalCarMeta" class="mt-1 text-xs font-medium text-slate-400"></p>
+
+    <div class="mt-5 flex items-center justify-center gap-1.5 sm:gap-3">
+      <div class="flex items-center gap-1.5">
+        <span id="step1Dot" class="step-indicator step-active">1</span>
+        <span class="hidden text-[11px] font-bold text-slate-700 sm:inline" data-i18n="step_personal">የግል መረጃ</span>
+      </div>
+      <div class="h-0.5 w-6 bg-slate-200 sm:w-10"></div>
+      <div class="flex items-center gap-1.5">
+        <span id="step2Dot" class="step-indicator step-inactive">2</span>
+        <span class="hidden text-[11px] font-bold text-slate-400 sm:inline" data-i18n="step_location">አድራሻ</span>
+      </div>
+      <div class="h-0.5 w-6 bg-slate-200 sm:w-10"></div>
+      <div class="flex items-center gap-1.5">
+        <span id="step3Dot" class="step-indicator step-inactive">3</span>
+        <span class="hidden text-[11px] font-bold text-slate-400 sm:inline" data-i18n="step_payment">ክፍያ</span>
+      </div>
+    </div>
+
+    <form id="orderForm" novalidate class="mt-5">
+      <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+
+      <!-- STEP 1 -->
+      <div id="orderStep1" class="space-y-4">
+        <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3">
+          <p class="flex items-center gap-2 text-xs font-bold text-emerald-800">
+            <i class="fa-solid fa-truck-fast"></i>
+            <span data-i18n="free_delivery_banner">🎉 በመላው ኢትዮጵያ ነጻ ማድረስ!</span>
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label for="fullName" class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_name">ሙሉ ስም</span> <span class="text-red-500">*</span></label>
+            <input id="fullName" name="fullName" type="text" required minlength="3" class="w-full rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label for="phone" class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_phone">ስልክ ቁጥር</span> <span class="text-red-500">*</span></label>
+            <input id="phone" name="phone" type="tel" required placeholder="09XXXXXXXX" pattern="^(\+251|0)[0-9]{9}$" class="w-full rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_id">የመታወቂያ ፎቶ</span> <span class="text-red-500">*</span></label>
+          <label id="idUploadWrap" class="file-upload block">
+            <input id="idFile" type="file" accept="image/*" class="hidden">
+            <div id="idUploadText">
+              <i class="fa-solid fa-id-card text-2xl text-slate-400"></i>
+              <p class="mt-2 text-xs font-semibold text-slate-600" data-i18n="form_id_hint">የመታወቂያ ፎቶ ይጫኑ (JPG/PNG)</p>
+            </div>
+            <div id="idPreview" class="hidden">
+              <img id="idPreviewImg" class="mx-auto max-h-32 rounded-lg">
+              <p class="mt-2 text-xs font-bold text-emerald-600"><i class="fa-solid fa-check-circle mr-1"></i><span data-i18n="form_uploaded">ተጭኗል</span></p>
+            </div>
+          </label>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_guarantee">የጉርድ ፎቶ</span> <span class="text-red-500">*</span></label>
+          <label id="gUploadWrap" class="file-upload block">
+            <input id="gFile" type="file" accept="image/*" class="hidden">
+            <div id="gUploadText">
+              <i class="fa-solid fa-file-shield text-2xl text-slate-400"></i>
+              <p class="mt-2 text-xs font-semibold text-slate-600" data-i18n="form_g_hint">የጉርድ ፎቶ ይጫኑ (JPG/PNG)</p>
+            </div>
+            <div id="gPreview" class="hidden">
+              <img id="gPreviewImg" class="mx-auto max-h-32 rounded-lg">
+              <p class="mt-2 text-xs font-bold text-emerald-600"><i class="fa-solid fa-check-circle mr-1"></i><span data-i18n="form_uploaded">ተጭኗል</span></p>
+            </div>
+          </label>
+        </div>
+
+        <p id="formError" class="hidden rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600"></p>
+
+        <button type="button" onclick="goToStep(2)" class="w-full rounded-xl bg-emerald-600 py-3.5 font-bold text-white shadow-lg hover:bg-emerald-500">
+          <span data-i18n="step_continue">ቀጥል</span> <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="orderStep2" class="hidden space-y-4">
+        <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3">
+          <p class="flex items-center gap-2 text-xs font-bold text-emerald-800">
+            <i class="fa-solid fa-location-dot"></i>
+            <span data-i18n="location_banner">📍 መኪናው የሚደርስበትን አካባቢ ይንገሩን</span>
+          </p>
+        </div>
+
+        <div>
+          <label for="region" class="mb-1.5 block text-xs font-bold text-slate-600"><i class="fa-solid fa-map mr-1 text-emerald-500"></i><span data-i18n="form_region">ክልል</span> <span class="text-red-500">*</span></label>
+          <select id="region" name="region" required class="w-full rounded-lg border border-slate-200 bg-white p-3 text-sm outline-none focus:border-emerald-500">
+            <option value="" data-i18n="form_region_select">— ክልል ይምረጡ —</option>
+            <option value="Addis Ababa">አዲስ አበባ (Addis Ababa)</option>
+            <option value="Afar">አፋር (Afar)</option>
+            <option value="Amhara">አማራ (Amhara)</option>
+            <option value="Benishangul-Gumuz">ቤንሻንጉል-ጉሙዝ (Benishangul-Gumuz)</option>
+            <option value="Central Ethiopia">መካከለኛው ኢትዮጵያ (Central Ethiopia)</option>
+            <option value="Dire Dawa">ድሬዳዋ (Dire Dawa)</option>
+            <option value="Gambella">ጋምቤላ (Gambella)</option>
+            <option value="Harari">ሐረሪ (Harari)</option>
+            <option value="Oromia">ኦሮሚያ (Oromia)</option>
+            <option value="Sidama">ሲዳማ (Sidama)</option>
+            <option value="Somali">ሶማሊ (Somali)</option>
+            <option value="South Ethiopia">ደቡብ ኢትዮጵያ (South Ethiopia)</option>
+            <option value="Southwest Ethiopia">ደቡብ ምዕራብ ኢትዮጵያ (Southwest Ethiopia)</option>
+            <option value="Tigray">ትግራይ (Tigray)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label for="zone" class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_zone">ዞን / ክፍለ ከተማ</span> <span class="text-red-500">*</span></label>
+            <input id="zone" name="zone" type="text" required placeholder="ለምሳሌ: ቦሌ / ሰሜን ሸዋ" class="w-full rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label for="woreda" class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_woreda">ወረዳ</span> <span class="text-red-500">*</span></label>
+            <input id="woreda" name="woreda" type="text" required placeholder="ለምሳሌ: ወረዳ 03" class="w-full rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label for="city" class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_city">ከተማ / መንደር</span> <span class="text-red-500">*</span></label>
+          <input id="city" name="city" type="text" required placeholder="ለምሳሌ: አዲስ አበባ / ቢሾፍቱ" class="w-full rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-emerald-500">
+        </div>
+
+        <div>
+          <label for="address" class="mb-1.5 block text-xs font-bold text-slate-600"><i class="fa-solid fa-house mr-1 text-emerald-500"></i><span data-i18n="form_address">ልዩ አድራሻ / ምልክት</span></label>
+          <textarea id="address" name="address" rows="2" placeholder="ለምሳሌ: ቦሌ መንገድ፣ ከግሎባል ሆቴል ፊት ለፊት፣ ቤት ቁጥር 123" class="w-full resize-none rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-emerald-500"></textarea>
+        </div>
+
+        <p id="formError2" class="hidden rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600"></p>
+
+        <div class="flex gap-2">
+          <button type="button" onclick="goToStep(1)" class="rounded-xl border border-slate-200 px-5 py-3.5 font-bold text-slate-600 hover:bg-slate-50">
+            <i class="fa-solid fa-arrow-left mr-1"></i><span data-i18n="step_back">ተመለስ</span>
+          </button>
+          <button type="button" onclick="goToStep(3)" class="flex-1 rounded-xl bg-emerald-600 py-3.5 font-bold text-white shadow-lg hover:bg-emerald-500">
+            <span data-i18n="step_continue">ቀጥል</span> <i class="fa-solid fa-arrow-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="orderStep3" class="hidden space-y-4">
+        <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+          <p class="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-emerald-700">
+            <i class="fa-solid fa-receipt"></i><span data-i18n="summary_title">የትዕዛዝ ማጠቃለያ</span>
+          </p>
+          <dl class="space-y-2 text-sm">
+            <div class="flex justify-between text-slate-700"><dt data-i18n="summary_car">መኪና</dt><dd id="sumCar" class="font-bold text-right"></dd></div>
+            <div class="flex justify-between border-t border-emerald-200 pt-2 text-slate-700"><dt data-i18n="summary_total">ጠቅላላ ዋጋ (VAT ተካቷል)</dt><dd id="sumTotal" class="font-bold"></dd></div>
+            <div class="flex justify-between rounded-lg bg-emerald-600 px-3 py-2.5 text-white"><dt class="font-bold" data-i18n="summary_deposit">ቅድሚያ መክፈል ያለብዎ (10%)</dt><dd id="sumDeposit" class="font-black"></dd></div>
+          </dl>
+        </div>
+
+        <div>
+          <div class="mb-3 flex items-center justify-between">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500" data-i18n="payment_methods">የመክፈያ አካውንቶች</p>
+            <p class="text-[10px] font-semibold text-emerald-600"><i class="fa-solid fa-hand-pointer mr-1"></i><span data-i18n="copy_hint">ለመቅዳት ይጫኑ</span></p>
+          </div>
+          <div id="paymentMethodsList" class="space-y-3"></div>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_receipt">የክፍያ ደረሰኝ ፎቶ</span> <span class="text-red-500">*</span></label>
+          <label id="rUploadWrap" class="file-upload block">
+            <input id="rFile" type="file" accept="image/*" class="hidden">
+            <div id="rUploadText">
+              <i class="fa-solid fa-receipt text-2xl text-slate-400"></i>
+              <p class="mt-2 text-xs font-semibold text-slate-600" data-i18n="form_r_hint">የከፈሉበትን ደረሰኝ ፎቶ ይጫኑ</p>
+            </div>
+            <div id="rPreview" class="hidden">
+              <img id="rPreviewImg" class="mx-auto max-h-32 rounded-lg">
+              <p class="mt-2 text-xs font-bold text-emerald-600"><i class="fa-solid fa-check-circle mr-1"></i><span data-i18n="form_uploaded">ተጭኗል</span></p>
+            </div>
+          </label>
+        </div>
+
+        <div>
+          <label for="note" class="mb-1.5 block text-xs font-bold text-slate-600" data-i18n="form_note">ተጨማሪ ማስታወሻ</label>
+          <textarea id="note" name="note" rows="2" class="w-full resize-none rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-emerald-500"></textarea>
+        </div>
+
+        <label class="flex items-start gap-2 text-xs text-slate-600">
+          <input type="checkbox" id="agreeCheck" required class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600">
+          <span data-i18n="form_agree">የአገልግሎት ውል እና የግላዊነት መመሪያን ተቀብያለሁ።</span>
+        </label>
+
+        <p id="formError3" class="hidden rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600"></p>
+
+        <div class="flex gap-2">
+          <button type="button" onclick="goToStep(2)" class="rounded-xl border border-slate-200 px-5 py-3.5 font-bold text-slate-600 hover:bg-slate-50">
+            <i class="fa-solid fa-arrow-left mr-1"></i><span data-i18n="step_back">ተመለስ</span>
+          </button>
+          <button type="submit" id="submitBtn" class="flex-1 rounded-xl bg-emerald-600 py-3.5 font-bold text-white shadow-lg hover:bg-emerald-500">
+            <i class="fa-solid fa-check mr-2"></i><span data-i18n="form_submit">ትእዛዝ አረጋግጥ</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+  <div class="w-full max-w-md rounded-2xl bg-white p-7 text-center shadow-2xl">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-600"><i class="fa-solid fa-circle-check"></i></div>
+    <h3 class="mt-5 text-xl font-bold text-slate-900" data-i18n="confirm_title">ትዕዛዝዎ ተልኳል!</h3>
+    <p class="mt-2 text-sm text-slate-500" data-i18n="confirm_desc">በ 24 ሰዓት ውስጥ እናገኝዎታለን።</p>
+    <div class="mt-5 rounded-xl bg-slate-50 p-4 text-left text-sm">
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-400" data-i18n="confirm_ref">የትዕዛዝ ማጣቀሻ</p>
+      <p id="orderRef" class="mt-1 font-mono text-lg font-bold text-emerald-600">—</p>
+    </div>
+    <div class="mt-5 flex flex-col gap-2 sm:flex-row">
+      <a id="waLink" href="#" target="_blank" rel="noopener" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-sm font-bold text-white hover:bg-green-500"><i class="fa-brands fa-whatsapp"></i><span data-i18n="confirm_wa">WhatsApp</span></a>
+      <button type="button" onclick="closeConfirm()" class="flex-1 rounded-xl border border-slate-300 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50" data-i18n="confirm_close">ዝጋ</button>
+    </div>
+  </div>
+</div>
+
+<!-- POLICY MODAL -->
+<div id="policyModal" class="fixed inset-0 z-[55] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+  <div class="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
+    <button type="button" onclick="closePolicy()" class="absolute right-4 top-4 rounded-lg p-1.5 text-xl text-slate-400 hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button>
+    <div id="policyContent"></div>
+  </div>
+</div>
+
+<!-- ADMIN GATE -->
+<div id="adminGate" class="fixed inset-0 z-[65] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+  <div class="w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl">
+    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-2xl text-emerald-400"><i class="fa-solid fa-lock"></i></div>
+    <h3 class="mt-4 text-center text-xl font-bold text-slate-900">Admin Panel</h3>
+    <p class="mt-1 text-center text-xs text-slate-500">ለመግባት የይለፍ ቃል ያስገቡ</p>
+    <form id="adminGateForm" class="mt-5 space-y-3">
+      <input id="adminPass" type="password" required autocomplete="current-password" placeholder="Password" class="w-full rounded-lg border border-slate-200 p-3 text-center text-sm outline-none focus:border-emerald-500">
+      <p id="adminError" class="hidden text-center text-xs font-semibold text-red-600">የተሳሳተ የይለፍ ቃል</p>
+      <button type="submit" class="w-full rounded-xl bg-slate-900 py-3 font-bold text-white hover:bg-slate-800">ግባ</button>
+      <button type="button" onclick="closeAdminGate()" class="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">ሰርዝ</button>
+    </form>
+    <p class="mt-3 text-center text-[10px] text-slate-400">Default: admin123</p>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="adminDashboard" class="fixed inset-0 z-[65] hidden bg-slate-100">
+  <div class="flex h-full flex-col">
+    <header class="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 shadow-sm sm:px-6">
+      <div class="flex items-center gap-3">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-emerald-400"><i class="fa-solid fa-gauge"></i></span>
+        <div>
+          <h1 class="text-base font-extrabold text-slate-900 sm:text-lg">Admin Dashboard</h1>
+          <p class="text-[10px] text-slate-500">EV-Golf Carts Ethiopia</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="exportOrders()" class="hidden rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-500 sm:block"><i class="fa-solid fa-download mr-1"></i>CSV</button>
+        <button type="button" onclick="logoutAdmin()" class="rounded-lg bg-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-300"><i class="fa-solid fa-right-from-bracket mr-1"></i>Logout</button>
+      </div>
+    </header>
+    <div class="flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-4 sm:px-6">
+      <button type="button" data-admintab="orders" class="admin-tab shrink-0 border-b-2 border-emerald-600 px-4 py-3 text-sm font-bold text-emerald-600">Orders</button>
+      <button type="button" data-admintab="cars" class="admin-tab shrink-0 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800">መኪኖች</button>
+      <button type="button" data-admintab="customers" class="admin-tab shrink-0 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800">ደንበኞች</button>
+      <button type="button" data-admintab="settings" class="admin-tab shrink-0 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800">⚙️ ቅንብሮች</button>
+      <button type="button" data-admintab="stats" class="admin-tab shrink-0 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800">Stats</button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6">
+      <div id="adminTabOrders" class="admin-tab-content">
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+          <select id="orderStatusFilter" onchange="renderAdminOrders()" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none">
+            <option value="all">ሁሉም Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <input id="orderSearch" oninput="renderAdminOrders()" type="search" placeholder="ፈልግ..." class="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none">
+        </div>
+        <div id="adminOrdersList" class="space-y-3"></div>
+      </div>
+      <div id="adminTabCars" class="admin-tab-content hidden">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-bold text-slate-900">መኪኖች</h2>
+          <button type="button" onclick="openCarForm()" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-500"><i class="fa-solid fa-plus mr-1"></i>አዲስ</button>
+        </div>
+        <div id="adminCarsList" class="space-y-3"></div>
+      </div>
+      <div id="adminTabCustomers" class="admin-tab-content hidden">
+        <h2 class="mb-4 text-lg font-bold text-slate-900">ደንበኞች</h2>
+        <div id="adminCustomersList" class="space-y-3"></div>
+      </div>
+      <div id="adminTabSettings" class="admin-tab-content hidden">
+        <h2 class="mb-4 text-lg font-bold text-slate-900">⚙️ የጣቢያ ቅንብሮች</h2>
+        <div id="adminSettings" class="space-y-4"></div>
+      </div>
+      <div id="adminTabStats" class="admin-tab-content hidden">
+        <h2 class="mb-4 text-lg font-bold text-slate-900">ስታቲስቲክስ</h2>
+        <div id="adminStats" class="grid grid-cols-2 gap-4 sm:grid-cols-4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAR FORM MODAL -->
+<div id="carFormModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+  <div class="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+    <button type="button" onclick="closeCarForm()" class="absolute right-4 top-4 rounded-lg p-1.5 text-xl text-slate-400 hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button>
+    <h3 id="carFormTitle" class="text-xl font-bold text-slate-900">አዲስ መኪና</h3>
+    <p class="mt-1 text-xs text-slate-500">ሁሉም ዋጋዎች VAT ተካተው</p>
+    <form id="carForm" class="mt-5 space-y-3">
+      <input type="hidden" id="carFormId">
+      <div>
+        <label class="mb-1 block text-xs font-bold text-slate-600">ስም *</label>
+        <input id="carFormName" required type="text" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+      </div>
+
+      <!-- MULTIPLE PHOTOS -->
+      <div>
+        <div class="mb-1 flex items-center justify-between">
+          <label class="block text-xs font-bold text-slate-600">
+            <i class="fa-solid fa-images mr-1 text-emerald-500"></i>
+            <span>የመኪና ፎቶዎች</span>
+            <span id="photoCount" class="ml-1.5 inline-flex items-center justify-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">0</span>
+          </label>
+          <span class="text-[10px] font-semibold text-slate-400">ብዙ ፎቶዎችን መጨመር ይችላሉ</span>
+        </div>
+
+        <div id="carPhotoGrid" class="mb-2 grid grid-cols-3 gap-2 sm:grid-cols-4"></div>
+
+        <label id="carPhotoWrap" class="file-upload block">
+          <input id="carPhotoFile" type="file" accept="image/*" multiple class="hidden">
+          <div id="carPhotoText">
+            <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400"></i>
+            <p class="mt-2 text-xs font-semibold text-slate-600">ፎቶ ለመጨመር ይጫኑ</p>
+            <p class="mt-1 text-[10px] text-slate-400">ብዙ ፎቶዎችን በአንድ ጊዜ መምረጥ ይችላሉ</p>
+          </div>
+        </label>
+
+        <button type="button" id="cloudinaryBtn" class="mt-2 w-full rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
+          <i class="fa-solid fa-cloud mr-1"></i>ወደ Cloudinary ይጫኑ
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">መቀመጫ *</label>
+          <input id="carFormSeats" required type="number" min="1" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">ዋጋ (ETB) *</label>
+          <input id="carFormPrice" required type="number" min="0" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">ባትሪ</label>
+          <input id="carFormBattery" type="text" placeholder="72 V / 7.5 KW" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">የባትሪ አቅም (kWh)</label>
+          <input id="carFormBatteryKwh" type="number" step="0.1" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">የሞተር ኃይል (kW)</label>
+          <input id="carFormMotorPower" type="number" step="0.1" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">ርቀት (km)</label>
+          <input id="carFormRange" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">ከፍተኛ ፍጥነት (km/h)</label>
+          <input id="carFormSpeed" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">የቻርጅ ጊዜ</label>
+          <input id="carFormCharge" type="text" placeholder="6 ሰዓት" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">ርዝመት (cm)</label>
+          <input id="carFormLength" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">ወርድ (cm)</label>
+          <input id="carFormWidth" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">ቁመት (cm)</label>
+          <input id="carFormHeight" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">የእቃ አቅም</label>
+          <input id="carFormCargo" type="text" placeholder="400 kg / 2.5 m³" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-bold text-slate-600">የእቃ ሁኔታ</label>
+          <select id="carFormStock" class="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+            <option value="in_stock">✅ አለ</option>
+            <option value="low_stock">⚠️ ጥቂት ቀረ</option>
+            <option value="out_of_stock">❌ አልተገኘም</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-bold text-slate-600">Video URL (optional)</label>
+        <input id="carFormVideo" type="url" placeholder="https://youtube.com/embed/..." class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-bold text-slate-600">Tag (optional)</label>
+        <input id="carFormTag" type="text" placeholder="አዲስ / ተወዳጅ" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-bold text-slate-600">መግለጫ</label>
+        <textarea id="carFormDesc" rows="2" class="w-full resize-none rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500"></textarea>
+      </div>
+      <button type="submit" class="w-full rounded-xl bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-500">አስቀምጥ</button>
+    </form>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   DEFAULT SETTINGS
+   ============================================================ */
+const DEFAULT_SETTINGS = {
+  contact: {
+    phone: '+251 900 000 000', phoneVisible: true,
+    whatsapp: '251900000000', whatsappVisible: true,
+    telegram: 'evgolfethiopia', telegramVisible: true,
+    email: 'info@evgolfethiopia.com', emailVisible: true,
+    facebook: 'https://facebook.com/evgolfethiopia', facebookVisible: true,
+    tiktok: 'https://tiktok.com/@evgolfethiopia', tiktokVisible: true
+  },
+  payment: {
+    telebirr:     { enabled: true, label: 'Telebirr', account: '0900 000 000', name: 'EV Golf Ethiopia' },
+    cbe:          { enabled: true, label: 'CBE Birr',  account: '1000 0000 0000', name: 'EV Golf Ethiopia' },
+    chapa:        { enabled: true, label: 'Chapa',     account: 'online', name: 'EV Golf Ethiopia' },
+    bankTransfer: { enabled: true, label: 'የባንክ ማስተላለፍ', account: '1000 1234 5678', name: 'EV Golf Ethiopia', bank: 'Commercial Bank of Ethiopia' }
+  },
+  order: { depositPercent: 10, vatRate: 0.15 }
+};
+
+/* ============================================================
+   DEFAULT CARS
+   ============================================================ */
+const DEFAULT_CARS = [
+  { id: 1, name: "7 Seater Golf A Dyz 25", seats: 7, price: 790000, battery: "72 V / 7.5 KW", batteryKwh: 7.5, motorPower: 5.5, range: 200, charge: "6 ሰዓት", speed: 45, dimensions: { length: 280, width: 130, height: 190 }, cargo: "400 kg / 2.5 m³", stock: "in_stock", video: "", photos: [], accent: "#10b981", tag: "", desc: "ለሪዞርት፣ ለሆቴል እና ለግል አገልግሎት ተስማሚ የ 7 መቀመጫ ኤሌክትሪክ ካርት።" },
+  { id: 2, name: "10 Seater Golf A Dyz 26", seats: 10, price: 1100000, battery: "96 V / 14 KW", batteryKwh: 14, motorPower: 7.5, range: 300, charge: "7 ሰዓት", speed: 50, dimensions: { length: 320, width: 140, height: 200 }, cargo: "600 kg / 3.5 m³", stock: "in_stock", video: "", photos: [], accent: "#0ea5e9", tag: "ተወዳጅ", desc: "መካከለኛ መጠን ያለው ለቡድን ማመላለሻ ተስማሚ።" },
+  { id: 3, name: "14 Seater Golf A Dyz 5E6", seats: 14, price: 1300000, battery: "108 V / 25 KW", batteryKwh: 25, motorPower: 12, range: 400, charge: "7 ሰዓት", speed: 55, dimensions: { length: 380, width: 150, height: 210 }, cargo: "800 kg / 5 m³", stock: "low_stock", video: "", photos: [], accent: "#f59e0b", tag: "", desc: "ለሪዞርት እና ለፋብሪካ ግቢ ምርጥ ምርጫ።" },
+  { id: 4, name: "17 Seater Golf Dh54", seats: 17, price: 1900000, battery: "118 V / 38 KW", batteryKwh: 38, motorPower: 18, range: 500, charge: "8 ሰዓት", speed: 60, dimensions: { length: 450, width: 160, height: 220 }, cargo: "1200 kg / 7 m³", stock: "in_stock", video: "", photos: [], accent: "#8b5cf6", tag: "", desc: "ሰፊ እና ምቹ የ 17 መቀመጫ ሻትል።" },
+  { id: 5, name: "23 Seater Large Shuttle", seats: 23, price: 2500000, battery: "180 V / 88 KW", batteryKwh: 88, motorPower: 35, range: 600, charge: "8 ሰዓት", speed: 65, dimensions: { length: 620, width: 200, height: 250 }, cargo: "2000 kg / 12 m³", stock: "in_stock", video: "", photos: [], accent: "#ef4444", tag: "አዲስ", desc: "ትልቁ የሻትል ባስ — ለኤርፖርት እና ለረጅም ርቀት።" }
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let carsData = [];
+let orders = [];
+let settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+let currentLang = localStorage.getItem('ev_lang') || 'am';
+let activeCar = null;
+let lastFocused = null;
+let orderStep = 1;
+let uploadedFiles = { id: null, guarantee: null, receipt: null };
+let carFormPhotos = [];
+let cloudinaryWidget = null;
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const formatPrice = (n) => new Intl.NumberFormat('en-US').format(Math.round(n));
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const formatSpecs = (v) => v == null || v === '' ? '—' : v;
+const STOCK_KEY = { in_stock:'stock_in', low_stock:'stock_low', out_of_stock:'stock_out' };
+const STOCK_CLASS = { in_stock:'stock-in', low_stock:'stock-low', out_of_stock:'stock-out' };
+
+const getPrimaryPhoto = (car) => (car.photos && car.photos.length) ? car.photos[0] : null;
+
+function compressImage(file, maxDim = 900, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > h && w > maxDim) { h = h * maxDim / w; w = maxDim; }
+        else if (h > maxDim) { w = w * maxDim / h; h = maxDim; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function dataURLtoFile(dataUrl, filename) {
+  if (!dataUrl || dataUrl.startsWith('http')) return null;
+  const [meta, b64] = dataUrl.split(',');
+  const mime = meta.match(/:(.*?);/)[1];
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new File([arr], filename, { type: mime });
+}
+
+async function copyText(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('📋 ተቀድቷል!');
+    if (btn) {
+      btn.classList.add('copied');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Copied</span>';
+      setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+    }
+  } catch (err) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast('📋 ተቀድቷል!'); } catch(_) { showToast('ማስቀደል አልተቻለም', 'error'); }
+    ta.remove();
+  }
+}
+
+/* ============================================================
+   SUPABASE DATA LAYER
+   ============================================================ */
+async function fetchCars() {
+  if (CONFIG.supabase.enabled && supabase) {
+    try {
+      const { data, error } = await supabase.from('cars').select('*').order('id');
+      if (error) throw error;
+      return data.map(c => ({
+        id: c.id, name: c.name, seats: c.seats, price: c.price,
+        battery: c.battery, batteryKwh: c.battery_kwh, motorPower: c.motor_power,
+        range: c.range_km, charge: c.charge_time, speed: c.speed_max,
+        dimensions: { length: c.dim_length, width: c.dim_width, height: c.dim_height },
+        cargo: c.cargo, stock: c.stock, video: c.video_url, tag: c.tag,
+        desc: c.description, photos: c.photos || [], accent: c.accent
+      }));
+    } catch (err) { console.warn('Supabase cars failed:', err); }
+  }
+  try {
+    const s = localStorage.getItem('ev_cars_v8');
+    if (!s) return JSON.parse(JSON.stringify(DEFAULT_CARS));
+    return JSON.parse(s);
+  } catch { return JSON.parse(JSON.stringify(DEFAULT_CARS)); }
+}
+
+async function saveCar(car) {
+  if (CONFIG.supabase.enabled && supabase) {
+    const row = {
+      name: car.name, seats: car.seats, price: car.price,
+      battery: car.battery, battery_kwh: car.batteryKwh, motor_power: car.motorPower,
+      range_km: car.range, charge_time: car.charge, speed_max: car.speed,
+      dim_length: car.dimensions?.length || 0, dim_width: car.dimensions?.width || 0, dim_height: car.dimensions?.height || 0,
+      cargo: car.cargo, stock: car.stock, video_url: car.video, tag: car.tag,
+      description: car.desc, photos: car.photos || [], accent: car.accent || '#10b981'
+    };
+    if (car.id) {
+      const { error } = await supabase.from('cars').update(row).eq('id', car.id);
+      if (error) throw error;
+      return car.id;
+    } else {
+      const { data, error } = await supabase.from('cars').insert(row).select().single();
+      if (error) throw error;
+      return data.id;
+    }
+  }
+  return car.id || (Math.max(0, ...carsData.map(c => c.id)) + 1);
+}
+
+async function deleteCarById(id) {
+  if (CONFIG.supabase.enabled && supabase) {
+    const { error } = await supabase.from('cars').delete().eq('id', id);
+    if (error) throw error;
+  }
+  carsData = carsData.filter(c => c.id !== id);
+  saveCarsLocal();
+}
+
+function saveCarsLocal() {
+  try { localStorage.setItem('ev_cars_v8', JSON.stringify(carsData)); } catch(_){}
+}
+
+async function fetchOrders() {
+  if (CONFIG.supabase.enabled && supabase) {
+    try {
+      const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data.map(o => ({
+        id: o.id, ref: o.ref, carId: o.car_id, car: o.car_name,
+        total: o.total, depositPct: o.deposit_pct, deposit: o.deposit,
+        name: o.full_name, phone: o.phone, region: o.region, zone: o.zone,
+        woreda: o.woreda, city: o.city, address: o.address, note: o.note,
+        idPhoto: o.id_photo_url, guaranteePhoto: o.guarantee_url, receiptPhoto: o.receipt_url,
+        status: o.status, lang: o.lang, ts: o.created_at
+      }));
+    } catch (err) { console.warn('Supabase orders failed:', err); }
+  }
+  try { return JSON.parse(localStorage.getItem('ev_orders_v8') || '[]'); } catch { return []; }
+}
+
+async function saveOrder(order) {
+  if (CONFIG.supabase.enabled && supabase) {
+    const row = {
+      ref: order.ref, car_id: order.carId, car_name: order.car,
+      total: order.total, deposit_pct: order.depositPct, deposit: order.deposit,
+      full_name: order.name, phone: order.phone,
+      region: order.region, zone: order.zone, woreda: order.woreda, city: order.city,
+      address: order.address, note: order.note,
+      id_photo_url: order.idPhoto, guarantee_url: order.guaranteePhoto, receipt_url: order.receiptPhoto,
+      status: order.status || 'pending', lang: order.lang || 'am'
+    };
+    const { data, error } = await supabase.from('orders').insert(row).select().single();
+    if (error) throw error;
+    return data;
+  }
+  orders.unshift(order);
+  try { localStorage.setItem('ev_orders_v8', JSON.stringify(orders)); } catch(_){}
+  return order;
+}
+
+async function updateOrderStatusDB(id, status) {
+  if (CONFIG.supabase.enabled && supabase && id) {
+    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+    if (error) throw error;
+  }
+}
+
+async function deleteOrderDB(id) {
+  if (CONFIG.supabase.enabled && supabase && id) {
+    const { error } = await supabase.from('orders').delete().eq('id', id);
+    if (error) throw error;
+  }
+}
+
+async function fetchSettings() {
+  if (CONFIG.supabase.enabled && supabase) {
+    try {
+      const { data, error } = await supabase.from('settings').select('data').eq('id', 1).single();
+      if (error) throw error;
+      return data.data;
+    } catch (err) { console.warn('Supabase settings failed:', err); }
+  }
+  try {
+    const s = localStorage.getItem('ev_settings');
+    if (s) {
+      const parsed = JSON.parse(s);
+      return {
+        contact: { ...DEFAULT_SETTINGS.contact, ...(parsed.contact || {}) },
+        payment: { ...DEFAULT_SETTINGS.payment, ...(parsed.payment || {}) },
+        order:   { ...DEFAULT_SETTINGS.order,   ...(parsed.order   || {}) }
+      };
+    }
+  } catch(_){}
+  return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+}
+
+async function saveSettingsDB(newSettings) {
+  if (CONFIG.supabase.enabled && supabase) {
+    const { error } = await supabase.from('settings').update({ data: newSettings, updated_at: new Date().toISOString() }).eq('id', 1);
+    if (error) throw error;
+  }
+  try { localStorage.setItem('ev_settings', JSON.stringify(newSettings)); } catch(_){}
+}
+
+async function uploadToStorage(dataUrlOrFile, folder) {
+  if (CONFIG.supabase.enabled && supabase) {
+    try {
+      let file;
+      if (typeof dataUrlOrFile === 'string' && dataUrlOrFile.startsWith('data:')) {
+        file = dataURLtoFile(dataUrlOrFile, `upload.jpg`);
+      } else if (dataUrlOrFile instanceof File) {
+        file = dataUrlOrFile;
+      } else {
+        return dataUrlOrFile;
+      }
+      if (!file) return dataUrlOrFile;
+
+      const ext = file.name.split('.').pop() || 'jpg';
+      const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from(CONFIG.supabase.storageBucket).upload(filename, file, { cacheControl: '3600', upsert: false });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from(CONFIG.supabase.storageBucket).getPublicUrl(filename);
+      return urlData.publicUrl;
+    } catch (err) {
+      console.warn('Storage upload failed, keeping base64:', err);
+      return dataUrlOrFile;
+    }
+  }
+  return dataUrlOrFile;
+}
+
+/* ============================================================
+   TELEGRAM NOTIFICATION
+   ============================================================ */
+async function notifyTelegram(order) {
+  if (!CONFIG.telegram.enabled || !CONFIG.telegram.botToken) return;
+
+  const text = `
+🚗 <b>NEW ORDER — EV-Golf Ethiopia</b>
+
+<b>Ref:</b> <code>${order.ref}</code>
+<b>Car:</b> ${order.car}
+<b>Total:</b> ${formatPrice(order.total)} ETB
+<b>Deposit:</b> ${formatPrice(order.deposit)} ETB (${order.depositPct}%)
+
+<b>👤 ደንበኛ</b>
+ስም: ${order.name}
+ስልክ: ${order.phone}
+
+<b>📍 የሚደርስበት</b>
+${order.region || ''} / ${order.zone || ''}
+${order.woreda || ''} / ${order.city || ''}
+${order.address || ''}
+
+${order.note ? `<b>📝 ማስታወሻ:</b>\n${order.note}` : ''}
+  `.trim();
+
+  const chatIds = CONFIG.telegram.chatIds || [];
+
+  for (const chatId of chatIds) {
+    try {
+      await fetch(`https://api.telegram.org/bot${CONFIG.telegram.botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: text,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true
+        })
+      });
+
+      const photos = [
+        { url: order.idPhoto, caption: '🆔 ID' },
+        { url: order.guaranteePhoto, caption: '📄 Guarantee' },
+        { url: order.receiptPhoto, caption: '🧾 Receipt' }
+      ];
+      for (const p of photos) {
+        if (!p.url) continue;
+        await fetch(`https://api.telegram.org/bot${CONFIG.telegram.botToken}/sendPhoto`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, photo: p.url, caption: p.caption })
+        }).catch(() => {});
+      }
+      console.log(`✅ Telegram sent to ${chatId}`);
+    } catch (err) {
+      console.warn(`❌ Telegram failed for ${chatId}:`, err);
+    }
+  }
+}
+
+/* ============================================================
+   Analytics
+   ============================================================ */
+function track(event, params = {}) {
+  if (CONFIG.analytics.enabled && typeof gtag === 'function') {
+    gtag('event', event, params);
+  }
+}
+
+/* ============================================================
+   I18N
+   ============================================================ */
+const I18N = {
+  am: {
+    nav_home:"መነሻ", nav_cars:"መኪኖች", nav_features:"ጥቅሞች", nav_warranty:"ዋስትና",
+    nav_faq:"ጥያቄዎች", nav_contact:"አድራሻ", cta_order:"አሁኑኑ ይዘዙ",
+    hero_badge:"አዲስ የ 2026 ሞዴሎች ደርሰዋል",
+    hero_title_1:"ዘመናዊ የኤሌክትሪክ ", hero_title_2:"ጎልፍ ካርቶች",
+    hero_desc:"ለሪዞርቶች፣ ለሆቴሎች፣ ለፋብሪካዎችና ለግል አገልግሎት — ነጻ ማድረስ በመላው ኢትዮጵያ።",
+    hero_btn_1:"መኪኖችን ይመልከቱ", hero_btn_2:"ያግኙን",
+    chip_delivery:"ነጻ ማድረስ", chip_warranty:"5 ዓመት ዋስትና", chip_electric:"100% ኤሌክትሪክ",
+    hero_badge_range:"ርቀት", hero_badge_seats:"መቀመጫ",
+    hero_stat_warranty:"ዋስትና", hero_stat_electric:"ኤሌክትሪክ", hero_stat_delivery:"ማድረስ",
+    filter_seats:"የመቀመጫ ብዛት", filter_seats_all:"ሁሉም",
+    filter_price:"የዋጋ ክልል", filter_price_all:"ሁሉም ዋጋ", filter_sort:"ደርድር በ",
+    filter_toggle:"ማጣሪያዎች",
+    sort_default:"ነባሪ", sort_low:"ዋጋ ↑", sort_high:"ዋጋ ↓", sort_seats:"መቀመጫ ↑",
+    result_suffix:"መኪኖች", reset_filters:"አጽዳ",
+    cars_title:"የመኪና ዝርዝሮች", cars_sub:"መርጠው በኦንላይን ማዘዝ ይችላሉ",
+    empty_title:"ምንም አልተገኘም", empty_btn:"አጽዳ",
+    features_title:"ለምን የእኛን ይመርጣሉ?",
+    feat_1t:"ዘላቂ Li-ion ባትሪ", feat_1d:"ሙሉ የ 5 ዓመት ዋስትና።",
+    feat_delivery_t:"ነጻ ማድረስ", feat_delivery_d:"በመላው ኢትዮጵያ ነጻ እናደርሳለን።",
+    feat_3t:"አስተማማኝ ደህንነት", feat_3d:"ትዕዛዝ በሙሉ ደህንነት።",
+    feat_4t:"የድህረ ሽያጭ ድጋፍ", feat_4d:"የመለዋወጫ እና ጥገና አገልግሎት።",
+    warranty_title:"የዋስትና እና የርቀት ዝርዝር",
+    war_title:"የዋስትና ውሎች", range_title:"የርቀት መለኪያ ሁኔታ",
+    faq_title:"በተደጋጋሚ የሚጠየቁ ጥያቄዎች",
+    faq_q1:"የባትሪ ዋስትና ስንት ዓመት ነው?", faq_a1:"ሁሉም Li-ion ባትሪዎች 5 ዓመት / 60,000 ኪሜ ዋስትና አላቸው።",
+    faq_q2:"በአንድ ቻርጅ ስንት ኪሜ ይጓዛል?", faq_a2:"እንደ ሞዴሉ 200 እስከ 600 ኪሜ።",
+    faq_q3:"ክፍያ በምን መንገድ?", faq_a3:"Telebirr፣ CBE Birr፣ Chapa ወይም የባንክ ማስተላለፍ። ትዕዛዙን ለማረጋገጥ 10% ቅድሚያ ክፍያ ያስፈልጋል።",
+    faq_q4:"ማድረስ ነጻ ነው?", faq_a4:"አዎ! በመላው ኢትዮጵያ ነጻ እናደርሳለን።",
+    foot_about:"ዘመናዊ የኤሌክትሪክ ትራንስፖርት መፍትሔዎች።",
+    foot_contact:"እኛን ለማግኘት", foot_hours:"ሰኞ – ቅዳሜ፣ 8:30 – 18:00",
+    foot_map:"አካባቢያችን", foot_rights:"መብቱ በሕግ የተጠበቀ ነው።",
+    foot_privacy:"የግላዊነት መመሪያ", foot_terms:"የአገልግሎት ውል",
+    modal_title:"የግዢ ቅጽ", modal_selected:"የመረጡት፡",
+    step_personal:"የግል መረጃ", step_location:"አድራሻ", step_payment:"ክፍያ",
+    step_continue:"ቀጥል", step_back:"ተመለስ",
+    form_name:"ሙሉ ስም", form_phone:"ስልክ ቁጥር",
+    form_region:"ክልል", form_region_select:"— ክልል ይምረጡ —",
+    form_zone:"ዞን / ክፍለ ከተማ", form_woreda:"ወረዳ",
+    form_city:"ከተማ / መንደር", form_address:"ልዩ አድራሻ / ምልክት",
+    location_banner:"📍 መኪናው የሚደርስበትን አካባቢ ይንገሩን",
+    free_delivery_banner:"🎉 በመላው ኢትዮጵያ ነጻ ማድረስ!",
+    form_id:"የመታወቂያ ፎቶ", form_id_hint:"የመታወቂያ ፎቶ ይጫኑ (JPG/PNG)",
+    form_guarantee:"የጉርድ ፎቶ", form_g_hint:"የጉርድ ፎቶ ይጫኑ (JPG/PNG)",
+    form_receipt:"የክፍያ ደረሰኝ ፎቶ", form_r_hint:"የከፈሉበትን ደረሰኝ ፎቶ ይጫኑ",
+    form_uploaded:"ተጭኗል",
+    summary_title:"የትዕዛዝ ማጠቃለያ", summary_car:"መኪና",
+    summary_total:"ጠቅላላ ዋጋ (VAT ተካቷል)", summary_deposit:"ቅድሚያ መክፈል ያለብዎ (10%)",
+    payment_methods:"የመክፈያ አካውንቶች", copy_hint:"ለመቅዳት ይጫኑ",
+    form_note:"ተጨማሪ ማስታወሻ", form_agree:"ውል እና የግላዊነት መመሪያን ተቀብያለሁ።",
+    form_submit:"ትእዛዝ አረጋግጥ",
+    confirm_title:"ትዕዛዝዎ ተልኳል!", confirm_desc:"በ 24 ሰዓት ውስጥ እናገኝዎታለን።",
+    confirm_ref:"የትዕዛዝ ማጣቀሻ", confirm_wa:"WhatsApp", confirm_close:"ዝጋ",
+    card_order:"ይዘዙ", card_details:"ዝርዝር",
+    toast_order:"ትዕዛዝዎ ደርሶናል!", toast_error:"ስህተት ተከስቷል።",
+    toast_empty:"እባክዎ ሁሉንም መሙሉ።", toast_sending:"በመላክ ላይ...",
+    toast_car_saved:"ተቀምጧል", toast_car_deleted:"ተሰርዟል",
+    toast_order_updated:"Status ተቀይሯል", toast_settings_saved:"ቅንብሮች ተቀምጠዋል",
+    toast_photo_added:"ፎቶ ተጨምሯል", toast_photo_removed:"ፎቶ ተወግዷል",
+    stock_in:"✅ አለ", stock_low:"⚠️ ጥቂት ቀረ", stock_out:"❌ አልተገኘም",
+    detail_gallery:"የፎቶ ጋለሪ", detail_specs:"ዝርዝር መረጃ",
+    detail_battery:"የባትሪ አቅም (kWh)", detail_motor:"የሞተር ኃይል",
+    detail_dimensions:"የመጠን", detail_cargo:"የእቃ አቅም",
+    detail_order:"ይዘዙ",
+    err_name:"እባክዎ ሙሉ ስምዎን ያስገቡ",
+    err_phone:"ስልክ ቁጥር በትክክል ያስገቡ (ለምሳሌ 0912345678)",
+    err_id:"የመታወቂያ ፎቶ ያስፈልጋል",
+    err_g:"የጉርድ ፎቶ ያስፈልጋል",
+    err_region:"እባክዎ ክልል ይምረጡ",
+    err_zone:"እባክዎ ዞን / ክፍለ ከተማ ያስገቡ",
+    err_woreda:"እባክዎ ወረዳ ያስገቡ",
+    err_city:"እባክዎ ከተማ / መንደር ያስገቡ",
+    err_receipt:"የክፍያ ደረሰኝ ፎቶ ያስፈልጋል",
+    err_agree:"እባክዎ ውሉን ይቀበሉ",
+    err_name_required:"የመኪና ስም ያስፈልጋል",
+    err_seats_required:"የመቀመጫ ብዛት ያስፈልጋል",
+    err_price_required:"ዋጋ ያስፈልጋል"
+  },
+  en: {
+    nav_home:"Home", nav_cars:"Cars", nav_features:"Features", nav_warranty:"Warranty",
+    nav_faq:"FAQ", nav_contact:"Contact", cta_order:"Order Now",
+    hero_badge:"New 2026 Models Arrived",
+    hero_title_1:"Modern Electric ", hero_title_2:"Golf Carts",
+    hero_desc:"For resorts, hotels, factories and personal use — free delivery across Ethiopia.",
+    hero_btn_1:"View Cars", hero_btn_2:"Contact Us",
+    chip_delivery:"Free Delivery", chip_warranty:"5-Year Warranty", chip_electric:"100% Electric",
+    hero_badge_range:"Range", hero_badge_seats:"Seats",
+    hero_stat_warranty:"Warranty", hero_stat_electric:"Electric", hero_stat_delivery:"Delivery",
+    filter_seats:"Seating", filter_seats_all:"All",
+    filter_price:"Price Range", filter_price_all:"All prices", filter_sort:"Sort by",
+    filter_toggle:"Filters",
+    sort_default:"Default", sort_low:"Price ↑", sort_high:"Price ↓", sort_seats:"Seats ↑",
+    result_suffix:"cars", reset_filters:"Reset",
+    cars_title:"Our Vehicles", cars_sub:"Choose and order online",
+    empty_title:"No matching cars", empty_btn:"Reset",
+    features_title:"Why Choose Us?",
+    feat_1t:"Durable Li-ion Battery", feat_1d:"Full 5-year warranty.",
+    feat_delivery_t:"Free Delivery", feat_delivery_d:"Free delivery across Ethiopia.",
+    feat_3t:"Secure Purchase", feat_3d:"Order safely and securely.",
+    feat_4t:"After-Sales Support", feat_4d:"Spare parts and maintenance.",
+    warranty_title:"Warranty & Range Details",
+    war_title:"Warranty Terms", range_title:"Range Conditions",
+    faq_title:"Frequently Asked Questions",
+    faq_q1:"How long is the battery warranty?", faq_a1:"All Li-ion batteries carry a 5-year / 60,000 km warranty.",
+    faq_q2:"How far on one charge?", faq_a2:"200 to 600 km depending on model.",
+    faq_q3:"How can I pay?", faq_a3:"Telebirr, CBE Birr, Chapa, or bank transfer. 10% deposit required.",
+    faq_q4:"Is delivery free?", faq_a4:"Yes! Free delivery across Ethiopia.",
+    foot_about:"Modern electric transport solutions.",
+    foot_contact:"Get in Touch", foot_hours:"Mon – Sat, 8:30 – 18:00",
+    foot_map:"Our Location", foot_rights:"All rights reserved.",
+    foot_privacy:"Privacy Policy", foot_terms:"Terms of Service",
+    modal_title:"Order Form", modal_selected:"Selected:",
+    step_personal:"Personal Info", step_location:"Address", step_payment:"Payment",
+    step_continue:"Continue", step_back:"Back",
+    form_name:"Full Name", form_phone:"Phone Number",
+    form_region:"Region", form_region_select:"— Select Region —",
+    form_zone:"Zone / Sub-city", form_woreda:"Woreda",
+    form_city:"City / Town", form_address:"Specific Address / Landmark",
+    location_banner:"📍 Tell us where to deliver the car",
+    free_delivery_banner:"🎉 Free delivery across Ethiopia!",
+    form_id:"ID Photo", form_id_hint:"Upload ID photo (JPG/PNG)",
+    form_guarantee:"Guarantee Photo", form_g_hint:"Upload guarantee photo",
+    form_receipt:"Payment Receipt", form_r_hint:"Upload payment receipt",
+    form_uploaded:"Uploaded",
+    summary_title:"Order Summary", summary_car:"Vehicle",
+    summary_total:"Total Price (VAT incl.)", summary_deposit:"Deposit to pay (10%)",
+    payment_methods:"Payment Accounts", copy_hint:"Click to copy",
+    form_note:"Additional notes", form_agree:"I accept the Terms and Privacy Policy.",
+    form_submit:"Confirm Order",
+    confirm_title:"Order Submitted!", confirm_desc:"We'll contact you within 24 hours.",
+    confirm_ref:"Order Reference", confirm_wa:"WhatsApp", confirm_close:"Close",
+    card_order:"Order", card_details:"Details",
+    toast_order:"Your order has arrived!", toast_error:"Something went wrong.",
+    toast_empty:"Please fill in all required fields.", toast_sending:"Sending...",
+    toast_car_saved:"Saved", toast_car_deleted:"Deleted",
+    toast_order_updated:"Status updated", toast_settings_saved:"Settings saved",
+    toast_photo_added:"Photo added", toast_photo_removed:"Photo removed",
+    stock_in:"✅ In Stock", stock_low:"⚠️ Low Stock", stock_out:"❌ Out of Stock",
+    detail_gallery:"Photo Gallery", detail_specs:"Specifications",
+    detail_battery:"Battery Capacity (kWh)", detail_motor:"Motor Power",
+    detail_dimensions:"Dimensions", detail_cargo:"Cargo Capacity",
+    detail_order:"Order",
+    err_name:"Please enter your full name",
+    err_phone:"Enter a valid phone (e.g. 0912345678)",
+    err_id:"ID photo required",
+    err_g:"Guarantee photo required",
+    err_region:"Please select a region",
+    err_zone:"Please enter zone/sub-city",
+    err_woreda:"Please enter woreda",
+    err_city:"Please enter city/town",
+    err_receipt:"Payment receipt required",
+    err_agree:"Please accept the terms",
+    err_name_required:"Car name is required",
+    err_seats_required:"Seat count is required",
+    err_price_required:"Price is required"
+  }
+};
+const t = (k) => (I18N[currentLang] && I18N[currentLang][k]) || I18N.am[k] || k;
+
+/* ============================================================
+   CAR IMAGE (SVG fallback)
+   ============================================================ */
+function carImage(car, angle = 'side') {
+  const primary = getPrimaryPhoto(car);
+  if (primary) return primary;
+
+  const c = car.accent || '#10b981';
+  const base = (extra) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420">
+  <defs>
+    <linearGradient id="bg${car.id}${angle}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0f172a"/><stop offset="100%" stop-color="#1e293b"/></linearGradient>
+    <linearGradient id="body${car.id}${angle}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f8fafc"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient>
+  </defs>
+  <rect width="640" height="420" fill="url(#bg${car.id}${angle})"/>
+  <circle cx="545" cy="80" r="130" fill="${c}" opacity="0.14"/>
+  <circle cx="80" cy="370" r="150" fill="${c}" opacity="0.08"/>
+  ${extra}
+</svg>`;
+
+  const views = {
+    side: `<ellipse cx="320" cy="356" rx="235" ry="24" fill="#000" opacity="0.35"/>
+      <rect x="170" y="120" width="300" height="18" rx="9" fill="${c}"/>
+      <rect x="184" y="136" width="12" height="118" rx="6" fill="${c}" opacity="0.6"/>
+      <rect x="444" y="136" width="12" height="118" rx="6" fill="${c}" opacity="0.6"/>
+      <rect x="232" y="206" width="176" height="58" rx="16" fill="#94a3b8"/>
+      <rect x="232" y="206" width="176" height="24" rx="12" fill="${c}" opacity="0.85"/>
+      <path d="M150 254 h340 a34 34 0 0 1 34 34 v22 a16 16 0 0 1 -16 16 h-376 a16 16 0 0 1 -16 -16 v-22 a34 34 0 0 1 34 -34 z" fill="url(#body${car.id}${angle})"/>
+      <rect x="112" y="288" width="62" height="38" rx="14" fill="#cbd5e1"/>
+      <circle cx="212" cy="326" r="34" fill="#111827" stroke="#e2e8f0" stroke-width="9"/>
+      <circle cx="440" cy="326" r="34" fill="#111827" stroke="#e2e8f0" stroke-width="9"/>
+      <circle cx="212" cy="326" r="9" fill="#64748b"/>
+      <circle cx="440" cy="326" r="9" fill="#64748b"/>
+      <text x="320" y="66" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="800" fill="#f8fafc">${car.seats} Seater</text>
+      <text x="320" y="98" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="17" font-weight="600" fill="${c}">${car.range} km / charge</text>`,
+    front: `<ellipse cx="320" cy="356" rx="200" ry="24" fill="#000" opacity="0.35"/>
+      <rect x="180" y="140" width="280" height="180" rx="20" fill="url(#body${car.id}${angle})"/>
+      <rect x="200" y="160" width="240" height="80" rx="12" fill="#1e293b" opacity="0.85"/>
+      <rect x="210" y="170" width="220" height="60" rx="8" fill="#0ea5e9" opacity="0.35"/>
+      <rect x="200" y="260" width="240" height="30" rx="8" fill="${c}" opacity="0.85"/>
+      <circle cx="220" cy="326" r="30" fill="#111827" stroke="#e2e8f0" stroke-width="8"/>
+      <circle cx="420" cy="326" r="30" fill="#111827" stroke="#e2e8f0" stroke-width="8"/>`,
+    back: `<ellipse cx="320" cy="356" rx="200" ry="24" fill="#000" opacity="0.35"/>
+      <rect x="180" y="140" width="280" height="180" rx="20" fill="url(#body${car.id}${angle})"/>
+      <rect x="200" y="160" width="240" height="100" rx="12" fill="#1e293b" opacity="0.85"/>
+      <rect x="210" y="270" width="220" height="26" rx="8" fill="${c}" opacity="0.85"/>`,
+    interior: `<rect x="80" y="100" width="480" height="240" rx="20" fill="#1e293b" opacity="0.85"/>
+      <rect x="100" y="120" width="440" height="60" rx="12" fill="#0ea5e9" opacity="0.25"/>
+      ${Array.from({length: Math.min(car.seats, 6)}, (_, i) => `<rect x="${120 + i*70}" y="200" width="55" height="80" rx="10" fill="${c}" opacity="0.8"/>`).join('')}`,
+    top: `<rect x="120" y="80" width="400" height="260" rx="30" fill="url(#body${car.id}${angle})"/>
+      <rect x="160" y="130" width="320" height="50" rx="12" fill="#0ea5e9" opacity="0.35"/>
+      <rect x="160" y="200" width="320" height="100" rx="12" fill="#94a3b8" opacity="0.55"/>`
+  };
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(base(views[angle] || views.side).trim());
+}
+
+function getGallery(car) {
+  const gallery = [];
+  if (car.photos && car.photos.length) {
+    car.photos.forEach(p => gallery.push(p));
+  } else {
+    gallery.push(carImage(car, 'side'));
+    gallery.push(carImage(car, 'front'));
+    gallery.push(carImage(car, 'back'));
+    gallery.push(carImage(car, 'interior'));
+    gallery.push(carImage(car, 'top'));
+  }
+  if (car.video && car.video.trim()) gallery.push({ type: 'video', url: car.video.trim() });
+  return gallery;
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function initApp() {
+  const status = $('#loaderStatus');
+  if (status) status.textContent = 'ዳታ በመጫን ላይ...';
+
+  try {
+    settings = await fetchSettings();
+    carsData = await fetchCars();
+    orders = await fetchOrders();
+  } catch (err) {
+    console.warn('Init error:', err);
+    if (!carsData || !carsData.length) carsData = JSON.parse(JSON.stringify(DEFAULT_CARS));
+    showToast('ዳታ ማምጣት አልተቻለም', 'error');
+  }
+
+  try { $('#year').textContent = new Date().getFullYear(); } catch(_){}
+  try { applyLanguage(currentLang); } catch(_){}
+  try { applySettings(); } catch(_){}
+  try { updateHeroCar(); } catch(_){}
+  try { onScroll(); } catch(_){}
+  try { updateFilterBadge(); } catch(_){}
+  try { setupLeafletMap(); } catch(_){}
+
+  setTimeout(() => {
+    const l = document.getElementById('pageLoader');
+    if (l) { l.classList.add('loader-hidden'); setTimeout(() => l.remove(), 500); }
+  }, 400);
+}
+
+// Safety: hide loader no matter what after 4s
+setTimeout(() => {
+  const l = document.getElementById('pageLoader');
+  if (l && !l.classList.contains('loader-hidden')) {
+    console.warn('⚠️ Force-hiding loader');
+    l.classList.add('loader-hidden');
+    setTimeout(() => l.remove(), 500);
+  }
+}, 4000);
+
+window.addEventListener('error', () => {
+  const l = document.getElementById('pageLoader');
+  if (l && !l.classList.contains('loader-hidden')) {
+    l.classList.add('loader-hidden');
+    setTimeout(() => l.remove(), 500);
+  }
+});
+window.addEventListener('unhandledrejection', () => {
+  const l = document.getElementById('pageLoader');
+  if (l && !l.classList.contains('loader-hidden')) {
+    l.classList.add('loader-hidden');
+    setTimeout(() => l.remove(), 500);
+  }
+});
+
+window.addEventListener('load', initApp);
+
+/* ============================================================
+   HERO ROTATOR
+   ============================================================ */
+function updateHeroCar() {
+  if (!carsData.length) return;
+  const idx = Math.floor(Date.now() / 6000) % carsData.length;
+  const car = carsData[idx];
+  const img = $('#heroCarImg');
+  if (img) {
+    img.style.opacity = '0';
+    setTimeout(() => {
+      img.src = carImage(car, 'side');
+      img.style.transition = 'opacity .6s';
+      img.style.opacity = '1';
+    }, 200);
+  }
+  $('#heroCarName').textContent = car.name;
+  $('#heroCarRange').textContent = car.range + ' km';
+  $('#heroCarSeats').textContent = car.seats + ' seats';
+  $('#heroCarSpeed').textContent = car.speed + ' km/h';
+}
+setInterval(updateHeroCar, 6000);
+
+/* ============================================================
+   LEAFLET MAP
+   ============================================================ */
+function setupLeafletMap() {
+  const mapEl = document.getElementById('evMap');
+  if (!mapEl || typeof L === 'undefined') return;
+  try {
+    const lat = 9.005401, lng = 38.763611;
+    const map = L.map('evMap', { zoomControl: true, scrollWheelZoom: false, attributionControl: false }).setView([lat, lng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    const icon = L.divIcon({
+      className: 'custom-marker',
+      html: `<div style="background:#059669;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(0,0,0,.3);border:3px solid #fff;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-bolt" style="transform:rotate(45deg);color:#fff;font-size:13px;"></i></div>`,
+      iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30]
+    });
+    L.marker([lat, lng], { icon }).addTo(map).bindPopup('<strong>EV-Golf Ethiopia</strong><br><span style="color:#64748b;font-size:12px;">ቦሌ መንገድ፣ አዲስ አበባ</span>').openPopup();
+  } catch (err) { console.warn('Leaflet failed:', err); }
+}
+
+/* ============================================================
+   RENDER CARDS
+   ============================================================ */
+function createCard(car) {
+  const el = document.createElement('article');
+  el.className = 'fade-up group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl';
+  const stockLabel = t(STOCK_KEY[car.stock] || 'stock_in');
+  const stockClass = STOCK_CLASS[car.stock] || 'stock-in';
+  const isOut = car.stock === 'out_of_stock';
+  const photoCount = car.photos && car.photos.length ? car.photos.length : 0;
+
+  el.innerHTML = `
+    <div class="relative overflow-hidden">
+      <img src="${carImage(car, 'side')}" alt="${escapeHtml(car.name)}" loading="lazy" decoding="async" class="h-52 w-full object-cover transition duration-500 group-hover:scale-105">
+      <span class="absolute left-3 top-3 rounded-full bg-slate-900/85 px-3 py-1 text-xs font-bold text-white backdrop-blur"><i class="fa-solid fa-users mr-1 text-emerald-400"></i>${car.seats}</span>
+      ${car.tag ? `<span class="absolute right-3 top-3 rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow">${escapeHtml(car.tag)}</span>` : ''}
+      <span class="absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold ${stockClass}">${stockLabel}</span>
+      ${photoCount > 1 ? `<span class="absolute bottom-3 right-3 rounded-full bg-slate-900/85 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur"><i class="fa-solid fa-images mr-1 text-emerald-400"></i>${photoCount}</span>` : ''}
+    </div>
+    <div class="flex flex-1 flex-col p-5">
+      <h3 class="text-lg font-bold leading-snug text-slate-900">${escapeHtml(car.name)}</h3>
+      <p class="mt-2 text-2xl font-black text-emerald-600">${formatPrice(car.price)} <span class="text-sm font-bold text-slate-400">ETB</span></p>
+      <p class="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">VAT ተካቷል</p>
+      <dl class="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+        <div class="flex items-center gap-1.5"><i class="fa-solid fa-battery-half text-emerald-500"></i><span>${escapeHtml(car.battery || '—')}</span></div>
+        <div class="flex items-center gap-1.5"><i class="fa-solid fa-bolt text-emerald-500"></i><span>${car.range || '—'} km</span></div>
+        <div class="flex items-center gap-1.5"><i class="fa-solid fa-gauge-high text-emerald-500"></i><span>${car.speed || '—'} km/h</span></div>
+        <div class="flex items-center gap-1.5"><i class="fa-solid fa-plug-circle-bolt text-emerald-500"></i><span>${escapeHtml(car.charge || '—')}</span></div>
+      </dl>
+      <div class="mt-5 grid grid-cols-2 gap-2">
+        <button type="button" data-detail="${car.id}" class="rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"><i class="fa-solid fa-circle-info mr-1"></i>${t('card_details')}</button>
+        <button type="button" data-order="${car.id}" ${isOut ? 'disabled' : ''} class="rounded-xl ${isOut ? 'bg-slate-300 cursor-not-allowed' : 'bg-slate-900 hover:bg-emerald-600'} py-3 text-sm font-semibold text-white transition"><i class="fa-solid fa-cart-shopping mr-1"></i>${isOut ? t('stock_out') : t('card_order')}</button>
+      </div>
+    </div>
+  `;
+  return el;
+}
+
+function renderCars(list) {
+  const grid = $('#carsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  if (list.length === 0) {
+    $('#emptyState').classList.remove('hidden');
+    grid.classList.add('hidden');
+  } else {
+    $('#emptyState').classList.add('hidden');
+    grid.classList.remove('hidden');
+    const frag = document.createDocumentFragment();
+    list.forEach(car => frag.appendChild(createCard(car)));
+    grid.appendChild(frag);
+  }
+  $('#resultCount').textContent = list.length;
+}
+
+function getFilteredCars() {
+  const seatVal = $('#seatFilter').value;
+  const priceVal = $('#priceFilter').value;
+  const sortVal = $('#sortFilter').value;
+  let list = carsData.filter(car => {
+    const matchSeat = seatVal === 'all' || String(car.seats) === seatVal;
+    let matchPrice = true;
+    if (priceVal !== 'all') {
+      const [min, max] = priceVal.split('-').map(Number);
+      matchPrice = car.price >= min && car.price <= max;
+    }
+    return matchSeat && matchPrice;
+  });
+  if (sortVal === 'low') list.sort((a,b) => a.price - b.price);
+  else if (sortVal === 'high') list.sort((a,b) => b.price - a.price);
+  else if (sortVal === 'seats') list.sort((a,b) => a.seats - b.seats);
+  return list;
+}
+
+function applyFilters() { renderCars(getFilteredCars()); }
+
+function resetFilters() {
+  $('#seatFilter').value = 'all';
+  $('#priceFilter').value = 'all';
+  $('#sortFilter').value = 'default';
+  applyFilters();
+  updateFilterBadge();
+}
+
+const filterPanel = $('#filterPanel');
+const toggleBtn = $('#toggleFilters');
+const filterBadge = $('#activeFilterBadge');
+
+function updateFilterBadge() {
+  const active =
+    ($('#seatFilter').value !== 'all' ? 1 : 0) +
+    ($('#priceFilter').value !== 'all' ? 1 : 0) +
+    ($('#sortFilter').value !== 'default' ? 1 : 0);
+  if (filterBadge) {
+    if (active > 0) {
+      filterBadge.textContent = active;
+      filterBadge.classList.remove('hidden');
+      filterBadge.classList.add('inline-flex');
+    } else {
+      filterBadge.classList.add('hidden');
+      filterBadge.classList.remove('inline-flex');
+    }
+  }
+}
+
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = !filterPanel.classList.contains('hidden');
+    filterPanel.classList.toggle('hidden');
+    toggleBtn.setAttribute('aria-expanded', String(!isOpen));
+  });
+}
+
+/* ============================================================
+   CAR DETAIL MODAL
+   ============================================================ */
+function openDetail(id) {
+  const car = carsData.find(c => c.id === id);
+  if (!car) return;
+  lastFocused = document.activeElement;
+  track('view_item', { item_id: car.id, item_name: car.name, price: car.price, currency: 'ETB' });
+
+  const gallery = getGallery(car);
+  const stockLabel = t(STOCK_KEY[car.stock] || 'stock_in');
+  const stockClass = STOCK_CLASS[car.stock] || 'stock-in';
+  const isOut = car.stock === 'out_of_stock';
+  const dims = car.dimensions || {};
+  const dimText = (dims.length && dims.width && dims.height) ? `${dims.length} × ${dims.width} × ${dims.height} cm` : '—';
+  const first = gallery[0];
+  const isVideoFirst = typeof first === 'object' && first.type === 'video';
+
+  const content = `
+    <div class="p-5 sm:p-7">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div>
+          <div class="flex items-center justify-between">
+            <h3 class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-slate-500"><i class="fa-solid fa-images text-emerald-500"></i>${t('detail_gallery')}</h3>
+            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">${gallery.length} items</span>
+          </div>
+          <div id="detailMainWrap" class="mt-3 overflow-hidden rounded-2xl bg-slate-900">
+            ${isVideoFirst ? `<iframe id="detailMainVideo" src="${escapeHtml(first.url)}" class="h-72 w-full sm:h-96" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : `<img id="detailMainImg" src="${first}" alt="${escapeHtml(car.name)}" class="h-72 w-full object-cover sm:h-96">`}
+          </div>
+          ${gallery.length > 1 ? `
+          <div class="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-6">
+            ${gallery.map((item, i) => {
+              if (typeof item === 'object' && item.type === 'video') {
+                return `<button type="button" onclick="switchDetailItem(${i})" class="gallery-thumb relative overflow-hidden rounded-lg border-2 border-transparent transition hover:border-emerald-400"><div class="flex h-14 w-full items-center justify-center bg-slate-800 text-white"><i class="fa-solid fa-play text-lg text-emerald-400"></i></div></button>`;
+              }
+              return `<button type="button" onclick="switchDetailItem(${i})" class="gallery-thumb ${i===0?'active':''} overflow-hidden rounded-lg border-2 border-transparent transition hover:border-emerald-400"><img src="${item}" alt="view ${i+1}" class="h-14 w-full object-cover"></button>`;
+            }).join('')}
+          </div>` : ''}
+        </div>
+        <div>
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <h2 class="text-2xl font-extrabold text-slate-900">${escapeHtml(car.name)}</h2>
+            <span class="rounded-full px-3 py-1 text-xs font-bold ${stockClass}">${stockLabel}</span>
+          </div>
+          ${car.tag ? `<span class="mt-2 inline-block rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white">${escapeHtml(car.tag)}</span>` : ''}
+          <p class="mt-3 text-3xl font-black text-emerald-600">${formatPrice(car.price)} <span class="text-base font-bold text-slate-400">ETB</span></p>
+          <p class="mt-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700"><i class="fa-solid fa-circle-check mr-1"></i>VAT (15%) ተካቷል</p>
+          <p class="mt-4 text-sm leading-relaxed text-slate-600">${escapeHtml(car.desc || '')}</p>
+          <h4 class="mt-5 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-slate-500"><i class="fa-solid fa-list-check text-emerald-500"></i>${t('detail_specs')}</h4>
+          <div class="mt-3 grid grid-cols-2 gap-3">
+            <div class="rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-battery-full mr-1"></i>${t('detail_battery')}</p><p class="mt-1 text-sm font-bold text-slate-800">${formatSpecs(car.batteryKwh)} ${car.batteryKwh?'kWh':''}</p></div>
+            <div class="rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-gear mr-1"></i>${t('detail_motor')}</p><p class="mt-1 text-sm font-bold text-slate-800">${formatSpecs(car.motorPower)} ${car.motorPower?'kW':''}</p></div>
+            <div class="rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-bolt mr-1"></i>ርቀት</p><p class="mt-1 text-sm font-bold text-slate-800">${formatSpecs(car.range)} km</p></div>
+            <div class="rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>ከፍተኛ ፍጥነት</p><p class="mt-1 text-sm font-bold text-slate-800">${formatSpecs(car.speed)} km/h</p></div>
+            <div class="rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-plug-circle-bolt mr-1"></i>ቻርጅ</p><p class="mt-1 text-sm font-bold text-slate-800">${escapeHtml(car.charge || '—')}</p></div>
+            <div class="rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-users mr-1"></i>መቀመጫ</p><p class="mt-1 text-sm font-bold text-slate-800">${car.seats}</p></div>
+            <div class="col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-ruler-combined mr-1"></i>${t('detail_dimensions')}</p><p class="mt-1 text-sm font-bold text-slate-800">${dimText}</p></div>
+            <div class="col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-box mr-1"></i>${t('detail_cargo')}</p><p class="mt-1 text-sm font-bold text-slate-800">${escapeHtml(car.cargo || '—')}</p></div>
+          </div>
+          <div class="mt-6">
+            <button type="button" onclick="closeDetail();openModal(${car.id})" ${isOut ? 'disabled' : ''} class="w-full rounded-xl ${isOut ? 'bg-slate-300 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500'} py-3 font-bold text-white"><i class="fa-solid fa-cart-shopping mr-2"></i>${isOut ? t('stock_out') : t('detail_order')}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  $('#detailContent').innerHTML = content;
+  $('#detailModal').classList.remove('hidden');
+  $('#detailModal').classList.add('flex');
+  document.body.classList.add('no-scroll');
+  window._detailGallery = gallery;
+}
+
+function switchDetailItem(i) {
+  const gallery = window._detailGallery;
+  if (!gallery || !gallery[i]) return;
+  const item = gallery[i];
+  const wrap = $('#detailMainWrap');
+  if (typeof item === 'object' && item.type === 'video') {
+    wrap.innerHTML = `<iframe id="detailMainVideo" src="${escapeHtml(item.url)}" class="h-72 w-full sm:h-96" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+  } else {
+    wrap.innerHTML = `<img id="detailMainImg" src="${item}" alt="view" class="h-72 w-full object-cover sm:h-96">`;
+  }
+  const thumbs = document.querySelectorAll('.gallery-thumb');
+  thumbs.forEach((b, idx) => {
+    b.classList.toggle('active', idx === i);
+    b.classList.toggle('border-emerald-500', idx === i);
+    b.classList.toggle('border-transparent', idx !== i);
+  });
+}
+
+function closeDetail() {
+  $('#detailModal').classList.add('hidden');
+  $('#detailModal').classList.remove('flex');
+  document.body.classList.remove('no-scroll');
+  if (lastFocused) lastFocused.focus();
+}
+
+/* ============================================================
+   ORDER MODAL (3 STEPS)
+   ============================================================ */
+function openModal(carId) {
+  const car = carsData.find(c => c.id === carId);
+  if (!car) return;
+  if (car.stock === 'out_of_stock') { showToast(t('stock_out'), 'error'); return; }
+  activeCar = car;
+  lastFocused = document.activeElement;
+  uploadedFiles = { id: null, guarantee: null, receipt: null };
+  track('begin_checkout', { item_id: car.id, item_name: car.name, value: car.price, currency: 'ETB' });
+
+  $('#modalCarName').textContent = car.name;
+  $('#modalCarMeta').textContent = `${car.seats} መቀመጫ · ${car.range} km · ${car.battery} · ${formatPrice(car.price)} ETB`;
+  ['formError','formError2','formError3'].forEach(id => $('#'+id)?.classList.add('hidden'));
+  ['id','g','r'].forEach(p => {
+    const prev = $(`#${p}Preview`); const txt = $(`#${p}UploadText`);
+    if (prev) prev.classList.add('hidden');
+    if (txt) txt.classList.remove('hidden');
+    const wrap = $(`#${p}UploadWrap`);
+    if (wrap) wrap.classList.remove('has-file');
+  });
+  goToStep(1);
+  renderPaymentMethods();
+  $('#orderModal').classList.remove('hidden');
+  $('#orderModal').classList.add('flex');
+  document.body.classList.add('no-scroll');
+  setTimeout(() => $('#fullName').focus(), 60);
+}
+
+function closeModal() {
+  $('#orderModal').classList.add('hidden');
+  $('#orderModal').classList.remove('flex');
+  document.body.classList.remove('no-scroll');
+  $('#orderForm').reset();
+  uploadedFiles = { id: null, guarantee: null, receipt: null };
+  activeCar = null;
+  orderStep = 1;
+  if (lastFocused) lastFocused.focus();
+}
+
+function goToStep(n) {
+  if (n === 2 && !validateStep1()) return;
+  if (n === 3 && !validateStep2()) return;
+  orderStep = n;
+  for (let i = 1; i <= 3; i++) {
+    $('#orderStep' + i).classList.toggle('hidden', i !== n);
+    const dot = $('#step' + i + 'Dot');
+    if (i < n) dot.className = 'step-indicator step-done';
+    else if (i === n) dot.className = 'step-indicator step-active';
+    else dot.className = 'step-indicator step-inactive';
+  }
+  if (n === 3) updateSummary();
+}
+
+function validateStep1() {
+  const name = $('#fullName').value.trim();
+  const phone = $('#phone').value.trim();
+  const phoneOk = /^(\+251|0)[0-9]{9}$/.test(phone);
+  if (!name || name.length < 3) { showErr('formError', t('err_name')); $('#fullName').focus(); return false; }
+  if (!phoneOk) { showErr('formError', t('err_phone')); $('#phone').focus(); return false; }
+  if (!uploadedFiles.id) { showErr('formError', t('err_id')); return false; }
+  if (!uploadedFiles.guarantee) { showErr('formError', t('err_g')); return false; }
+  $('#formError').classList.add('hidden');
+  return true;
+}
+
+function validateStep2() {
+  const region = $('#region').value;
+  const zone = $('#zone').value.trim();
+  const woreda = $('#woreda').value.trim();
+  const city = $('#city').value.trim();
+  if (!region) { showErr('formError2', t('err_region')); $('#region').focus(); return false; }
+  if (!zone) { showErr('formError2', t('err_zone')); $('#zone').focus(); return false; }
+  if (!woreda) { showErr('formError2', t('err_woreda')); $('#woreda').focus(); return false; }
+  if (!city) { showErr('formError2', t('err_city')); $('#city').focus(); return false; }
+  $('#formError2').classList.add('hidden');
+  return true;
+}
+
+function showErr(id, msg) {
+  const el = $('#' + id);
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function updateSummary() {
+  if (!activeCar) return;
+  const total = activeCar.price;
+  const depositPct = settings.order.depositPercent || 10;
+  const deposit = total * (depositPct / 100);
+  $('#sumCar').textContent = activeCar.name;
+  $('#sumTotal').textContent = `${formatPrice(total)} ETB`;
+  $('#sumDeposit').textContent = `${formatPrice(deposit)} ETB`;
+}
+
+function renderPaymentMethods() {
+  const list = $('#paymentMethodsList');
+  const methods = [];
+  Object.entries(settings.payment).forEach(([key, m]) => {
+    if (!m.enabled) return;
+    let icon = 'fa-credit-card';
+    if (key === 'telebirr') icon = 'fa-mobile-screen';
+    else if (key === 'cbe') icon = 'fa-building-columns';
+    else if (key === 'chapa') icon = 'fa-globe';
+    else if (key === 'bankTransfer') icon = 'fa-money-bill-transfer';
+
+    methods.push(`
+      <div class="pay-account rounded-xl p-3.5">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-sm text-white"><i class="fa-solid ${icon}"></i></div>
+            <p class="text-sm font-bold text-slate-800">${escapeHtml(m.label || key)}</p>
+          </div>
+          <button type="button" class="copy-btn flex items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow"
+                  onclick="copyText('${escapeHtml(m.account)}', this)">
+            <i class="fa-solid fa-copy"></i> <span>Copy</span>
+          </button>
+        </div>
+        ${m.account ? `<div class="mt-2.5 flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 shadow-sm">
+          <div class="min-w-0 flex-1">
+            <p class="text-[9px] font-bold uppercase tracking-wider text-slate-500">Account</p>
+            <p class="account-number">${escapeHtml(m.account)}</p>
+          </div>
+        </div>` : ''}
+        ${m.name ? `<p class="mt-1.5 text-[11px] text-slate-700"><span class="font-bold">Name:</span> ${escapeHtml(m.name)}</p>` : ''}
+        ${m.bank ? `<p class="text-[11px] text-slate-700"><span class="font-bold">Bank:</span> ${escapeHtml(m.bank)}</p>` : ''}
+      </div>
+    `);
+  });
+  list.innerHTML = methods.length ? methods.join('') : '<p class="text-xs text-slate-400">ምንም የመክፈያ አማራጭ አልተዘጋጀም</p>';
+}
+
+function setupUpload(inputId, wrapId, textId, prevId, prevImgId, key) {
+  const input = $(`#${inputId}`);
+  const wrap = $(`#${wrapId}`);
+  const text = $(`#${textId}`);
+  const prev = $(`#${prevId}`);
+  const prevImg = $(`#${prevImgId}`);
+  if (!input) return;
+  input.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('እባክዎ ምስል ብቻ ይጫኑ', 'error'); return; }
+    try {
+      const compressed = await compressImage(file);
+      uploadedFiles[key] = compressed;
+      prevImg.src = compressed;
+      text.classList.add('hidden');
+      prev.classList.remove('hidden');
+      wrap.classList.add('has-file');
+    } catch (err) { showToast('ምስሉን መጫን አልተቻለም', 'error'); }
+  });
+}
+
+setupUpload('idFile', 'idUploadWrap', 'idUploadText', 'idPreview', 'idPreviewImg', 'id');
+setupUpload('gFile', 'gUploadWrap', 'gUploadText', 'gPreview', 'gPreviewImg', 'guarantee');
+setupUpload('rFile', 'rUploadWrap', 'rUploadText', 'rPreview', 'rPreviewImg', 'receipt');
+
+function generateRef() {
+  const d = new Date();
+  const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const rand = Math.random().toString(36).slice(2,6).toUpperCase();
+  return `EV-${stamp}-${rand}`;
+}
+
+async function handleOrderSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  if (form.elements.website.value) return;
+  if (!$('#agreeCheck').checked) { showErr('formError3', t('err_agree')); return; }
+  if (!uploadedFiles.receipt) { showErr('formError3', t('err_receipt')); return; }
+  $('#formError3').classList.add('hidden');
+
+  const total = activeCar.price;
+  const depositPct = settings.order.depositPercent || 10;
+  const deposit = total * (depositPct / 100);
+
+  $('#submitBtn').disabled = true;
+  $('#submitBtn').innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>${t('toast_sending')}`;
+
+  try {
+    const [idUrl, guarUrl, receiptUrl] = await Promise.all([
+      uploadToStorage(uploadedFiles.id, 'ids'),
+      uploadToStorage(uploadedFiles.guarantee, 'guarantees'),
+      uploadToStorage(uploadedFiles.receipt, 'receipts')
+    ]);
+
+    const payload = {
+      ref: generateRef(),
+      car: activeCar.name, carId: activeCar.id,
+      total, depositPct, deposit,
+      name: form.elements.fullName.value.trim(),
+      phone: form.elements.phone.value.trim(),
+      region: form.elements.region.value,
+      zone: form.elements.zone.value.trim(),
+      woreda: form.elements.woreda.value.trim(),
+      city: form.elements.city.value.trim(),
+      address: form.elements.address.value.trim(),
+      note: form.elements.note.value.trim(),
+      idPhoto: idUrl, guaranteePhoto: guarUrl, receiptPhoto: receiptUrl,
+      status: 'pending',
+      lang: currentLang,
+      ts: new Date().toISOString()
+    };
+
+    const saved = await saveOrder(payload);
+    if (saved && saved.id) payload.id = saved.id;
+
+    await notifyTelegram(payload);
+
+    $('#orderRef').textContent = payload.ref;
+    const waMsg = encodeURIComponent(`Hello! Order ref: ${payload.ref} — ${payload.car} — Deposit: ${formatPrice(payload.deposit)} ETB`);
+    $('#waLink').href = `https://wa.me/${settings.contact.whatsapp}?text=${waMsg}`;
+
+    closeModal();
+    $('#confirmModal').classList.remove('hidden');
+    $('#confirmModal').classList.add('flex');
+    document.body.classList.add('no-scroll');
+    showToast(t('toast_order'));
+
+    track('purchase', { transaction_id: payload.ref, value: payload.total, currency: 'ETB', items: [{ item_id: activeCar.id, item_name: activeCar.name, price: total }] });
+  } catch (err) {
+    console.error(err);
+    showErr('formError3', t('toast_error'));
+    showToast(t('toast_error'), 'error');
+  } finally {
+    $('#submitBtn').disabled = false;
+    $('#submitBtn').innerHTML = `<i class="fa-solid fa-check mr-2"></i>${t('form_submit')}`;
+  }
+}
+
+function closeConfirm() {
+  $('#confirmModal').classList.add('hidden');
+  $('#confirmModal').classList.remove('flex');
+  document.body.classList.remove('no-scroll');
+}
+
+/* ============================================================
+   POLICY
+   ============================================================ */
+function openPolicy(type) {
+  const content = type === 'privacy' ? `
+    <h2 class="text-2xl font-extrabold text-slate-900">የግላዊነት መመሪያ</h2>
+    <div class="mt-4 space-y-4 text-sm leading-relaxed text-slate-600">
+      <p>የግል መረጃዎን ለትዕዛዝ ማስተናገድ፣ ለማድረስ እና ለደንበኛ ድጋፍ ብቻ እንጠቀማለን።</p>
+      <p>የመታወቂያ እና የጉርድ ፎቶዎች ለማረጋገጫ ብቻ ይውላሉ።</p>
+    </div>` : `
+    <h2 class="text-2xl font-extrabold text-slate-900">የአገልግሎት ውል</h2>
+    <div class="mt-4 space-y-4 text-sm leading-relaxed text-slate-600">
+      <p>ትዕዛዝ ለማረጋገጥ 10% ቅድሚያ ክፍያ ያስፈልጋል። ቀሪው ሲረከቡ ይከፈላል።</p>
+      <p>ሁሉም ዋጋዎች VAT (15%) ተካተው ናቸው።</p>
+      <p>የባትሪ ዋስትና 5 ዓመት / 60,000 ኪሜ። ሞተር 2 ዓመት።</p>
+    </div>`;
+  $('#policyContent').innerHTML = content;
+  $('#policyModal').classList.remove('hidden');
+  $('#policyModal').classList.add('flex');
+  document.body.classList.add('no-scroll');
+}
+function closePolicy() {
+  $('#policyModal').classList.add('hidden');
+  $('#policyModal').classList.remove('flex');
+  document.body.classList.remove('no-scroll');
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function showToast(message, type = 'success') {
+  const el = document.createElement('div');
+  const isError = type === 'error';
+  el.className = `pointer-events-auto flex w-full items-start gap-3 rounded-xl border-l-4 ${isError ? 'border-red-500' : 'border-emerald-500'} bg-slate-900 px-5 py-4 text-white shadow-2xl transition-all duration-300 opacity-0 translate-y-3`;
+  el.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation text-red-400' : 'fa-circle-check text-emerald-400'} mt-0.5"></i><span class="text-sm font-medium leading-snug">${escapeHtml(message)}</span>`;
+  $('#toastContainer').appendChild(el);
+  requestAnimationFrame(() => el.classList.remove('opacity-0', 'translate-y-3'));
+  setTimeout(() => { el.classList.add('opacity-0', 'translate-y-3'); setTimeout(() => el.remove(), 320); }, 3500);
+}
+
+/* ============================================================
+   LANGUAGE
+   ============================================================ */
+function applyLanguage(lang) {
+  if (!I18N[lang]) lang = 'am';
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  try { localStorage.setItem('ev_lang', lang); } catch(_){}
+  $$('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+  $$('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = t(key);
+    if (val) el.placeholder = val;
+  });
+  $$('.lang-btn').forEach(btn => {
+    const active = btn.dataset.lang === lang;
+    btn.classList.toggle('bg-emerald-600', active);
+    btn.classList.toggle('text-white', active);
+    btn.classList.toggle('text-slate-300', !active);
+  });
+  applyFilters();
+  updateHeroCar();
+}
+
+/* ============================================================
+   APPLY SETTINGS TO UI
+   ============================================================ */
+function applySettings() {
+  const c = settings.contact;
+  const ft = $('#footTelegram');
+  if (ft) { if (c.telegramVisible && c.telegram) { ft.style.display=''; ft.href=`https://t.me/${c.telegram}`; } else ft.style.display='none'; }
+  const ff = $('#footFacebook');
+  if (ff) { if (c.facebookVisible && c.facebook) { ff.style.display=''; ff.href=c.facebook; } else ff.style.display='none'; }
+  const ftt = $('#footTiktok');
+  if (ftt) { if (c.tiktokVisible && c.tiktok) { ftt.style.display=''; ftt.href=c.tiktok; } else ftt.style.display='none'; }
+  const fw = $('#footWhatsapp');
+  if (fw) { if (c.whatsappVisible && c.whatsapp) { fw.style.display=''; fw.href=`https://wa.me/${c.whatsapp}`; } else fw.style.display='none'; }
+  const fpLi = $('#footPhoneLi');
+  if (fpLi) { if (c.phoneVisible && c.phone) { fpLi.style.display=''; $('#footPhoneText').textContent=c.phone; $('#footPhone').href=`tel:${c.phone.replace(/\s/g,'')}`; } else fpLi.style.display='none'; }
+  const feLi = $('#footEmailLi');
+  if (feLi) { if (c.emailVisible && c.email) { feLi.style.display=''; $('#footEmailText').textContent=c.email; $('#footEmail').href=`mailto:${c.email}`; } else feLi.style.display='none'; }
+  const fph = $('#floatPhone');
+  if (fph) { if (c.phoneVisible && c.phone) { fph.style.display=''; fph.href=`tel:${c.phone.replace(/\s/g,'')}`; } else fph.style.display='none'; }
+  const ftg = $('#floatTelegram');
+  if (ftg) { if (c.telegramVisible && c.telegram) { ftg.style.display=''; ftg.href=`https://t.me/${c.telegram}`; } else ftg.style.display='none'; }
+  const fwa = $('#floatWhatsapp');
+  if (fwa) { if (c.whatsappVisible && c.whatsapp) { fwa.style.display=''; fwa.href=`https://wa.me/${c.whatsapp}?text=Hello%20EV-Golf%20Ethiopia`; } else fwa.style.display='none'; }
+}
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+function openAdminGate(e) {
+  if (e) e.preventDefault();
+  if (sessionStorage.getItem('ev_admin') === '1') { openAdminDashboard(); return; }
+  $('#adminGate').classList.remove('hidden');
+  $('#adminGate').classList.add('flex');
+  $('#adminError').classList.add('hidden');
+  setTimeout(() => $('#adminPass').focus(), 60);
+}
+function closeAdminGate() {
+  $('#adminGate').classList.add('hidden');
+  $('#adminGate').classList.remove('flex');
+  $('#adminPass').value = '';
+}
+function logoutAdmin() {
+  sessionStorage.removeItem('ev_admin');
+  $('#adminDashboard').classList.add('hidden');
+  $('#adminDashboard').classList.remove('flex');
+  document.body.classList.remove('no-scroll');
+}
+async function openAdminDashboard() {
+  $('#adminDashboard').classList.remove('hidden');
+  $('#adminDashboard').classList.add('flex');
+  document.body.classList.add('no-scroll');
+  orders = await fetchOrders();
+  carsData = await fetchCars();
+  renderAdminOrders();
+  renderAdminCars();
+  renderAdminCustomers();
+  renderAdminSettings();
+  renderAdminStats();
+}
+
+$('#adminGateForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const pass = $('#adminPass').value;
+  if (pass === CONFIG.adminPassword) {
+    sessionStorage.setItem('ev_admin', '1');
+    closeAdminGate();
+    openAdminDashboard();
+  } else {
+    $('#adminError').classList.remove('hidden');
+    $('#adminPass').value = '';
+    $('#adminPass').focus();
+  }
+});
+
+$$('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const name = tab.dataset.admintab;
+    $$('.admin-tab').forEach(t => {
+      const active = t.dataset.admintab === name;
+      t.classList.toggle('border-emerald-600', active);
+      t.classList.toggle('text-emerald-600', active);
+      t.classList.toggle('border-transparent', !active);
+      t.classList.toggle('text-slate-500', !active);
+    });
+    $$('.admin-tab-content').forEach(c => c.classList.add('hidden'));
+    const map = { orders:'adminTabOrders', cars:'adminTabCars', customers:'adminTabCustomers', settings:'adminTabSettings', stats:'adminTabStats' };
+    $('#' + map[name]).classList.remove('hidden');
+  });
+});
+
+function renderAdminOrders() {
+  const filter = $('#orderStatusFilter')?.value || 'all';
+  const q = ($('#orderSearch')?.value || '').toLowerCase();
+  let list = orders.filter(o => {
+    const matchStatus = filter === 'all' || o.status === filter;
+    const matchQ = !q || (o.name||'').toLowerCase().includes(q) || (o.phone||'').includes(q) || (o.ref||'').toLowerCase().includes(q);
+    return matchStatus && matchQ;
+  });
+  const container = $('#adminOrdersList');
+  if (list.length === 0) {
+    container.innerHTML = `<div class="rounded-xl bg-white p-8 text-center text-slate-500 shadow-sm"><i class="fa-solid fa-inbox mb-3 text-3xl text-slate-300"></i><p>ምንም Orders የለም</p></div>`;
+    return;
+  }
+  container.innerHTML = list.map(o => `
+    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-xs font-bold text-slate-500">${escapeHtml(o.ref)}</span>
+            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold status-${o.status}">${o.status.toUpperCase()}</span>
+          </div>
+          <h4 class="mt-1 font-bold text-slate-900">${escapeHtml(o.car)}</h4>
+          <p class="mt-1 text-xs text-slate-500">${new Date(o.ts).toLocaleString()}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-lg font-black text-emerald-600">${formatPrice(o.total)} ETB</p>
+          <p class="text-xs font-bold text-amber-600">Deposit: ${formatPrice(o.deposit)} ETB (${o.depositPct}%)</p>
+          <select onchange="updateOrderStatus('${o.ref}', this.value)" class="mt-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-semibold outline-none">
+            <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
+            <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmed</option>
+            <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
+            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-3 grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600 sm:grid-cols-2">
+        <p><i class="fa-solid fa-user mr-1 text-emerald-500"></i>${escapeHtml(o.name)}</p>
+        <p><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>${escapeHtml(o.phone)}</p>
+        <p class="sm:col-span-2"><i class="fa-solid fa-location-dot mr-1 text-emerald-500"></i>${escapeHtml(o.region||'')} / ${escapeHtml(o.zone||'')} / ${escapeHtml(o.woreda||'')} / ${escapeHtml(o.city||'')}</p>
+        ${o.address ? `<p class="sm:col-span-2"><i class="fa-solid fa-house mr-1 text-emerald-500"></i>${escapeHtml(o.address)}</p>` : ''}
+        ${o.note ? `<p class="sm:col-span-2"><i class="fa-solid fa-note-sticky mr-1 text-emerald-500"></i>${escapeHtml(o.note)}</p>` : ''}
+      </div>
+      <div class="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3">
+        <div class="text-center"><p class="text-[10px] font-bold uppercase text-slate-400">ID</p>${o.idPhoto ? `<img src="${o.idPhoto}" onclick="viewAdminImage('${o.idPhoto}','ID')" class="mt-1 mx-auto h-16 w-full cursor-pointer rounded-lg object-cover hover:ring-2 hover:ring-emerald-500">` : '<p class="text-xs text-slate-400">—</p>'}</div>
+        <div class="text-center"><p class="text-[10px] font-bold uppercase text-slate-400">Guarantee</p>${o.guaranteePhoto ? `<img src="${o.guaranteePhoto}" onclick="viewAdminImage('${o.guaranteePhoto}','Guarantee')" class="mt-1 mx-auto h-16 w-full cursor-pointer rounded-lg object-cover hover:ring-2 hover:ring-emerald-500">` : '<p class="text-xs text-slate-400">—</p>'}</div>
+        <div class="text-center"><p class="text-[10px] font-bold uppercase text-slate-400">Receipt</p>${o.receiptPhoto ? `<img src="${o.receiptPhoto}" onclick="viewAdminImage('${o.receiptPhoto}','Receipt')" class="mt-1 mx-auto h-16 w-full cursor-pointer rounded-lg object-cover hover:ring-2 hover:ring-emerald-500">` : '<p class="text-xs text-slate-400">—</p>'}</div>
+      </div>
+      <div class="mt-3 flex gap-2 border-t border-slate-100 pt-3">
+        <a href="tel:${escapeHtml(o.phone)}" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200"><i class="fa-solid fa-phone mr-1"></i>Call</a>
+        <a href="https://wa.me/${(o.phone||'').replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hello ' + o.name + ' — order ' + o.ref)}" target="_blank" class="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-bold text-green-700 hover:bg-green-200"><i class="fa-brands fa-whatsapp mr-1"></i>WhatsApp</a>
+        <button type="button" onclick="deleteOrder('${o.ref}')" class="ml-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100"><i class="fa-solid fa-trash mr-1"></i>Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewAdminImage(src, title) {
+  const w = window.open('', '_blank');
+  w.document.write(`<html><head><title>${title}</title><style>body{margin:0;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#fff;padding:20px}img{max-width:100%;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}</style></head><body><img src="${src}"></body></html>`);
+}
+
+async function updateOrderStatus(ref, status) {
+  const idx = orders.findIndex(o => o.ref === ref);
+  if (idx < 0) return;
+  try {
+    await updateOrderStatusDB(orders[idx].id, status);
+    orders[idx].status = status;
+    showToast(t('toast_order_updated'));
+  } catch (err) { showToast('ስህተት', 'error'); }
+}
+
+async function deleteOrder(ref) {
+  if (!confirm('ማጥፋት ይፈልጋሉ?')) return;
+  const order = orders.find(o => o.ref === ref);
+  if (!order) return;
+  try {
+    await deleteOrderDB(order.id);
+    orders = orders.filter(o => o.ref !== ref);
+    renderAdminOrders();
+    renderAdminStats();
+  } catch (err) { showToast('ስህተት', 'error'); }
+}
+
+function renderAdminCars() {
+  const container = $('#adminCarsList');
+  container.innerHTML = carsData.map(c => {
+    const stockLabel = t(STOCK_KEY[c.stock] || 'stock_in');
+    const stockClass = STOCK_CLASS[c.stock] || 'stock-in';
+    const photoCount = c.photos ? c.photos.length : 0;
+    return `
+    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+      <div class="flex flex-wrap items-center gap-4">
+        <img src="${carImage(c, 'side')}" alt="${escapeHtml(c.name)}" class="h-16 w-24 rounded-lg object-cover">
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h4 class="font-bold text-slate-900">${escapeHtml(c.name)}</h4>
+            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold ${stockClass}">${stockLabel}</span>
+            ${photoCount > 0 ? `<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700"><i class="fa-solid fa-images mr-1"></i>${photoCount}</span>` : ''}
+          </div>
+          <p class="mt-1 text-xs text-slate-500">${c.seats} seats · ${c.range} km · ${escapeHtml(c.battery||'')}</p>
+          <p class="mt-1 text-sm font-black text-emerald-600">${formatPrice(c.price)} ETB</p>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" onclick="openCarForm(${c.id})" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200"><i class="fa-solid fa-pen mr-1"></i>Edit</button>
+          <button type="button" onclick="deleteCar(${c.id})" class="rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-100"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+    </div>
+  `}).join('');
+}
+
+/* ============================================================
+   CAR FORM PHOTOS (MULTIPLE)
+   ============================================================ */
+function renderCarFormPhotos() {
+  const grid = $('#carPhotoGrid');
+  const count = $('#photoCount');
+  if (!grid) return;
+  if (count) count.textContent = carFormPhotos.length;
+  if (carFormPhotos.length === 0) {
+    grid.innerHTML = '';
+    grid.classList.add('hidden');
+    return;
+  }
+  grid.classList.remove('hidden');
+  grid.innerHTML = carFormPhotos.map((p, i) => `
+    <div class="photo-tile">
+      <img src="${p}" alt="photo ${i+1}">
+      ${i === 0 ? '<span class="primary-badge">ዋና</span>' : ''}
+      <button type="button" class="del-btn" onclick="removeCarFormPhoto(${i})" aria-label="Remove">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+function removeCarFormPhoto(i) {
+  if (i < 0 || i >= carFormPhotos.length) return;
+  carFormPhotos.splice(i, 1);
+  renderCarFormPhotos();
+  showToast(t('toast_photo_removed'), 'error');
+}
+
+function openCarForm(id) {
+  const modal = $('#carFormModal');
+  carFormPhotos = [];
+
+  if (id) {
+    const car = carsData.find(c => c.id === id);
+    if (!car) return;
+    $('#carFormTitle').textContent = 'Edit Car';
+    $('#carFormId').value = car.id;
+    $('#carFormName').value = car.name;
+    $('#carFormSeats').value = car.seats;
+    $('#carFormPrice').value = car.price;
+    $('#carFormBattery').value = car.battery || '';
+    $('#carFormBatteryKwh').value = car.batteryKwh || '';
+    $('#carFormMotorPower').value = car.motorPower || '';
+    $('#carFormRange').value = car.range || '';
+    $('#carFormSpeed').value = car.speed || '';
+    $('#carFormCharge').value = car.charge || '';
+    $('#carFormLength').value = (car.dimensions && car.dimensions.length) || '';
+    $('#carFormWidth').value = (car.dimensions && car.dimensions.width) || '';
+    $('#carFormHeight').value = (car.dimensions && car.dimensions.height) || '';
+    $('#carFormCargo').value = car.cargo || '';
+    $('#carFormStock').value = car.stock || 'in_stock';
+    $('#carFormVideo').value = car.video || '';
+    $('#carFormTag').value = car.tag || '';
+    $('#carFormDesc').value = car.desc || '';
+    if (Array.isArray(car.photos) && car.photos.length) {
+      carFormPhotos = [...car.photos];
+    }
+  } else {
+    $('#carFormTitle').textContent = 'አዲስ መኪና';
+    $('#carForm').reset();
+    $('#carFormId').value = '';
+  }
+
+  $('#carPhotoFile').value = '';
+  $('#carPhotoWrap').classList.remove('has-file');
+  renderCarFormPhotos();
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeCarForm() {
+  $('#carFormModal').classList.add('hidden');
+  $('#carFormModal').classList.remove('flex');
+  carFormPhotos = [];
+}
+
+/* File input — MULTIPLE */
+$('#carPhotoFile').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  let added = 0;
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    try {
+      const compressed = await compressImage(file, 900, 0.75);
+      const url = await uploadToStorage(compressed, 'cars');
+      carFormPhotos.push(url);
+      added++;
+    } catch (err) { console.warn(err); }
+  }
+  if (added > 0) {
+    $('#carPhotoWrap').classList.add('has-file');
+    renderCarFormPhotos();
+    showToast(`📸 ${added} ${t('toast_photo_added')}`);
+  } else {
+    showToast('እባክዎ ምስል ብቻ ይጫኑ', 'error');
+  }
+  e.target.value = '';
+});
+
+/* Cloudinary Widget */
+$('#cloudinaryBtn').addEventListener('click', () => {
+  if (!CONFIG.cloudinary.enabled || typeof cloudinary === 'undefined') {
+    showToast('Cloudinary አልተዋቀረም', 'error');
+    return;
+  }
+  if (!cloudinaryWidget) {
+    cloudinaryWidget = cloudinary.createUploadWidget({
+      cloudName: CONFIG.cloudinary.cloudName,
+      uploadPreset: CONFIG.cloudinary.uploadPreset,
+      folder: 'ev-golf/cars',
+      sources: ['local', 'camera', 'url'],
+      multiple: true,
+      maxFiles: 10,
+      clientAllowedFormats: ['jpg','jpeg','png','webp'],
+      maxFileSize: 5000000,
+      styles: { palette: {
+        window: '#0f172a', windowBorder: '#10b981', tabIcon: '#10b981',
+        textDark: '#f8fafc', textLight: '#94a3b8', link: '#34d399',
+        action: '#059669', inProgress: '#34d399', complete: '#10b981', sourceBg: '#1e293b'
+      }}
+    }, (error, result) => {
+      if (error) { console.error(error); return; }
+      if (result.event === 'success') {
+        carFormPhotos.push(result.info.secure_url);
+        renderCarFormPhotos();
+        showToast('☁️ ፎቶ ከCloudinary ተጨምሯል');
+      }
+    });
+  }
+  cloudinaryWidget.open();
+});
+
+$('#carForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('#carFormId').value;
+  const nameVal = $('#carFormName').value.trim();
+  const seatsVal = parseInt($('#carFormSeats').value) || 0;
+  const priceVal = parseInt($('#carFormPrice').value) || 0;
+
+  if (!nameVal) { showToast(t('err_name_required'), 'error'); return; }
+  if (seatsVal < 1) { showToast(t('err_seats_required'), 'error'); return; }
+  if (priceVal < 0) { showToast(t('err_price_required'), 'error'); return; }
+
+  const data = {
+    name: nameVal, seats: seatsVal, price: priceVal,
+    battery: $('#carFormBattery').value.trim(),
+    batteryKwh: parseFloat($('#carFormBatteryKwh').value) || 0,
+    motorPower: parseFloat($('#carFormMotorPower').value) || 0,
+    range: parseInt($('#carFormRange').value) || 0,
+    speed: parseInt($('#carFormSpeed').value) || 0,
+    charge: $('#carFormCharge').value.trim(),
+    dimensions: {
+      length: parseInt($('#carFormLength').value) || 0,
+      width: parseInt($('#carFormWidth').value) || 0,
+      height: parseInt($('#carFormHeight').value) || 0
+    },
+    cargo: $('#carFormCargo').value.trim(),
+    stock: $('#carFormStock').value,
+    video: $('#carFormVideo').value.trim(),
+    tag: $('#carFormTag').value.trim(),
+    desc: $('#carFormDesc').value.trim(),
+    photos: [...carFormPhotos]
+  };
+
+  try {
+    if (id) {
+      const car = carsData.find(c => c.id === Number(id));
+      await saveCar({ ...data, id: Number(id), accent: car?.accent });
+      if (car) Object.assign(car, data);
+      saveCarsLocal();
+    } else {
+      const newId = await saveCar(data);
+      const accents = ['#10b981','#0ea5e9','#f59e0b','#8b5cf6','#ef4444'];
+      const newCar = { id: newId || (Math.max(0, ...carsData.map(c => c.id)) + 1), accent: accents[carsData.length % accents.length], ...data };
+      carsData.push(newCar);
+      saveCarsLocal();
+    }
+    renderAdminCars();
+    applyFilters();
+    updateHeroCar();
+    closeCarForm();
+    showToast(t('toast_car_saved'));
+  } catch (err) {
+    console.error(err);
+    showToast('ማስቀመጥ አልተቻለም: ' + (err.message || ''), 'error');
+  }
+});
+
+async function deleteCar(id) {
+  if (!confirm('መኪናውን ማጥፋት ይፈልጋሉ?')) return;
+  try {
+    await deleteCarById(id);
+    renderAdminCars();
+    applyFilters();
+    updateHeroCar();
+    showToast(t('toast_car_deleted'));
+  } catch (err) { showToast('ስህተት', 'error'); }
+}
+
+/* ============================================================
+   ADMIN CUSTOMERS
+   ============================================================ */
+function renderAdminCustomers() {
+  const map = {};
+  orders.forEach(o => {
+    const key = o.phone || o.name;
+    if (!map[key]) map[key] = { name:o.name, phone:o.phone, region:o.region, city:o.city, orders:0, spent:0, deposit:0 };
+    map[key].orders++;
+    map[key].spent += o.total || 0;
+    map[key].deposit += o.deposit || 0;
+  });
+  const list = Object.values(map).sort((a,b) => b.spent - a.spent);
+  const container = $('#adminCustomersList');
+  if (list.length === 0) {
+    container.innerHTML = `<div class="rounded-xl bg-white p-8 text-center text-slate-500 shadow-sm"><i class="fa-solid fa-users mb-3 text-3xl text-slate-300"></i><p>ምንም ደንበኞች የለም</p></div>`;
+    return;
+  }
+  container.innerHTML = list.map(c => `
+    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h4 class="font-bold text-slate-900">${escapeHtml(c.name)}</h4>
+          <p class="mt-1 text-xs text-slate-500"><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>${escapeHtml(c.phone || '—')}</p>
+          ${c.region ? `<p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1 text-emerald-500"></i>${escapeHtml(c.region)}${c.city ? ', ' + escapeHtml(c.city) : ''}</p>` : ''}
+        </div>
+        <div class="text-right">
+          <p class="text-sm font-bold text-slate-700">${c.orders} orders</p>
+          <p class="text-lg font-black text-emerald-600">${formatPrice(c.spent)} ETB</p>
+          <p class="text-[10px] font-bold text-amber-600">Deposit: ${formatPrice(c.deposit)} ETB</p>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   ADMIN SETTINGS
+   ============================================================ */
+function renderAdminSettings() {
+  const c = settings.contact;
+  const p = settings.payment;
+  const container = $('#adminSettings');
+  container.innerHTML = `
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-slate-900"><i class="fa-solid fa-address-book text-emerald-600"></i> የመገኛ መረጃ</h3>
+      <div class="space-y-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>ስልክ ቁጥር</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setPhoneVisible" ${c.phoneVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
+          <input type="text" id="setPhone" value="${escapeHtml(c.phone)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-whatsapp mr-1 text-green-500"></i>WhatsApp</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setWhatsappVisible" ${c.whatsappVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
+          <input type="text" id="setWhatsapp" value="${escapeHtml(c.whatsapp)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-telegram mr-1 text-sky-500"></i>Telegram</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setTelegramVisible" ${c.telegramVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
+          <input type="text" id="setTelegram" value="${escapeHtml(c.telegram)}" placeholder="evgolfethiopia" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-solid fa-envelope mr-1 text-emerald-500"></i>ኢሜይል</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setEmailVisible" ${c.emailVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
+          <input type="email" id="setEmail" value="${escapeHtml(c.email)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-facebook mr-1 text-blue-500"></i>Facebook</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setFacebookVisible" ${c.facebookVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
+          <input type="url" id="setFacebook" value="${escapeHtml(c.facebook)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-tiktok mr-1 text-slate-800"></i>TikTok</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setTiktokVisible" ${c.tiktokVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
+          <input type="url" id="setTiktok" value="${escapeHtml(c.tiktok)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-slate-900"><i class="fa-solid fa-file-invoice-dollar text-emerald-600"></i> የትዕዛዝ ቅንብሮች</h3>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div><label class="mb-1 block text-xs font-bold text-slate-600">ቅድሚያ ክፍያ (%)</label><input type="number" id="setDeposit" min="1" max="100" value="${settings.order.depositPercent}" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500"></div>
+        <div><label class="mb-1 block text-xs font-bold text-slate-600">VAT (%)</label><input type="number" id="setVat" min="0" max="50" step="0.5" value="${(settings.order.vatRate*100).toFixed(1)}" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500"></div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-slate-900"><i class="fa-solid fa-credit-card text-emerald-600"></i> የመክፈያ አካውንቶች</h3>
+      <div class="space-y-3">
+        ${['telebirr','cbe','chapa','bankTransfer'].map(key => {
+          const m = p[key] || {};
+          return `
+          <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+            <div class="flex items-center justify-between gap-2">
+              <label class="text-sm font-bold text-slate-700">${escapeHtml(m.label || key)}</label>
+              <label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" data-pay="${key}" ${m.enabled?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600 pay-toggle"><span class="font-semibold text-slate-600">አሳይ</span></label>
+            </div>
+            <input type="text" data-payfield="${key}-label" value="${escapeHtml(m.label||'')}" placeholder="Label" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs outline-none focus:border-emerald-500">
+            <input type="text" data-payfield="${key}-account" value="${escapeHtml(m.account||'')}" placeholder="Account number" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs outline-none focus:border-emerald-500">
+            <input type="text" data-payfield="${key}-name" value="${escapeHtml(m.name||'')}" placeholder="Account name" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs outline-none focus:border-emerald-500">
+            ${key === 'bankTransfer' ? `<input type="text" data-payfield="${key}-bank" value="${escapeHtml(m.bank||'')}" placeholder="Bank name" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs outline-none focus:border-emerald-500">` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <button type="button" onclick="resetSettings()" class="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-rotate-left mr-1"></i>ዳግም</button>
+      <button type="button" onclick="saveAdminSettings()" class="rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-emerald-500"><i class="fa-solid fa-save mr-1"></i>አስቀምጥ</button>
+    </div>
+  `;
+}
+
+async function saveAdminSettings() {
+  const newSettings = {
+    contact: {
+      phone: $('#setPhone').value.trim(), phoneVisible: $('#setPhoneVisible').checked,
+      whatsapp: $('#setWhatsapp').value.trim(), whatsappVisible: $('#setWhatsappVisible').checked,
+      telegram: $('#setTelegram').value.trim(), telegramVisible: $('#setTelegramVisible').checked,
+      email: $('#setEmail').value.trim(), emailVisible: $('#setEmailVisible').checked,
+      facebook: $('#setFacebook').value.trim(), facebookVisible: $('#setFacebookVisible').checked,
+      tiktok: $('#setTiktok').value.trim(), tiktokVisible: $('#setTiktokVisible').checked
+    },
+    payment: {},
+    order: {
+      depositPercent: parseFloat($('#setDeposit').value) || 10,
+      vatRate: (parseFloat($('#setVat').value) || 15) / 100
+    }
+  };
+  ['telebirr','cbe','chapa','bankTransfer'].forEach(key => {
+    newSettings.payment[key] = {
+      enabled: document.querySelector(`[data-pay="${key}"]`).checked,
+      label: document.querySelector(`[data-payfield="${key}-label"]`).value.trim(),
+      account: document.querySelector(`[data-payfield="${key}-account"]`).value.trim(),
+      name: document.querySelector(`[data-payfield="${key}-name"]`).value.trim(),
+      bank: document.querySelector(`[data-payfield="${key}-bank"]`)?.value.trim() || ''
+    };
+  });
+  try {
+    await saveSettingsDB(newSettings);
+    settings = newSettings;
+    applySettings();
+    showToast(t('toast_settings_saved'));
+  } catch (err) { showToast('ማስቀምጥ አልተቻለም', 'error'); }
+}
+
+async function resetSettings() {
+  if (!confirm('ሁሉንም ቅንብሮች ወደ ነባሪ መመለስ ይፈልጋሉ?')) return;
+  settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  await saveSettingsDB(settings);
+  applySettings();
+  renderAdminSettings();
+  showToast('ተመልሷል');
+}
+
+function renderAdminStats() {
+  const total = orders.length;
+  const pending = orders.filter(o => o.status === 'pending').length;
+  const delivered = orders.filter(o => o.status === 'delivered').length;
+  const revenue = orders.filter(o => o.status !== 'cancelled').reduce((s,o) => s + (o.total||0), 0);
+  const depositTotal = orders.filter(o => o.status !== 'cancelled').reduce((s,o) => s + (o.deposit||0), 0);
+  $('#adminStats').innerHTML = `
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Total Orders</p><p class="mt-2 text-2xl font-black text-slate-900">${total}</p></div>
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Pending</p><p class="mt-2 text-2xl font-black text-amber-600">${pending}</p></div>
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Delivered</p><p class="mt-2 text-2xl font-black text-emerald-600">${delivered}</p></div>
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Total Revenue</p><p class="mt-2 text-xl font-black text-slate-900">${formatPrice(revenue)} <span class="text-xs font-bold text-slate-400">ETB</span></p><p class="mt-1 text-[10px] font-bold text-amber-600">Deposits: ${formatPrice(depositTotal)} ETB</p></div>
+  `;
+}
+
+function exportOrders() {
+  if (orders.length === 0) { showToast('ምንም orders የለም', 'error'); return; }
+  const headers = ['Ref','Date','Car','Total','Deposit %','Deposit','Status','Name','Phone','Region','Zone','Woreda','City','Address','Note'];
+  const rows = orders.map(o => [o.ref,o.ts,o.car,o.total,o.depositPct,o.deposit,o.status,o.name,o.phone,o.region,o.zone,o.woreda,o.city,o.address,o.note].map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ev-orders-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   EVENT LISTENERS
+   ============================================================ */
+$('#seatFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
+$('#priceFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
+$('#sortFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
+$('#resetBtn')?.addEventListener('click', resetFilters);
+
+$('#carsGrid')?.addEventListener('click', (e) => {
+  const orderBtn = e.target.closest('[data-order]');
+  if (orderBtn && !orderBtn.disabled) { openModal(Number(orderBtn.dataset.order)); return; }
+  const detailBtn = e.target.closest('[data-detail]');
+  if (detailBtn) { openDetail(Number(detailBtn.dataset.detail)); return; }
+});
+
+$('#orderForm')?.addEventListener('submit', handleOrderSubmit);
+
+$('#orderModal')?.addEventListener('click', (e) => { if (e.target === $('#orderModal')) closeModal(); });
+$('#confirmModal')?.addEventListener('click', (e) => { if (e.target === $('#confirmModal')) closeConfirm(); });
+$('#detailModal')?.addEventListener('click', (e) => { if (e.target === $('#detailModal')) closeDetail(); });
+$('#policyModal')?.addEventListener('click', (e) => { if (e.target === $('#policyModal')) closePolicy(); });
+$('#adminGate')?.addEventListener('click', (e) => { if (e.target === $('#adminGate')) closeAdminGate(); });
+$('#carFormModal')?.addEventListener('click', (e) => { if (e.target === $('#carFormModal')) closeCarForm(); });
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!$('#orderModal').classList.contains('hidden')) closeModal();
+    if (!$('#confirmModal').classList.contains('hidden')) closeConfirm();
+    if (!$('#detailModal').classList.contains('hidden')) closeDetail();
+    if (!$('#policyModal').classList.contains('hidden')) closePolicy();
+    if (!$('#adminGate').classList.contains('hidden')) closeAdminGate();
+    if (!$('#carFormModal').classList.contains('hidden')) closeCarForm();
+  }
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+    e.preventDefault();
+    openAdminGate();
+  }
+});
+
+$('#menuBtn')?.addEventListener('click', () => {
+  const isOpen = !$('#mobileMenu').classList.contains('hidden');
+  $('#mobileMenu').classList.toggle('hidden');
+  $('#menuBtn').setAttribute('aria-expanded', String(!isOpen));
+  $('#menuBtn').innerHTML = isOpen ? '<i class="fa-solid fa-bars"></i>' : '<i class="fa-solid fa-xmark"></i>';
+});
+$$('#mobileMenu a').forEach(link => {
+  link.addEventListener('click', () => {
+    $('#mobileMenu').classList.add('hidden');
+    $('#menuBtn').setAttribute('aria-expanded', 'false');
+    $('#menuBtn').innerHTML = '<i class="fa-solid fa-bars"></i>';
+  });
+});
+
+const navLinks = $$('[data-nav]');
+const sectionIds = ['home', 'cars', 'features', 'warranty', 'faq', 'contact'];
+function onScroll() {
+  const y = window.scrollY;
+  const toTop = $('#toTop');
+  if (toTop) {
+    toTop.classList.toggle('hidden', y < 400);
+    toTop.classList.toggle('flex', y >= 400);
+  }
+  let current = 'home';
+  for (const id of sectionIds) {
+    const sec = document.getElementById(id);
+    if (sec && sec.offsetTop - 120 <= y) current = id;
+  }
+  navLinks.forEach(a => a.classList.toggle('is-active', a.dataset.nav === current));
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+$('#toTop')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+$$('.lang-btn').forEach(btn => btn.addEventListener('click', () => {
+  applyLanguage(btn.dataset.lang);
+  track('language_switch', { language: btn.dataset.lang });
+}));
+
+if (location.hash === '#admin') setTimeout(() => openAdminGate(), 800);
+</script>
+</body>
+</html>
