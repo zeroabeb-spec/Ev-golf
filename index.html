@@ -18,9 +18,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 
-<!-- 🛡️ EARLY SAFETY NET — JS ሙሉ ቢሰበርም loader ከ 8 ሰከንድ በኋላ ይጠፋል -->
+<!-- 🛡️ EARLY SAFETY NET -->
 <script>
   (function () {
     function killLoader() {
@@ -32,19 +31,12 @@
         }
       } catch (_) {}
     }
-    // ሁለት ደረጃ የደህንነት መረብ
     setTimeout(killLoader, 6000);
     setTimeout(killLoader, 10000);
   })();
 </script>
 
 <script>
-/* ==================================================================
-   🛡️ SAFE STORAGE WRAPPER
-   localStorage/sessionStorage በ sandboxed iframe ውስጥ ሲነካ
-   SecurityError ይጥላል — ይህ ደግሞ ሙሉ script ያቆማል።
-   ስለዚህ ሁሉንም ጥሪዎች በ try/catch እንጠብቃለን።
-   ================================================================== */
 const safeStorage = {
   get(key, fallback = null) {
     try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
@@ -77,16 +69,13 @@ const safeSession = {
 
 <script>
 tailwind.config = { theme: { extend: {
-  colors: { primary: '#059669', darkBg: '#0f172a' },
+  colors: { primary: '#059669', darkBg: '#0f172a', surface: '#f8fafc' },
   fontFamily: {
     sans: ['Inter','Noto Sans Ethiopic','system-ui','sans-serif'],
     mono: ['JetBrains Mono','ui-monospace','monospace']
   }
 }}}
 
-/* ==================================================================
-   ⚙️ CONFIGURATION
-   ================================================================== */
 const CONFIG = {
   supabase: {
     url: 'https://gifccgwxfuirhrngabbv.supabase.co',
@@ -94,33 +83,21 @@ const CONFIG = {
     storageBucket: 'ev-golf',
     enabled: true
   },
-  cloudinary: {
-    cloudName: 'azdf4lwt',
-    uploadPreset: 'ev_golf_unsigned',
-    enabled: true
-  },
   telegram: {
     botToken: '8934767624:AAHpvF2GDL04SmGM8FctJSfJxSitsrbmhXQ',
     chatIds: ['586949881366288', '8266834331'],
     enabled: true
   },
-  analytics: {
-    measurementId: 'G-XXXXXXXXXX',
-    enabled: false
-  },
-  adminPassword: 'admin123'
+  analytics: { measurementId: 'G-XXXXXXXXXX', enabled: false }
 };
 
-// Supabase Client (defensive — window.supabase ላይሆን ይችላል)
-// ⚠️ 'sbClient' እንጠቀማለን — 'supabase' ቢሆን CDN global ጋር ይጋጫል
 var sbClient = null;
 try {
   if (CONFIG.supabase.enabled && CONFIG.supabase.url && typeof window !== 'undefined' && window.supabase) {
     sbClient = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
-    window.supabase = sbClient; // 🎯 SDK namespace በ client እንተካው
+    window.supabase = sbClient;
     console.log('✅ Supabase connected');
   } else if (CONFIG.supabase.enabled) {
-    console.warn('⚠️ Supabase SDK not loaded — falling back to localStorage');
     CONFIG.supabase.enabled = false;
   }
 } catch (err) {
@@ -139,16 +116,15 @@ html{-webkit-tap-highlight-color:transparent}
 ::-webkit-scrollbar-thumb:hover{background:#94a3b8}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .fade-up{animation:fadeUp .45s ease both}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.float-anim{animation:float 4s ease-in-out infinite}
-@keyframes floatSlow{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(2deg)}}
-.float-slow{animation:floatSlow 6s ease-in-out infinite}
-@keyframes spinSlow{to{transform:rotate(360deg)}}
-.spin-slow{animation:spinSlow 1s linear infinite}
 @keyframes pulseGlow{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.65;transform:scale(1.05)}}
 .pulse-glow{animation:pulseGlow 4s ease-in-out infinite}
 @keyframes shine{0%{background-position:-200% center}100%{background-position:200% center}}
 .shine-text{background:linear-gradient(90deg,#34d399 0%,#a7f3d0 50%,#34d399 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 3s linear infinite}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.float-y{animation:floatY 5s ease-in-out infinite}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.marquee-track{display:flex;width:max-content;animation:marquee 30s linear infinite}
+.marquee-mask{mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
 details.faq>summary{list-style:none;cursor:pointer}
 details.faq>summary::-webkit-details-marker{display:none}
 details.faq[open] .faq-chevron{transform:rotate(180deg)}
@@ -169,7 +145,7 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
 .file-upload{border:2px dashed #cbd5e1;border-radius:.75rem;padding:1rem;text-align:center;transition:all .2s;cursor:pointer;background:#f8fafc}
 .file-upload:hover{border-color:#10b981;background:#ecfdf5}
 .file-upload.has-file{border-color:#10b981;background:#ecfdf5;border-style:solid}
-.step-indicator{width:2rem;height:2rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;transition:all .3s}
+.step-indicator{width:2rem;height:2rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;transition:all .3s;flex-shrink:0}
 .step-active{background:#059669;color:#fff;box-shadow:0 0 0 4px rgba(5,150,105,.2)}
 .step-done{background:#059669;color:#fff}
 .step-inactive{background:#e2e8f0;color:#94a3b8}
@@ -178,28 +154,33 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
 .copy-btn:hover{background:#059669;color:#fff}
 .copy-btn.copied{background:#059669;color:#fff}
 .hero-grid-bg{background-image:linear-gradient(rgba(16,185,129,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.08) 1px,transparent 1px);background-size:40px 40px}
-.account-number{
-  font-family:'JetBrains Mono','ui-monospace',monospace;
-  font-size:1rem;
-  font-weight:700;
-  letter-spacing:.03em;
-  color:#0f172a;
-  line-height:1.4;
-  word-break:break-all;
-  user-select:all;
-}
-@media (min-width:640px){ .account-number{font-size:1.05rem;} }
-.photo-tile{position:relative;overflow:hidden;border-radius:.65rem;border:1px solid #e2e8f0;aspect-ratio:1/1;background:#f1f5f9}
-.photo-tile img{width:100%;height:100%;object-fit:cover;display:block}
-.photo-tile .del-btn{position:absolute;top:.3rem;right:.3rem;width:1.5rem;height:1.5rem;border-radius:9999px;background:#ef4444;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;box-shadow:0 4px 10px rgba(0,0,0,.2);transition:all .15s}
-.photo-tile .del-btn:hover{background:#dc2626;transform:scale(1.1)}
-.photo-tile .primary-badge{position:absolute;top:.3rem;left:.3rem;background:#059669;color:#fff;font-size:.55rem;font-weight:800;padding:.15rem .4rem;border-radius:9999px;letter-spacing:.05em}
+.account-number{font-family:'JetBrains Mono','ui-monospace',monospace;font-size:1.05rem;font-weight:700;letter-spacing:.03em;color:#0f172a;line-height:1.4;word-break:break-all;user-select:all}
+@media (min-width:640px){ .account-number{font-size:1.1rem;} }
+.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#fabSecondary{transition:transform .3s ease,opacity .25s ease}
+#heroCarImg{image-rendering:-webkit-optimize-contrast}
+.hero-dot{width:8px;height:8px;border-radius:9999px;background:rgba(148,163,184,.5);transition:all .3s;cursor:pointer}
+.hero-dot.active{width:26px;background:#10b981}
+.stat-num{font-variant-numeric:tabular-nums}
+
+/* === PAYMENT CHIP STYLES === */
+.pay-chip{position:relative;transition:all .25s cubic-bezier(.4,0,.2,1)}
+.pay-chip.is-selected{transform:translateY(-2px)}
+@keyframes popIn{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop-in{animation:popIn .25s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}100%{box-shadow:0 0 0 12px rgba(16,185,129,0)}}
+.pulse-ring{animation:pulseRing 1.5s ease-out infinite}
+.amount-hero{background:linear-gradient(135deg,#059669 0%,#10b981 45%,#14b8a6 100%);position:relative;overflow:hidden}
+.amount-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 20%,rgba(255,255,255,.18),transparent 45%),radial-gradient(circle at 80% 80%,rgba(255,255,255,.12),transparent 45%)}
+.amount-hero::after{content:'';position:absolute;top:-40%;right:-10%;width:60%;height:180%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:rotate(20deg);animation:shine 4s linear infinite}
+@keyframes bounceIn{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+.bounce-in{animation:bounceIn .5s cubic-bezier(.34,1.56,.64,1) both}
+
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
-<!-- NOSCRIPT FALLBACK -->
 <noscript>
   <div style="position:fixed;inset:0;z-index:9999;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif">
     <div>
@@ -213,12 +194,11 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
   </div>
 </noscript>
 
-<!-- LOADING -->
 <div id="pageLoader" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900 transition-opacity duration-500">
   <div class="text-center">
     <div class="relative mx-auto h-16 w-16">
       <div class="absolute inset-0 rounded-full border-4 border-slate-700"></div>
-      <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 spin-slow"></div>
+      <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 animate-spin"></div>
       <div class="absolute inset-0 flex items-center justify-center"><i class="fa-solid fa-bolt text-xl text-emerald-400"></i></div>
     </div>
     <p class="mt-4 text-xs font-semibold tracking-widest text-slate-400">EV-GOLF ETHIOPIA</p>
@@ -273,24 +253,20 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
       <a href="#faq" class="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400"><i class="fa-solid fa-circle-question w-5 text-emerald-500"></i><span data-i18n="nav_faq">ጥያቄዎች</span></a>
       <a href="#contact" class="flex items-center gap-3 rounded-lg px-3 py-3 font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400"><i class="fa-solid fa-location-dot w-5 text-emerald-500"></i><span data-i18n="nav_contact">አድራሻ</span></a>
       <a href="#cars" class="mt-2 block rounded-xl bg-emerald-600 px-3 py-3 text-center text-sm font-bold text-white"><span data-i18n="cta_order">አሁኑኑ ይዘዙ</span></a>
-      <div class="mt-2 border-t border-slate-800 pt-3">
-        <a href="#admin" onclick="openAdminGate(event)" class="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-500 hover:text-emerald-400">
-          <i class="fa-solid fa-lock"></i> Admin Panel
-        </a>
-      </div>
     </div>
   </nav>
 </header>
 
 <!-- HERO -->
 <section id="home" class="relative overflow-hidden bg-slate-950 text-white">
-  <div class="hero-grid-bg absolute inset-0 opacity-40"></div>
-  <div class="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-emerald-500/20 blur-[100px] pulse-glow"></div>
-  <div class="pointer-events-none absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-cyan-500/15 blur-[100px] pulse-glow" style="animation-delay:1s"></div>
+  <div class="hero-grid-bg absolute inset-0 opacity-30"></div>
+  <div class="pointer-events-none absolute -right-40 -top-40 h-[560px] w-[560px] rounded-full bg-emerald-500/25 blur-[120px] pulse-glow"></div>
+  <div class="pointer-events-none absolute -bottom-52 -left-40 h-[520px] w-[520px] rounded-full bg-sky-500/15 blur-[120px] pulse-glow"></div>
 
-  <div class="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
-    <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-      <div class="space-y-6">
+  <div class="relative mx-auto max-w-7xl px-4 pb-24 pt-12 sm:px-6 lg:px-8 lg:pb-32 lg:pt-20">
+    <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
+
+      <div class="order-2 space-y-6 lg:order-1">
         <div class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-300 backdrop-blur-sm">
           <span class="relative flex h-2 w-2">
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
@@ -299,87 +275,109 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
           <span data-i18n="hero_badge">አዲስ የ 2026 ሞዴሎች ደርሰዋል</span>
         </div>
 
-        <h1 class="text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">
+        <h1 class="text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-[4.25rem]">
           <span data-i18n="hero_title_1">ዘመናዊ የኤሌክትሪክ </span>
           <br>
           <span class="shine-text" data-i18n="hero_title_2">ጎልፍ ካርቶች</span>
         </h1>
 
-        <p class="max-w-lg text-base leading-relaxed text-slate-300 sm:text-lg" data-i18n="hero_desc">
+        <p class="max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base lg:text-lg" data-i18n="hero_desc">
           ለሪዞርቶች፣ ለሆቴሎች፣ ለፋብሪካዎችና ለግል አገልግሎት — ነጻ ማድረስ በመላው ኢትዮጵያ።
         </p>
 
         <div class="flex flex-wrap gap-2">
-          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 backdrop-blur-sm ring-1 ring-white/10">
-            <i class="fa-solid fa-truck-fast text-emerald-400"></i><span data-i18n="chip_delivery">ነጻ ማድረስ</span>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-300 ring-1 ring-emerald-500/30">
+            <i class="fa-solid fa-shield-halved"></i><span data-i18n="chip_warranty">5 ዓመት ዋስትና</span>
           </span>
-          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 backdrop-blur-sm ring-1 ring-white/10">
-            <i class="fa-solid fa-shield-halved text-emerald-400"></i><span data-i18n="chip_warranty">5 ዓመት ዋስትና</span>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-300 ring-1 ring-emerald-500/30">
+            <i class="fa-solid fa-truck-fast"></i><span data-i18n="chip_delivery">ነጻ ማድረስ</span>
           </span>
-          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 backdrop-blur-sm ring-1 ring-white/10">
-            <i class="fa-solid fa-bolt text-emerald-400"></i><span data-i18n="chip_electric">100% ኤሌክትሪክ</span>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-300 ring-1 ring-emerald-500/30">
+            <i class="fa-solid fa-bolt"></i><span data-i18n="chip_electric">100% ኤሌክትሪክ</span>
           </span>
         </div>
 
-        <div class="flex flex-col gap-3 pt-2 sm:flex-row">
-          <a href="#cars" class="rounded-xl bg-emerald-600 px-7 py-3.5 text-center font-bold text-white shadow-2xl shadow-emerald-600/30 transition hover:-translate-y-0.5 hover:bg-emerald-500">
-            <i class="fa-solid fa-car-side mr-2"></i><span data-i18n="hero_btn_1">መኪኖችን ይመልከቱ</span>
+        <div class="flex flex-col gap-3 pt-1 sm:flex-row">
+          <a href="#cars" class="group inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 py-4 text-center text-base font-black text-white shadow-2xl shadow-emerald-600/40 transition hover:-translate-y-0.5 hover:bg-emerald-500">
+            <i class="fa-solid fa-cart-shopping transition group-hover:scale-110"></i>
+            <span data-i18n="hero_btn_1">አሁኑኑ ይዘዙ</span>
           </a>
-          <a href="#contact" class="rounded-xl border border-white/20 bg-white/5 px-7 py-3.5 text-center font-bold text-white backdrop-blur-sm transition hover:bg-white/10">
-            <i class="fa-solid fa-phone mr-2"></i><span data-i18n="hero_btn_2">ያግኙን</span>
+          <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-7 py-4 text-center font-bold text-white backdrop-blur-sm transition hover:bg-white/10">
+            <i class="fa-solid fa-phone"></i><span data-i18n="hero_btn_2">ያግኙን</span>
           </a>
+        </div>
+
+        <div class="grid max-w-md grid-cols-3 gap-2 border-t border-white/10 pt-6">
+          <div>
+            <p class="stat-num text-2xl font-black text-emerald-400 sm:text-3xl">500<span class="text-emerald-500">+</span></p>
+            <p class="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">ደንበኞች</p>
+          </div>
+          <div class="border-l border-white/10 pl-3">
+            <p class="stat-num text-2xl font-black text-emerald-400 sm:text-3xl">5<span class="text-base"> ዓመት</span></p>
+            <p class="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">ዋስትና</p>
+          </div>
+          <div class="border-l border-white/10 pl-3">
+            <p class="stat-num text-2xl font-black text-emerald-400 sm:text-3xl">24/7</p>
+            <p class="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">ድጋፍ</p>
+          </div>
         </div>
       </div>
 
-      <div class="relative">
-        <div class="float-anim absolute -right-2 -top-4 z-10 hidden rounded-2xl border border-emerald-500/30 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-md sm:block">
-          <div class="flex items-center gap-2">
-            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400"><i class="fa-solid fa-bolt"></i></div>
-            <div>
-              <p class="text-[10px] font-semibold uppercase text-slate-400" data-i18n="hero_badge_range">ርቀት</p>
-              <p class="text-sm font-black text-white">600 km</p>
-            </div>
-          </div>
-        </div>
+      <div class="relative order-1 lg:order-2">
+        <div class="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-emerald-500/30 via-transparent to-sky-500/20 blur-3xl"></div>
 
-        <div class="float-slow absolute -bottom-4 -left-4 z-10 hidden rounded-2xl border border-cyan-500/30 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-md sm:block">
-          <div class="flex items-center gap-2">
-            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/20 text-cyan-400"><i class="fa-solid fa-users"></i></div>
-            <div>
-              <p class="text-[10px] font-semibold uppercase text-slate-400" data-i18n="hero_badge_seats">መቀመጫ</p>
-              <p class="text-sm font-black text-white">7 – 23</p>
-            </div>
-          </div>
-        </div>
+        <div class="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gradient-to-br from-slate-800/90 to-slate-900/95 p-2 shadow-2xl backdrop-blur">
+          <div class="relative overflow-hidden rounded-[1.4rem] bg-slate-900">
+            <img id="heroCarImg" src="" alt="Electric golf cart"
+                 class="h-64 w-full object-cover transition-opacity duration-500 sm:h-[26rem] lg:h-[31rem]">
 
-        <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-800/90 to-slate-900/90 p-2 shadow-2xl backdrop-blur">
-          <div class="relative overflow-hidden rounded-2xl bg-slate-900">
-            <img id="heroCarImg" src="" alt="Electric golf cart" class="h-64 w-full object-cover sm:h-96">
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent p-5">
-              <p id="heroCarName" class="text-lg font-black text-white"></p>
-              <div class="mt-2 flex items-center gap-3 text-xs">
-                <span class="flex items-center gap-1 text-emerald-400"><i class="fa-solid fa-road"></i><span id="heroCarRange"></span></span>
-                <span class="flex items-center gap-1 text-cyan-400"><i class="fa-solid fa-users"></i><span id="heroCarSeats"></span></span>
-                <span class="flex items-center gap-1 text-amber-400"><i class="fa-solid fa-gauge-high"></i><span id="heroCarSpeed"></span></span>
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
+
+            <div class="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-slate-950/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-emerald-300 ring-1 ring-emerald-500/40 backdrop-blur">
+              <i class="fa-solid fa-star text-amber-400"></i> 2026
+            </div>
+
+            <div class="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+              <p id="heroCarName" class="text-lg font-black leading-tight text-white sm:text-2xl"></p>
+              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <span class="rounded-full bg-emerald-500/20 px-2.5 py-1 font-bold text-emerald-300 ring-1 ring-emerald-500/40">
+                  <i class="fa-solid fa-users mr-1"></i><span id="heroCarSeats"></span>
+                </span>
+                <span class="rounded-full bg-emerald-500/20 px-2.5 py-1 font-bold text-emerald-300 ring-1 ring-emerald-500/40">
+                  <i class="fa-solid fa-road mr-1"></i><span id="heroCarRange"></span>
+                </span>
+                <span class="rounded-full bg-emerald-500/20 px-2.5 py-1 font-bold text-emerald-300 ring-1 ring-emerald-500/40">
+                  <i class="fa-solid fa-gauge-high mr-1"></i><span id="heroCarSpeed"></span>
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="mt-4 grid grid-cols-3 gap-2">
-          <div class="rounded-xl border border-white/10 bg-white/5 p-3 text-center backdrop-blur">
-            <p class="text-lg font-black text-white">5<span class="text-xs font-bold text-emerald-400">y</span></p>
-            <p class="text-[10px] font-semibold text-slate-400" data-i18n="hero_stat_warranty">ዋስትና</p>
-          </div>
-          <div class="rounded-xl border border-white/10 bg-white/5 p-3 text-center backdrop-blur">
-            <p class="text-lg font-black text-white">100<span class="text-xs font-bold text-emerald-400">%</span></p>
-            <p class="text-[10px] font-semibold text-slate-400" data-i18n="hero_stat_electric">ኤሌክትሪክ</p>
-          </div>
-          <div class="rounded-xl border border-white/10 bg-white/5 p-3 text-center backdrop-blur">
-            <p class="text-lg font-black text-white">0<span class="text-xs font-bold text-emerald-400">ETB</span></p>
-            <p class="text-[10px] font-semibold text-slate-400" data-i18n="hero_stat_delivery">ማድረስ</p>
-          </div>
+        <div id="heroDots" class="mt-5 flex items-center justify-center gap-2"></div>
+
+        <div class="float-y absolute -left-3 top-8 hidden rounded-2xl border border-white/10 bg-slate-900/90 px-4 py-3 shadow-xl backdrop-blur sm:block">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">ነጻ ማድረስ</p>
+          <p class="text-sm font-black text-emerald-400">All Ethiopia</p>
         </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="relative border-y border-white/10 bg-slate-900/60 py-4 backdrop-blur">
+    <div class="marquee-mask overflow-hidden">
+      <div class="marquee-track gap-10 text-sm font-bold uppercase tracking-widest text-slate-400">
+        <span class="flex items-center gap-3"><i class="fa-solid fa-bolt text-emerald-500"></i> Li-ion Battery</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-shield-halved text-emerald-500"></i> 5 Year Warranty</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-truck-fast text-emerald-500"></i> Free Delivery</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-leaf text-emerald-500"></i> Zero Emission</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-headset text-emerald-500"></i> 24/7 Support</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-bolt text-emerald-500"></i> Li-ion Battery</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-shield-halved text-emerald-500"></i> 5 Year Warranty</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-truck-fast text-emerald-500"></i> Free Delivery</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-leaf text-emerald-500"></i> Zero Emission</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-headset text-emerald-500"></i> 24/7 Support</span>
       </div>
     </div>
   </div>
@@ -391,73 +389,60 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
   </div>
 </section>
 
-<!-- FILTER BAR -->
-<section id="cars" class="relative z-10 mx-auto -mt-4 max-w-7xl px-4 sm:px-6 lg:px-8">
-  <div class="rounded-2xl border border-slate-100 bg-white p-3 shadow-xl sm:p-4">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <button type="button" id="toggleFilters" class="relative flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700" aria-controls="filterPanel" aria-expanded="false">
-        <i class="fa-solid fa-filter"></i>
-        <span data-i18n="filter_toggle">ማጣሪያዎች</span>
-        <span id="activeFilterBadge" class="hidden h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-600 px-1.5 text-[10px] font-bold text-white">0</span>
-      </button>
-      <p class="shrink-0 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-700">
-        <span id="resultCount">0</span> <span data-i18n="result_suffix">መኪኖች</span>
-      </p>
-    </div>
-    <div id="filterPanel" class="hidden overflow-hidden border-t border-slate-100 pt-3">
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div>
-          <label for="seatFilter" class="mb-1.5 block text-xs font-bold text-slate-500" data-i18n="filter_seats">የመቀመጫ ብዛት</label>
-          <select id="seatFilter" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500">
-            <option value="all" data-i18n="filter_seats_all">ሁሉም</option>
-            <option value="7">7 መቀመጫ</option>
-            <option value="10">10 መቀመጫ</option>
-            <option value="14">14 መቀመጫ</option>
-            <option value="17">17 መቀመጫ</option>
-            <option value="23">23 መቀመጫ</option>
-          </select>
-        </div>
-        <div>
-          <label for="priceFilter" class="mb-1.5 block text-xs font-bold text-slate-500" data-i18n="filter_price">የዋጋ ክልል</label>
-          <select id="priceFilter" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500">
-            <option value="all" data-i18n="filter_price_all">ሁሉም ዋጋ</option>
-            <option value="0-1000000">ከ 1M በታች</option>
-            <option value="1000000-1500000">1M – 1.5M</option>
-            <option value="1500000-99999999">ከ 1.5M በላይ</option>
-          </select>
-        </div>
-        <div>
-          <label for="sortFilter" class="mb-1.5 block text-xs font-bold text-slate-500" data-i18n="filter_sort">ደርድር በ</label>
-          <select id="sortFilter" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500">
-            <option value="default" data-i18n="sort_default">ነባሪ</option>
-            <option value="low" data-i18n="sort_low">ዋጋ ↑</option>
-            <option value="high" data-i18n="sort_high">ዋጋ ↓</option>
-            <option value="seats" data-i18n="sort_seats">መቀመጫ ↑</option>
-          </select>
-        </div>
-      </div>
-      <div class="mt-3 flex justify-end">
-        <button type="button" id="resetBtn" class="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800">
-          <i class="fa-solid fa-rotate-left mr-1"></i><span data-i18n="reset_filters">አጽዳ</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- CARS LIST -->
-<section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+<section id="cars" class="relative z-10 mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
   <div class="mb-10 text-center">
-    <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl" data-i18n="cars_title">የመኪና ዝርዝሮች</h2>
+    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700">
+      <i class="fa-solid fa-car-side"></i> <span data-i18n="nav_cars">መኪኖች</span>
+    </span>
+    <h2 class="mt-4 text-3xl font-extrabold text-slate-900 sm:text-4xl" data-i18n="cars_title">የመኪና ዝርዝሮች</h2>
     <p class="mt-3 text-slate-500" data-i18n="cars_sub">መርጠው በኦንላይን ማዘዝ ይችላሉ</p>
+    <p class="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
+      <i class="fa-solid fa-car"></i>
+      <span id="resultCount">0</span> <span data-i18n="result_suffix">መኪኖች</span>
+    </p>
   </div>
-  <div id="carsGrid" class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"></div>
+  <div id="carsGrid" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"></div>
   <div id="emptyState" class="hidden py-20 text-center">
     <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
       <i class="fa-solid fa-car-burst text-3xl text-slate-300"></i>
     </div>
     <p class="mt-5 text-lg font-bold text-slate-700" data-i18n="empty_title">ምንም አልተገኘም</p>
-    <button type="button" onclick="resetFilters()" class="mt-6 rounded-xl bg-emerald-600 px-6 py-2.5 font-semibold text-white hover:bg-emerald-500" data-i18n="empty_btn">አጽዳ</button>
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<section class="border-y border-slate-200 bg-white py-10">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
+      <div class="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-5 transition hover:-translate-y-1 hover:border-emerald-200 hover:bg-white hover:shadow-lg">
+        <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-xl text-emerald-600 transition group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+          <i class="fa-solid fa-shield-halved"></i>
+        </span>
+        <div>
+          <p class="text-base font-black text-slate-900">5 ዓመት ዋስትና</p>
+          <p class="text-xs font-semibold text-slate-500">Li-ion ባትሪ ሙሉ ሽፋን</p>
+        </div>
+      </div>
+      <div class="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-5 transition hover:-translate-y-1 hover:border-emerald-200 hover:bg-white hover:shadow-lg">
+        <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-xl text-emerald-600 transition group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+          <i class="fa-solid fa-truck-fast"></i>
+        </span>
+        <div>
+          <p class="text-base font-black text-slate-900">ነጻ ማድረስ</p>
+          <p class="text-xs font-semibold text-slate-500">በመላው ኢትዮጵያ</p>
+        </div>
+      </div>
+      <div class="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-5 transition hover:-translate-y-1 hover:border-emerald-200 hover:bg-white hover:shadow-lg">
+        <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-xl text-emerald-600 transition group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+          <i class="fa-solid fa-bolt"></i>
+        </span>
+        <div>
+          <p class="text-base font-black text-slate-900">100% ኤሌክትሪክ</p>
+          <p class="text-xs font-semibold text-slate-500">ዜሮ ነዳጅ · ዜሮ ጭስ</p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -556,7 +541,7 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
 
 <!-- FOOTER -->
 <footer id="contact" class="border-t border-slate-800 bg-slate-900 py-12 text-slate-400">
-  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 sm:px-6 md:grid-cols-2 lg:grid-cols-4 lg:px-8">
     <div>
       <a href="#home" class="flex items-center gap-2 text-white">
         <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15"><i class="fa-solid fa-bolt text-lg text-emerald-400"></i></span>
@@ -579,40 +564,50 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
         <li class="flex items-center"><i class="fa-solid fa-clock mr-3 w-4 text-emerald-400"></i> <span data-i18n="foot_hours">ሰኞ – ቅዳሜ፣ 8:30 – 18:00</span></li>
       </ul>
     </div>
-    <div>
+    <div class="md:col-span-2">
       <h4 class="mb-4 font-bold text-white" data-i18n="foot_map">አካባቢያችን</h4>
-      <div id="evMap" style="height:150px;border-radius:12px;overflow:hidden;background:#1e293b;"></div>
+      <div id="evMap" class="h-64 w-full overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800 sm:h-72"></div>
       <div class="mt-4 flex flex-wrap gap-3 text-xs">
         <button type="button" onclick="openPolicy('privacy')" class="hover:text-emerald-400" data-i18n="foot_privacy">የግላዊነት መመሪያ</button>
         <button type="button" onclick="openPolicy('terms')" class="hover:text-emerald-400" data-i18n="foot_terms">የአገልግሎት ውል</button>
       </div>
     </div>
   </div>
-  <div class="mx-auto mt-8 max-w-7xl border-t border-slate-800 px-4 pt-5 sm:px-6 lg:px-8">
+  <div class="mx-auto mt-10 max-w-7xl border-t border-slate-800 px-4 pt-5 sm:px-6 lg:px-8">
     <div class="flex flex-col items-center justify-between gap-3 text-xs sm:flex-row">
       <p>© <span id="year">2026</span> EV-Golf Carts Ethiopia. <span data-i18n="foot_rights">መብቱ በሕግ የተጠበቀ ነው።</span></p>
-      <button type="button" onclick="openAdminGate(event)" class="flex items-center gap-1.5 text-slate-600 transition hover:text-emerald-400"><i class="fa-solid fa-lock"></i> Admin</button>
     </div>
   </div>
 </footer>
 
 <!-- FLOATING BUTTONS -->
-<div id="floatingButtons" class="fixed bottom-6 left-6 z-40 flex flex-col gap-3">
-  <a id="floatPhone" href="#" aria-label="Call" class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-lg text-white shadow-xl transition-all hover:scale-105 hover:bg-emerald-500">
-    <i class="fa-solid fa-phone"></i>
-    <span class="float-tip">Call · ይደውሉልን</span>
-  </a>
-  <a id="floatTelegram" href="#" target="_blank" rel="noopener" aria-label="Telegram" class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-sky-500 text-lg text-white shadow-xl transition-all hover:scale-105 hover:bg-sky-400">
-    <i class="fa-brands fa-telegram"></i>
-    <span class="float-tip">Telegram</span>
-  </a>
-  <a id="floatWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp" class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-green-500 text-lg text-white shadow-xl transition-all hover:scale-105 hover:bg-green-600">
-    <i class="fa-brands fa-whatsapp"></i>
-    <span class="float-tip">WhatsApp</span>
-  </a>
+<div id="floatingButtons" class="fixed bottom-5 left-4 z-40 sm:bottom-6 sm:left-6">
+  <div class="relative flex flex-col items-start gap-3">
+    <div id="fabSecondary" class="pointer-events-none flex translate-y-2 flex-col gap-3 opacity-0">
+      <a id="floatTelegram" href="#" target="_blank" rel="noopener" aria-label="Telegram"
+         class="group relative flex h-11 w-11 items-center justify-center rounded-full bg-sky-500 text-base text-white shadow-xl transition-all hover:scale-105 hover:bg-sky-400">
+        <i class="fa-brands fa-telegram"></i>
+        <span class="float-tip">Telegram</span>
+      </a>
+      <a id="floatWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp"
+         class="group relative flex h-11 w-11 items-center justify-center rounded-full bg-green-500 text-base text-white shadow-xl transition-all hover:scale-105 hover:bg-green-600">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span class="float-tip">WhatsApp</span>
+      </a>
+      <a id="floatPhone" href="#" aria-label="Call"
+         class="group relative flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600 text-base text-white shadow-xl transition-all hover:scale-105 hover:bg-emerald-500">
+        <i class="fa-solid fa-phone"></i>
+        <span class="float-tip">Call · ይደውሉልን</span>
+      </a>
+    </div>
+    <button id="fabMain" type="button" aria-label="Contact"
+            class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-xl text-white shadow-2xl shadow-emerald-600/40 transition-all hover:scale-105 hover:bg-emerald-500">
+      <i id="fabIcon" class="fa-solid fa-comment-dots transition-transform duration-300"></i>
+    </button>
+  </div>
 </div>
 
-<button id="toTop" type="button" aria-label="ወደ ላይ" class="fixed bottom-6 right-6 z-40 hidden h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-xl transition hover:bg-emerald-600">
+<button id="toTop" type="button" aria-label="ወደ ላይ" class="fixed bottom-5 right-4 z-40 hidden h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-xl transition hover:bg-emerald-600 sm:bottom-6 sm:right-6">
   <i class="fa-solid fa-arrow-up"></i>
 </button>
 
@@ -628,7 +623,7 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
   </div>
 </div>
 
-<!-- ORDER MODAL (3 STEPS) -->
+<!-- ORDER MODAL -->
 <div id="orderModal" class="fixed inset-0 z-[55] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
   <div id="orderModalBox" class="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl sm:p-7">
     <button type="button" onclick="closeModal()" aria-label="ዝጋ" class="absolute right-4 top-4 rounded-lg p-1.5 text-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
@@ -637,27 +632,35 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
     <p class="mt-1 text-sm text-slate-500"><span data-i18n="modal_selected">የመረጡት፡</span> <span id="modalCarName" class="font-bold text-emerald-600"></span></p>
     <p id="modalCarMeta" class="mt-1 text-xs font-medium text-slate-400"></p>
 
-    <div class="mt-5 flex items-center justify-center gap-1.5 sm:gap-3">
-      <div class="flex items-center gap-1.5">
+    <div class="mt-6 flex items-center justify-between gap-1">
+      <div class="flex flex-1 items-center gap-2">
         <span id="step1Dot" class="step-indicator step-active">1</span>
-        <span class="hidden text-[11px] font-bold text-slate-700 sm:inline" data-i18n="step_personal">የግል መረጃ</span>
+        <div class="min-w-0 flex-1">
+          <p id="step1Label" class="truncate text-[11px] font-black text-slate-900" data-i18n="step_personal">የግል መረጃ</p>
+          <p class="truncate text-[9px] font-semibold uppercase tracking-wide text-slate-400">Step 1</p>
+        </div>
       </div>
-      <div class="h-0.5 w-6 bg-slate-200 sm:w-10"></div>
-      <div class="flex items-center gap-1.5">
+      <div class="h-0.5 w-3 bg-slate-200 sm:w-6"></div>
+      <div class="flex flex-1 items-center gap-2">
         <span id="step2Dot" class="step-indicator step-inactive">2</span>
-        <span class="hidden text-[11px] font-bold text-slate-400 sm:inline" data-i18n="step_location">አድራሻ</span>
+        <div class="min-w-0 flex-1">
+          <p id="step2Label" class="truncate text-[11px] font-black text-slate-400" data-i18n="step_location">አድራሻ</p>
+          <p class="truncate text-[9px] font-semibold uppercase tracking-wide text-slate-300">Step 2</p>
+        </div>
       </div>
-      <div class="h-0.5 w-6 bg-slate-200 sm:w-10"></div>
-      <div class="flex items-center gap-1.5">
+      <div class="h-0.5 w-3 bg-slate-200 sm:w-6"></div>
+      <div class="flex flex-1 items-center gap-2">
         <span id="step3Dot" class="step-indicator step-inactive">3</span>
-        <span class="hidden text-[11px] font-bold text-slate-400 sm:inline" data-i18n="step_payment">ክፍያ</span>
+        <div class="min-w-0 flex-1">
+          <p id="step3Label" class="truncate text-[11px] font-black text-slate-400" data-i18n="step_payment">ክፍያ</p>
+          <p class="truncate text-[9px] font-semibold uppercase tracking-wide text-slate-300">Step 3</p>
+        </div>
       </div>
     </div>
 
-    <form id="orderForm" novalidate class="mt-5">
+    <form id="orderForm" novalidate class="mt-6">
       <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
 
-      <!-- STEP 1 -->
       <div id="orderStep1" class="space-y-4">
         <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3">
           <p class="flex items-center gap-2 text-xs font-bold text-emerald-800">
@@ -714,7 +717,6 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
         </button>
       </div>
 
-      <!-- STEP 2 -->
       <div id="orderStep2" class="hidden space-y-4">
         <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3">
           <p class="flex items-center gap-2 text-xs font-bold text-emerald-800">
@@ -777,34 +779,132 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
         </div>
       </div>
 
-      <!-- STEP 3 -->
+      <!-- ================================================
+           STEP 3 — REDESIGNED PAYMENT STEP
+           ================================================ -->
       <div id="orderStep3" class="hidden space-y-4">
-        <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
-          <p class="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-emerald-700">
-            <i class="fa-solid fa-receipt"></i><span data-i18n="summary_title">የትዕዛዝ ማጠቃለያ</span>
+
+        <!-- 🎯 HERO: EXACT AMOUNT TO PAY -->
+        <div class="amount-hero rounded-2xl p-5 text-white shadow-2xl shadow-emerald-600/30">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-emerald-50">
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur">
+                  <i class="fa-solid fa-wallet text-[11px]"></i>
+                </span>
+                <span data-i18n="pay_now_label">አሁን የሚከፍሉት መጠን</span>
+              </div>
+              <span class="inline-flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider backdrop-blur">
+                <i class="fa-solid fa-bolt"></i> 10%
+              </span>
+            </div>
+
+            <div class="mt-3 flex flex-wrap items-baseline gap-2">
+              <span id="payNowAmount" class="text-4xl font-black tracking-tight sm:text-5xl">0</span>
+              <span class="text-lg font-black text-emerald-50">ETB</span>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-white/15 p-3 backdrop-blur">
+              <div>
+                <p class="text-[9px] font-bold uppercase tracking-wider text-emerald-50/90" data-i18n="remaining_label">ቀሪ (ሲረከቡ)</p>
+                <p class="mt-0.5 text-sm font-black text-white"><span id="remainingAmount">0</span> <span class="text-[10px] font-bold text-emerald-50/80">ETB</span></p>
+              </div>
+              <div class="border-l border-white/20 pl-3">
+                <p class="text-[9px] font-bold uppercase tracking-wider text-emerald-50/90" data-i18n="total_label">ጠቅላላ ዋጋ</p>
+                <p class="mt-0.5 text-sm font-black text-white"><span id="totalAmount">0</span> <span class="text-[10px] font-bold text-emerald-50/80">ETB</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 💡 WHY 10% EXPLANATION -->
+        <div class="rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-50 p-4 shadow-sm">
+          <div class="flex items-start gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30">
+              <i class="fa-solid fa-lightbulb"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-black text-amber-900" data-i18n="why_deposit_title">ለምን 10% ቅድሚያ ይከፈላል?</p>
+              <p class="mt-1 text-xs leading-relaxed text-amber-800" data-i18n="why_deposit_desc">
+                መኪናው ለእርስዎ ብቻ እንዲዘጋጅ እና የማድረሻ ሂደቱ እንዲጀመር ቅድሚያ ክፍያ ያስፈልጋል። ቀሪውን የሚከፍሉት መኪናውን ሲረከቡ ብቻ ነው።
+              </p>
+              <div class="mt-2.5 flex flex-wrap gap-1.5">
+                <span class="inline-flex items-center gap-1 rounded-md bg-white px-2 py-1 text-[10px] font-bold text-amber-800 shadow-sm ring-1 ring-amber-200">
+                  <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+                  <span data-i18n="why_badge_1">ሙሉ ዋስትና</span>
+                </span>
+                <span class="inline-flex items-center gap-1 rounded-md bg-white px-2 py-1 text-[10px] font-bold text-amber-800 shadow-sm ring-1 ring-amber-200">
+                  <i class="fa-solid fa-rotate-left text-emerald-500"></i>
+                  <span data-i18n="why_badge_2">ሊመለስ የሚችል</span>
+                </span>
+                <span class="inline-flex items-center gap-1 rounded-md bg-white px-2 py-1 text-[10px] font-bold text-amber-800 shadow-sm ring-1 ring-amber-200">
+                  <i class="fa-solid fa-lock text-emerald-500"></i>
+                  <span data-i18n="why_badge_3">ደህንነቱ የተጠበቀ</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 📋 ORDER SUMMARY -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p class="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
+            <i class="fa-solid fa-receipt text-emerald-500"></i>
+            <span data-i18n="summary_title">የትዕዛዝ ማጠቃለያ</span>
           </p>
           <dl class="space-y-2 text-sm">
-            <div class="flex justify-between text-slate-700"><dt data-i18n="summary_car">መኪና</dt><dd id="sumCar" class="font-bold text-right"></dd></div>
-            <div class="flex justify-between border-t border-emerald-200 pt-2 text-slate-700"><dt data-i18n="summary_total">ጠቅላላ ዋጋ (VAT ተካቷል)</dt><dd id="sumTotal" class="font-bold"></dd></div>
-            <div class="flex justify-between rounded-lg bg-emerald-600 px-3 py-2.5 text-white"><dt class="font-bold" data-i18n="summary_deposit">ቅድሚያ መክፈል ያለብዎ (10%)</dt><dd id="sumDeposit" class="font-black"></dd></div>
+            <div class="flex items-center justify-between gap-3">
+              <dt class="flex items-center gap-1.5 text-slate-600">
+                <i class="fa-solid fa-car-side text-xs text-emerald-500"></i>
+                <span data-i18n="summary_car">መኪና</span>
+              </dt>
+              <dd id="sumCar" class="text-right text-xs font-bold text-slate-900 max-w-[60%] truncate"></dd>
+            </div>
+            <div class="flex items-center justify-between gap-3 border-t border-slate-100 pt-2">
+              <dt class="flex items-center gap-1.5 text-slate-600">
+                <i class="fa-solid fa-tag text-xs text-emerald-500"></i>
+                <span data-i18n="summary_total">ጠቅላላ ዋጋ (VAT ተካቷል)</span>
+              </dt>
+              <dd id="sumTotal" class="text-sm font-black text-slate-900"></dd>
+            </div>
           </dl>
         </div>
 
+        <!-- 💳 PAYMENT METHODS — CHIP SELECTION -->
         <div>
-          <div class="mb-3 flex items-center justify-between">
-            <p class="text-xs font-bold uppercase tracking-wide text-slate-500" data-i18n="payment_methods">የመክፈያ አካውንቶች</p>
-            <p class="text-[10px] font-semibold text-emerald-600"><i class="fa-solid fa-hand-pointer mr-1"></i><span data-i18n="copy_hint">ለመቅዳት ይጫኑ</span></p>
+          <div class="mb-3 flex items-center justify-between gap-2">
+            <p class="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-600">
+              <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                <i class="fa-solid fa-credit-card text-[11px]"></i>
+              </span>
+              <span data-i18n="choose_payment">የመክፈያ ዘዴ ይምረጡ</span>
+            </p>
+            <p class="text-[10px] font-bold text-emerald-600">
+              <i class="fa-solid fa-arrow-down mr-1"></i>
+              <span data-i18n="select_hint">ይጫኑ</span>
+            </p>
           </div>
-          <div id="paymentMethodsList" class="space-y-3"></div>
+
+          <div id="paymentChips" class="grid grid-cols-2 gap-2 sm:grid-cols-4"></div>
+
+          <div id="paymentDetails" class="mt-3"></div>
         </div>
 
+        <!-- 📸 RECEIPT UPLOAD -->
         <div>
-          <label class="mb-1.5 block text-xs font-bold text-slate-600"><span data-i18n="form_receipt">የክፍያ ደረሰኝ ፎቶ</span> <span class="text-red-500">*</span></label>
+          <label class="mb-1.5 flex items-center gap-2 text-xs font-bold text-slate-600">
+            <span class="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-100 text-[10px] text-emerald-600">
+              <i class="fa-solid fa-camera"></i>
+            </span>
+            <span data-i18n="form_receipt">የክፍያ ደረሰኝ ፎቶ</span>
+            <span class="text-red-500">*</span>
+          </label>
           <label id="rUploadWrap" class="file-upload block">
             <input id="rFile" type="file" accept="image/*" class="hidden">
             <div id="rUploadText">
               <i class="fa-solid fa-receipt text-2xl text-slate-400"></i>
               <p class="mt-2 text-xs font-semibold text-slate-600" data-i18n="form_r_hint">የከፈሉበትን ደረሰኝ ፎቶ ይጫኑ</p>
+              <p class="mt-1 text-[10px] text-slate-400">JPG / PNG · ≤ 5MB</p>
             </div>
             <div id="rPreview" class="hidden">
               <img id="rPreviewImg" class="mx-auto max-h-32 rounded-lg">
@@ -813,27 +913,31 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
           </label>
         </div>
 
+        <!-- 📝 NOTE -->
         <div>
           <label for="note" class="mb-1.5 block text-xs font-bold text-slate-600" data-i18n="form_note">ተጨማሪ ማስታወሻ</label>
           <textarea id="note" name="note" rows="2" class="w-full resize-none rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-emerald-500"></textarea>
         </div>
 
-        <label class="flex items-start gap-2 text-xs text-slate-600">
+        <!-- ✅ AGREE -->
+        <label class="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 transition hover:bg-slate-100">
           <input type="checkbox" id="agreeCheck" required class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600">
           <span data-i18n="form_agree">የአገልግሎት ውል እና የግላዊነት መመሪያን ተቀብያለሁ።</span>
         </label>
 
         <p id="formError3" class="hidden rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600"></p>
 
-        <div class="flex gap-2">
+        <!-- 🎬 ACTIONS -->
+        <div class="flex gap-2 pt-1">
           <button type="button" onclick="goToStep(2)" class="rounded-xl border border-slate-200 px-5 py-3.5 font-bold text-slate-600 hover:bg-slate-50">
             <i class="fa-solid fa-arrow-left mr-1"></i><span data-i18n="step_back">ተመለስ</span>
           </button>
-          <button type="submit" id="submitBtn" class="flex-1 rounded-xl bg-emerald-600 py-3.5 font-bold text-white shadow-lg hover:bg-emerald-500">
-            <i class="fa-solid fa-check mr-2"></i><span data-i18n="form_submit">ትእዛዝ አረጋግጥ</span>
+          <button type="submit" id="submitBtn" class="flex-1 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 py-3.5 font-black text-white shadow-xl shadow-emerald-600/30 transition hover:from-emerald-500 hover:to-emerald-400 active:scale-[.99]">
+            <i class="fa-solid fa-circle-check mr-2"></i><span data-i18n="form_submit">ትእዛዝ አረጋግጥ</span>
           </button>
         </div>
       </div>
+
     </form>
   </div>
 </div>
@@ -863,212 +967,9 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
   </div>
 </div>
 
-<!-- ADMIN GATE -->
-<div id="adminGate" class="fixed inset-0 z-[65] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-  <div class="w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl">
-    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-2xl text-emerald-400"><i class="fa-solid fa-lock"></i></div>
-    <h3 class="mt-4 text-center text-xl font-bold text-slate-900">Admin Panel</h3>
-    <p class="mt-1 text-center text-xs text-slate-500">ለመግባት የይለፍ ቃል ያስገቡ</p>
-    <form id="adminGateForm" class="mt-5 space-y-3">
-      <input id="adminPass" type="password" required autocomplete="current-password" placeholder="Password" class="w-full rounded-lg border border-slate-200 p-3 text-center text-sm outline-none focus:border-emerald-500">
-      <p id="adminError" class="hidden text-center text-xs font-semibold text-red-600">የተሳሳተ የይለፍ ቃል</p>
-      <button type="submit" class="w-full rounded-xl bg-slate-900 py-3 font-bold text-white hover:bg-slate-800">ግባ</button>
-      <button type="button" onclick="closeAdminGate()" class="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">ሰርዝ</button>
-    </form>
-    <p class="mt-3 text-center text-[10px] text-slate-400">Default: admin123</p>
-  </div>
-</div>
-
-<!-- ADMIN DASHBOARD -->
-<div id="adminDashboard" class="fixed inset-0 z-[65] hidden bg-slate-100">
-  <div class="flex h-full flex-col">
-    <header class="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 shadow-sm sm:px-6">
-      <div class="flex items-center gap-3">
-        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-emerald-400"><i class="fa-solid fa-gauge"></i></span>
-        <div>
-          <h1 class="text-base font-extrabold text-slate-900 sm:text-lg">Admin Dashboard</h1>
-          <p class="text-[10px] text-slate-500">EV-Golf Carts Ethiopia</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button type="button" onclick="exportOrders()" class="hidden rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-500 sm:block"><i class="fa-solid fa-download mr-1"></i>CSV</button>
-        <button type="button" onclick="logoutAdmin()" class="rounded-lg bg-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-300"><i class="fa-solid fa-right-from-bracket mr-1"></i>Logout</button>
-      </div>
-    </header>
-    <div class="flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-4 sm:px-6">
-      <button type="button" data-admintab="orders" class="admin-tab shrink-0 border-b-2 border-emerald-600 px-4 py-3 text-sm font-bold text-emerald-600">Orders</button>
-      <button type="button" data-admintab="cars" class="admin-tab shrink-0 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800">መኪኖች</button>
-      <button type="button" data-admintab="customers" class="admin-tab shrink-0 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800">ደንበኞች</button>
-      <button type="button" data-admintab="settings" class="admin-tab shrink-0 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800">⚙️ ቅንብሮች</button>
-      <button type="button" data-admintab="stats" class="admin-tab shrink-0 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-800">Stats</button>
-    </div>
-    <div class="flex-1 overflow-y-auto p-4 sm:p-6">
-      <div id="adminTabOrders" class="admin-tab-content">
-        <div class="mb-4 flex flex-wrap items-center gap-2">
-          <select id="orderStatusFilter" onchange="renderAdminOrders()" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none">
-            <option value="all">ሁሉም Status</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-          <input id="orderSearch" oninput="renderAdminOrders()" type="search" placeholder="ፈልግ..." class="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none">
-        </div>
-        <div id="adminOrdersList" class="space-y-3"></div>
-      </div>
-      <div id="adminTabCars" class="admin-tab-content hidden">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-bold text-slate-900">መኪኖች</h2>
-          <button type="button" onclick="openCarForm()" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-500"><i class="fa-solid fa-plus mr-1"></i>አዲስ</button>
-        </div>
-        <div id="adminCarsList" class="space-y-3"></div>
-      </div>
-      <div id="adminTabCustomers" class="admin-tab-content hidden">
-        <h2 class="mb-4 text-lg font-bold text-slate-900">ደንበኞች</h2>
-        <div id="adminCustomersList" class="space-y-3"></div>
-      </div>
-      <div id="adminTabSettings" class="admin-tab-content hidden">
-        <h2 class="mb-4 text-lg font-bold text-slate-900">⚙️ የጣቢያ ቅንብሮች</h2>
-        <div id="adminSettings" class="space-y-4"></div>
-      </div>
-      <div id="adminTabStats" class="admin-tab-content hidden">
-        <h2 class="mb-4 text-lg font-bold text-slate-900">ስታቲስቲክስ</h2>
-        <div id="adminStats" class="grid grid-cols-2 gap-4 sm:grid-cols-4"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CAR FORM MODAL -->
-<div id="carFormModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-  <div class="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
-    <button type="button" onclick="closeCarForm()" class="absolute right-4 top-4 rounded-lg p-1.5 text-xl text-slate-400 hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button>
-    <h3 id="carFormTitle" class="text-xl font-bold text-slate-900">አዲስ መኪና</h3>
-    <p class="mt-1 text-xs text-slate-500">ሁሉም ዋጋዎች VAT ተካተው</p>
-    <form id="carForm" class="mt-5 space-y-3">
-      <input type="hidden" id="carFormId">
-      <div>
-        <label class="mb-1 block text-xs font-bold text-slate-600">ስም *</label>
-        <input id="carFormName" required type="text" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-      </div>
-
-      <div>
-        <div class="mb-1 flex items-center justify-between">
-          <label class="block text-xs font-bold text-slate-600">
-            <i class="fa-solid fa-images mr-1 text-emerald-500"></i>
-            <span>የመኪና ፎቶዎች</span>
-            <span id="photoCount" class="ml-1.5 inline-flex items-center justify-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">0</span>
-          </label>
-          <span class="text-[10px] font-semibold text-slate-400">ብዙ ፎቶዎችን መጨመር ይችላሉ</span>
-        </div>
-
-        <div id="carPhotoGrid" class="mb-2 grid grid-cols-3 gap-2 sm:grid-cols-4"></div>
-
-        <label id="carPhotoWrap" class="file-upload block">
-          <input id="carPhotoFile" type="file" accept="image/*" multiple class="hidden">
-          <div id="carPhotoText">
-            <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400"></i>
-            <p class="mt-2 text-xs font-semibold text-slate-600">ፎቶ ለመጨመር ይጫኑ</p>
-            <p class="mt-1 text-[10px] text-slate-400">ብዙ ፎቶዎችን በአንድ ጊዜ መምረጥ ይችላሉ</p>
-          </div>
-        </label>
-
-        <button type="button" id="cloudinaryBtn" class="mt-2 w-full rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
-          <i class="fa-solid fa-cloud mr-1"></i>ወደ Cloudinary ይጫኑ
-        </button>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">መቀመጫ *</label>
-          <input id="carFormSeats" required type="number" min="1" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">ዋጋ (ETB) *</label>
-          <input id="carFormPrice" required type="number" min="0" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">ባትሪ</label>
-          <input id="carFormBattery" type="text" placeholder="72 V / 7.5 KW" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">የባትሪ አቅም (kWh)</label>
-          <input id="carFormBatteryKwh" type="number" step="0.1" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">የሞተር ኃይል (kW)</label>
-          <input id="carFormMotorPower" type="number" step="0.1" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">ርቀት (km)</label>
-          <input id="carFormRange" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">ከፍተኛ ፍጥነት (km/h)</label>
-          <input id="carFormSpeed" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">የቻርጅ ጊዜ</label>
-          <input id="carFormCharge" type="text" placeholder="6 ሰዓት" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-      </div>
-      <div class="grid grid-cols-3 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">ርዝመት (cm)</label>
-          <input id="carFormLength" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">ወርድ (cm)</label>
-          <input id="carFormWidth" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">ቁመት (cm)</label>
-          <input id="carFormHeight" type="number" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">የእቃ አቅም</label>
-          <input id="carFormCargo" type="text" placeholder="400 kg / 2.5 m³" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-slate-600">የእቃ ሁኔታ</label>
-          <select id="carFormStock" class="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
-            <option value="in_stock">✅ አለ</option>
-            <option value="low_stock">⚠️ ጥቂት ቀረ</option>
-            <option value="out_of_stock">❌ አልተገኘም</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label class="mb-1 block text-xs font-bold text-slate-600">Video URL (optional)</label>
-        <input id="carFormVideo" type="url" placeholder="https://youtube.com/embed/..." class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-      </div>
-      <div>
-        <label class="mb-1 block text-xs font-bold text-slate-600">Tag (optional)</label>
-        <input id="carFormTag" type="text" placeholder="አዲስ / ተወዳጅ" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
-      </div>
-      <div>
-        <label class="mb-1 block text-xs font-bold text-slate-600">መግለጫ</label>
-        <textarea id="carFormDesc" rows="2" class="w-full resize-none rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500"></textarea>
-      </div>
-      <button type="submit" class="w-full rounded-xl bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-500">አስቀምጥ</button>
-    </form>
-  </div>
-</div>
-
 <script>
 'use strict';
 
-/* ============================================================
-   DEFAULT SETTINGS
-   ============================================================ */
 const DEFAULT_SETTINGS = {
   contact: {
     phone: '+251 900 000 000', phoneVisible: true,
@@ -1087,9 +988,6 @@ const DEFAULT_SETTINGS = {
   order: { depositPercent: 10, vatRate: 0.15 }
 };
 
-/* ============================================================
-   DEFAULT CARS
-   ============================================================ */
 const DEFAULT_CARS = [
   { id: 1, name: "7 Seater Golf A Dyz 25", seats: 7, price: 790000, battery: "72 V / 7.5 KW", batteryKwh: 7.5, motorPower: 5.5, range: 200, charge: "6 ሰዓት", speed: 45, dimensions: { length: 280, width: 130, height: 190 }, cargo: "400 kg / 2.5 m³", stock: "in_stock", video: "", photos: [], accent: "#10b981", tag: "", desc: "ለሪዞርት፣ ለሆቴል እና ለግል አገልግሎት ተስማሚ የ 7 መቀመጫ ኤሌክትሪክ ካርት።" },
   { id: 2, name: "10 Seater Golf A Dyz 26", seats: 10, price: 1100000, battery: "96 V / 14 KW", batteryKwh: 14, motorPower: 7.5, range: 300, charge: "7 ሰዓት", speed: 50, dimensions: { length: 320, width: 140, height: 200 }, cargo: "600 kg / 3.5 m³", stock: "in_stock", video: "", photos: [], accent: "#0ea5e9", tag: "ተወዳጅ", desc: "መካከለኛ መጠን ያለው ለቡድን ማመላለሻ ተስማሚ።" },
@@ -1098,9 +996,6 @@ const DEFAULT_CARS = [
   { id: 5, name: "23 Seater Large Shuttle", seats: 23, price: 2500000, battery: "180 V / 88 KW", batteryKwh: 88, motorPower: 35, range: 600, charge: "8 ሰዓት", speed: 65, dimensions: { length: 620, width: 200, height: 250 }, cargo: "2000 kg / 12 m³", stock: "in_stock", video: "", photos: [], accent: "#ef4444", tag: "አዲስ", desc: "ትልቁ የሻትል ባስ — ለኤርፖርት እና ለረጅም ርቀት።" }
 ];
 
-/* ============================================================
-   STATE
-   ============================================================ */
 let carsData = [];
 let orders = [];
 let settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
@@ -1109,14 +1004,10 @@ let activeCar = null;
 let lastFocused = null;
 let orderStep = 1;
 let uploadedFiles = { id: null, guarantee: null, receipt: null };
-let carFormPhotos = [];
-let cloudinaryWidget = null;
 let heroIndex = 0;
 let heroInterval = null;
+let selectedPayMethod = null;   // ⭐ NEW: selected payment method
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 const formatPrice = (n) => new Intl.NumberFormat('en-US').format(Math.round(n));
@@ -1165,17 +1056,11 @@ function dataURLtoFile(dataUrl, filename) {
 
 async function copyText(text, btn) {
   try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(text);
-    } else {
+    if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
+    else {
       const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      ta.remove();
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
     }
     showToast('📋 ተቀድቷል!');
     if (btn) {
@@ -1184,15 +1069,9 @@ async function copyText(text, btn) {
       btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Copied</span>';
       setTimeout(() => { try { btn.innerHTML = orig; btn.classList.remove('copied'); } catch(_){} }, 1500);
     }
-  } catch (err) {
-    console.warn('Copy failed:', err);
-    showToast('ማስቀደል አልተቻለም', 'error');
-  }
+  } catch (err) { showToast('ማስቀደል አልተቻለም', 'error'); }
 }
 
-/* ============================================================
-   SUPABASE DATA LAYER
-   ============================================================ */
 async function fetchCars() {
   if (CONFIG.supabase.enabled && supabase) {
     try {
@@ -1216,42 +1095,6 @@ async function fetchCars() {
     const parsed = JSON.parse(s);
     return Array.isArray(parsed) && parsed.length ? parsed : JSON.parse(JSON.stringify(DEFAULT_CARS));
   } catch { return JSON.parse(JSON.stringify(DEFAULT_CARS)); }
-}
-
-async function saveCar(car) {
-  if (CONFIG.supabase.enabled && supabase) {
-    const row = {
-      name: car.name, seats: car.seats, price: car.price,
-      battery: car.battery, battery_kwh: car.batteryKwh, motor_power: car.motorPower,
-      range_km: car.range, charge_time: car.charge, speed_max: car.speed,
-      dim_length: car.dimensions?.length || 0, dim_width: car.dimensions?.width || 0, dim_height: car.dimensions?.height || 0,
-      cargo: car.cargo, stock: car.stock, video_url: car.video, tag: car.tag,
-      description: car.desc, photos: car.photos || [], accent: car.accent || '#10b981'
-    };
-    if (car.id) {
-      const { error } = await supabase.from('cars').update(row).eq('id', car.id);
-      if (error) throw error;
-      return car.id;
-    } else {
-      const { data, error } = await supabase.from('cars').insert(row).select().single();
-      if (error) throw error;
-      return data.id;
-    }
-  }
-  return car.id || (Math.max(0, ...carsData.map(c => c.id)) + 1);
-}
-
-async function deleteCarById(id) {
-  if (CONFIG.supabase.enabled && supabase) {
-    const { error } = await supabase.from('cars').delete().eq('id', id);
-    if (error) throw error;
-  }
-  carsData = carsData.filter(c => c.id !== id);
-  saveCarsLocal();
-}
-
-function saveCarsLocal() {
-  safeStorage.set('ev_cars_v8', JSON.stringify(carsData));
 }
 
 async function fetchOrders() {
@@ -1297,20 +1140,6 @@ async function saveOrder(order) {
   return order;
 }
 
-async function updateOrderStatusDB(id, status) {
-  if (CONFIG.supabase.enabled && supabase && id) {
-    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-    if (error) throw error;
-  }
-}
-
-async function deleteOrderDB(id) {
-  if (CONFIG.supabase.enabled && supabase && id) {
-    const { error } = await supabase.from('orders').delete().eq('id', id);
-    if (error) throw error;
-  }
-}
-
 async function fetchSettings() {
   if (CONFIG.supabase.enabled && supabase) {
     try {
@@ -1333,47 +1162,28 @@ async function fetchSettings() {
   return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 }
 
-async function saveSettingsDB(newSettings) {
-  if (CONFIG.supabase.enabled && supabase) {
-    const { error } = await supabase.from('settings').update({ data: newSettings, updated_at: new Date().toISOString() }).eq('id', 1);
-    if (error) throw error;
-  }
-  safeStorage.set('ev_settings', JSON.stringify(newSettings));
-}
-
 async function uploadToStorage(dataUrlOrFile, folder) {
   if (CONFIG.supabase.enabled && supabase) {
     try {
       let file;
-      if (typeof dataUrlOrFile === 'string' && dataUrlOrFile.startsWith('data:')) {
-        file = dataURLtoFile(dataUrlOrFile, `upload.jpg`);
-      } else if (dataUrlOrFile instanceof File) {
-        file = dataUrlOrFile;
-      } else {
-        return dataUrlOrFile;
-      }
+      if (typeof dataUrlOrFile === 'string' && dataUrlOrFile.startsWith('data:')) file = dataURLtoFile(dataUrlOrFile, `upload.jpg`);
+      else if (dataUrlOrFile instanceof File) file = dataUrlOrFile;
+      else return dataUrlOrFile;
       if (!file) return dataUrlOrFile;
-
       const ext = (file.name && file.name.split('.').pop()) || 'jpg';
       const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from(CONFIG.supabase.storageBucket).upload(filename, file, { cacheControl: '3600', upsert: false });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from(CONFIG.supabase.storageBucket).getPublicUrl(filename);
       return urlData.publicUrl;
-    } catch (err) {
-      console.warn('Storage upload failed, keeping base64:', err);
-      return dataUrlOrFile;
-    }
+    } catch (err) { console.warn('Storage upload failed:', err); return dataUrlOrFile; }
   }
   return dataUrlOrFile;
 }
 
-/* ============================================================
-   TELEGRAM NOTIFICATION
-   ============================================================ */
 async function notifyTelegram(order) {
   if (!CONFIG.telegram.enabled || !CONFIG.telegram.botToken) return;
-
+  const payLabels = { telebirr: 'Telebirr', cbe: 'CBE Birr', chapa: 'Chapa', bankTransfer: 'Bank Transfer' };
   const text = `
 🚗 <b>NEW ORDER — EV-Golf Ethiopia</b>
 
@@ -1381,6 +1191,7 @@ async function notifyTelegram(order) {
 <b>Car:</b> ${order.car}
 <b>Total:</b> ${formatPrice(order.total)} ETB
 <b>Deposit:</b> ${formatPrice(order.deposit)} ETB (${order.depositPct}%)
+<b>Payment:</b> ${payLabels[order.paymentMethod] || order.paymentMethod || '—'}
 
 <b>👤 ደንበኛ</b>
 ስም: ${order.name}
@@ -1394,21 +1205,13 @@ ${order.address || ''}
 ${order.note ? `<b>📝 ማስታወሻ:</b>\n${order.note}` : ''}
   `.trim();
 
-  const chatIds = CONFIG.telegram.chatIds || [];
-
-  for (const chatId of chatIds) {
+  for (const chatId of CONFIG.telegram.chatIds || []) {
     try {
       await fetch(`https://api.telegram.org/bot${CONFIG.telegram.botToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: text,
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        })
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true })
       });
-
       const photos = [
         { url: order.idPhoto, caption: '🆔 ID' },
         { url: order.guaranteePhoto, caption: '📄 Guarantee' },
@@ -1422,27 +1225,15 @@ ${order.note ? `<b>📝 ማስታወሻ:</b>\n${order.note}` : ''}
           body: JSON.stringify({ chat_id: chatId, photo: p.url, caption: p.caption })
         }).catch(() => {});
       }
-      console.log(`✅ Telegram sent to ${chatId}`);
-    } catch (err) {
-      console.warn(`❌ Telegram failed for ${chatId}:`, err);
-    }
+    } catch (err) { console.warn(`Telegram failed for ${chatId}:`, err); }
   }
 }
 
-/* ============================================================
-   Analytics
-   ============================================================ */
 function track(event, params = {}) {
-  try {
-    if (CONFIG.analytics.enabled && typeof window.gtag === 'function') {
-      window.gtag('event', event, params);
-    }
-  } catch (_) {}
+  try { if (CONFIG.analytics.enabled && typeof window.gtag === 'function') window.gtag('event', event, params); }
+  catch (_) {}
 }
 
-/* ============================================================
-   I18N
-   ============================================================ */
 const I18N = {
   am: {
     nav_home:"መነሻ", nav_cars:"መኪኖች", nav_features:"ጥቅሞች", nav_warranty:"ዋስትና",
@@ -1450,17 +1241,12 @@ const I18N = {
     hero_badge:"አዲስ የ 2026 ሞዴሎች ደርሰዋል",
     hero_title_1:"ዘመናዊ የኤሌክትሪክ ", hero_title_2:"ጎልፍ ካርቶች",
     hero_desc:"ለሪዞርቶች፣ ለሆቴሎች፣ ለፋብሪካዎችና ለግል አገልግሎት — ነጻ ማድረስ በመላው ኢትዮጵያ።",
-    hero_btn_1:"መኪኖችን ይመልከቱ", hero_btn_2:"ያግኙን",
+    hero_btn_1:"አሁኑኑ ይዘዙ", hero_btn_2:"ያግኙን",
     chip_delivery:"ነጻ ማድረስ", chip_warranty:"5 ዓመት ዋስትና", chip_electric:"100% ኤሌክትሪክ",
     hero_badge_range:"ርቀት", hero_badge_seats:"መቀመጫ",
-    hero_stat_warranty:"ዋስትና", hero_stat_electric:"ኤሌክትሪክ", hero_stat_delivery:"ማድረስ",
-    filter_seats:"የመቀመጫ ብዛት", filter_seats_all:"ሁሉም",
-    filter_price:"የዋጋ ክልል", filter_price_all:"ሁሉም ዋጋ", filter_sort:"ደርድር በ",
-    filter_toggle:"ማጣሪያዎች",
-    sort_default:"ነባሪ", sort_low:"ዋጋ ↑", sort_high:"ዋጋ ↓", sort_seats:"መቀመጫ ↑",
-    result_suffix:"መኪኖች", reset_filters:"አጽዳ",
+    result_suffix:"መኪኖች",
     cars_title:"የመኪና ዝርዝሮች", cars_sub:"መርጠው በኦንላይን ማዘዝ ይችላሉ",
-    empty_title:"ምንም አልተገኘም", empty_btn:"አጽዳ",
+    empty_title:"ምንም አልተገኘም",
     features_title:"ለምን የእኛን ይመርጣሉ?",
     feat_1t:"ዘላቂ Li-ion ባትሪ", feat_1d:"ሙሉ የ 5 ዓመት ዋስትና።",
     feat_delivery_t:"ነጻ ማድረስ", feat_delivery_d:"በመላው ኢትዮጵያ ነጻ እናደርሳለን።",
@@ -1500,9 +1286,6 @@ const I18N = {
     card_order:"ይዘዙ", card_details:"ዝርዝር",
     toast_order:"ትዕዛዝዎ ደርሶናል!", toast_error:"ስህተት ተከስቷል።",
     toast_empty:"እባክዎ ሁሉንም መሙሉ።", toast_sending:"በመላክ ላይ...",
-    toast_car_saved:"ተቀምጧል", toast_car_deleted:"ተሰርዟል",
-    toast_order_updated:"Status ተቀይሯል", toast_settings_saved:"ቅንብሮች ተቀምጠዋል",
-    toast_photo_added:"ፎቶ ተጨምሯል", toast_photo_removed:"ፎቶ ተወግዷል",
     stock_in:"✅ አለ", stock_low:"⚠️ ጥቂት ቀረ", stock_out:"❌ አልተገኘም",
     detail_gallery:"የፎቶ ጋለሪ", detail_specs:"ዝርዝር መረጃ",
     detail_battery:"የባትሪ አቅም (kWh)", detail_motor:"የሞተር ኃይል",
@@ -1518,9 +1301,22 @@ const I18N = {
     err_city:"እባክዎ ከተማ / መንደር ያስገቡ",
     err_receipt:"የክፍያ ደረሰኝ ፎቶ ያስፈልጋል",
     err_agree:"እባክዎ ውሉን ይቀበሉ",
-    err_name_required:"የመኪና ስም ያስፈልጋል",
-    err_seats_required:"የመቀመጫ ብዛት ያስፈልጋል",
-    err_price_required:"ዋጋ ያስፈልጋል"
+    /* ⭐ NEW Step 3 keys */
+    pay_now_label:"አሁን የሚከፍሉት መጠን",
+    remaining_label:"ቀሪ (ሲረከቡ)",
+    total_label:"ጠቅላላ ዋጋ",
+    why_deposit_title:"ለምን 10% ቅድሚያ ይከፈላል?",
+    why_deposit_desc:"መኪናው ለእርስዎ ብቻ እንዲዘጋጅ እና የማድረሻ ሂደቱ እንዲጀመር ቅድሚያ ክፍያ ያስፈልጋል። ቀሪውን የሚከፍሉት መኪናውን ሲረከቡ ብቻ ነው።",
+    why_badge_1:"ሙሉ ዋስትና",
+    why_badge_2:"ሊመለስ የሚችል",
+    why_badge_3:"ደህንነቱ የተጠበቀ",
+    choose_payment:"የመክፈያ ዘዴ ይምረጡ",
+    select_hint:"ይጫኑ",
+    selected_label:"የተመረጠ",
+    transfer_note:"ገንዘብ ሲያስተላልፉ በ \"Reason/Reference\" ላይ የትዕዛዝ ቁጥሩን ያስገቡ",
+    account_label:"የአካውንት ቁጥር",
+    name_label:"ስም",
+    bank_label:"ባንክ"
   },
   en: {
     nav_home:"Home", nav_cars:"Cars", nav_features:"Features", nav_warranty:"Warranty",
@@ -1528,17 +1324,12 @@ const I18N = {
     hero_badge:"New 2026 Models Arrived",
     hero_title_1:"Modern Electric ", hero_title_2:"Golf Carts",
     hero_desc:"For resorts, hotels, factories and personal use — free delivery across Ethiopia.",
-    hero_btn_1:"View Cars", hero_btn_2:"Contact Us",
+    hero_btn_1:"Order Now", hero_btn_2:"Contact Us",
     chip_delivery:"Free Delivery", chip_warranty:"5-Year Warranty", chip_electric:"100% Electric",
     hero_badge_range:"Range", hero_badge_seats:"Seats",
-    hero_stat_warranty:"Warranty", hero_stat_electric:"Electric", hero_stat_delivery:"Delivery",
-    filter_seats:"Seating", filter_seats_all:"All",
-    filter_price:"Price Range", filter_price_all:"All prices", filter_sort:"Sort by",
-    filter_toggle:"Filters",
-    sort_default:"Default", sort_low:"Price ↑", sort_high:"Price ↓", sort_seats:"Seats ↑",
-    result_suffix:"cars", reset_filters:"Reset",
+    result_suffix:"cars",
     cars_title:"Our Vehicles", cars_sub:"Choose and order online",
-    empty_title:"No matching cars", empty_btn:"Reset",
+    empty_title:"No matching cars",
     features_title:"Why Choose Us?",
     feat_1t:"Durable Li-ion Battery", feat_1d:"Full 5-year warranty.",
     feat_delivery_t:"Free Delivery", feat_delivery_d:"Free delivery across Ethiopia.",
@@ -1578,9 +1369,6 @@ const I18N = {
     card_order:"Order", card_details:"Details",
     toast_order:"Your order has arrived!", toast_error:"Something went wrong.",
     toast_empty:"Please fill in all required fields.", toast_sending:"Sending...",
-    toast_car_saved:"Saved", toast_car_deleted:"Deleted",
-    toast_order_updated:"Status updated", toast_settings_saved:"Settings saved",
-    toast_photo_added:"Photo added", toast_photo_removed:"Photo removed",
     stock_in:"✅ In Stock", stock_low:"⚠️ Low Stock", stock_out:"❌ Out of Stock",
     detail_gallery:"Photo Gallery", detail_specs:"Specifications",
     detail_battery:"Battery Capacity (kWh)", detail_motor:"Motor Power",
@@ -1588,30 +1376,34 @@ const I18N = {
     detail_order:"Order",
     err_name:"Please enter your full name",
     err_phone:"Enter a valid phone (e.g. 0912345678)",
-    err_id:"ID photo required",
-    err_g:"Guarantee photo required",
-    err_region:"Please select a region",
-    err_zone:"Please enter zone/sub-city",
-    err_woreda:"Please enter woreda",
-    err_city:"Please enter city/town",
-    err_receipt:"Payment receipt required",
-    err_agree:"Please accept the terms",
-    err_name_required:"Car name is required",
-    err_seats_required:"Seat count is required",
-    err_price_required:"Price is required"
+    err_id:"ID photo required", err_g:"Guarantee photo required",
+    err_region:"Please select a region", err_zone:"Please enter zone/sub-city",
+    err_woreda:"Please enter woreda", err_city:"Please enter city/town",
+    err_receipt:"Payment receipt required", err_agree:"Please accept the terms",
+    /* ⭐ NEW Step 3 keys */
+    pay_now_label:"Amount to pay now",
+    remaining_label:"Remaining (on delivery)",
+    total_label:"Total price",
+    why_deposit_title:"Why 10% deposit?",
+    why_deposit_desc:"The deposit reserves your vehicle and starts the delivery process. You only pay the remaining balance when you receive the car.",
+    why_badge_1:"Fully warranted",
+    why_badge_2:"Refundable",
+    why_badge_3:"Secure & protected",
+    choose_payment:"Choose payment method",
+    select_hint:"Click to select",
+    selected_label:"Selected",
+    transfer_note:"When transferring, put the order reference in the \"Reason/Reference\" field",
+    account_label:"Account Number",
+    name_label:"Name",
+    bank_label:"Bank"
   }
 };
 const t = (k) => (I18N[currentLang] && I18N[currentLang][k]) || I18N.am[k] || k;
 
-/* ============================================================
-   CAR IMAGE (SVG fallback)
-   ============================================================ */
 function carImage(car, angle = 'side') {
   const primary = getPrimaryPhoto(car);
   if (primary) return primary;
-
   const c = car.accent || '#10b981';
-  const safeName = String(car.name || '').replace(/[<>&"']/g, '');
   const base = (extra) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420">
   <defs>
     <linearGradient id="bg${car.id}${angle}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0f172a"/><stop offset="100%" stop-color="#1e293b"/></linearGradient>
@@ -1622,7 +1414,6 @@ function carImage(car, angle = 'side') {
   <circle cx="80" cy="370" r="150" fill="${c}" opacity="0.08"/>
   ${extra}
 </svg>`;
-
   const views = {
     side: `<ellipse cx="320" cy="356" rx="235" ry="24" fill="#000" opacity="0.35"/>
       <rect x="170" y="120" width="300" height="18" rx="9" fill="${c}"/>
@@ -1661,9 +1452,8 @@ function carImage(car, angle = 'side') {
 
 function getGallery(car) {
   const gallery = [];
-  if (car.photos && car.photos.length) {
-    car.photos.forEach(p => gallery.push(p));
-  } else {
+  if (car.photos && car.photos.length) car.photos.forEach(p => gallery.push(p));
+  else {
     gallery.push(carImage(car, 'side'));
     gallery.push(carImage(car, 'front'));
     gallery.push(carImage(car, 'back'));
@@ -1674,40 +1464,24 @@ function getGallery(car) {
   return gallery;
 }
 
-/* ============================================================
-   INIT
-   ============================================================ */
 async function initApp() {
   const status = document.getElementById('loaderStatus');
   if (status) status.textContent = 'ዳታ በመጫን ላይ...';
 
-  try {
-    settings = await fetchSettings();
-  } catch (err) {
-    console.warn('Settings load failed:', err);
-  }
-  try {
-    carsData = await fetchCars();
-  } catch (err) {
+  try { settings = await fetchSettings(); } catch (err) { console.warn('Settings load failed:', err); }
+  try { carsData = await fetchCars(); } catch (err) {
     console.warn('Cars load failed:', err);
     if (!carsData || !carsData.length) carsData = JSON.parse(JSON.stringify(DEFAULT_CARS));
   }
-  try {
-    orders = await fetchOrders();
-  } catch (err) {
-    console.warn('Orders load failed:', err);
-    orders = [];
-  }
+  try { orders = await fetchOrders(); } catch (err) { console.warn('Orders load failed:', err); orders = []; }
 
   try { document.getElementById('year').textContent = new Date().getFullYear(); } catch(_){}
   try { applyLanguage(currentLang); } catch(err){ console.warn('applyLanguage:', err); }
   try { applySettings(); } catch(err){ console.warn('applySettings:', err); }
   try { updateHeroCar(); } catch(err){ console.warn('updateHeroCar:', err); }
   try { onScroll(); } catch(_){}
-  try { updateFilterBadge(); } catch(_){}
   try { setupLeafletMap(); } catch(err){ console.warn('Leaflet:', err); }
 
-  // Start hero rotator
   if (heroInterval) clearInterval(heroInterval);
   heroInterval = setInterval(updateHeroCar, 6000);
 
@@ -1717,48 +1491,45 @@ async function initApp() {
   }, 400);
 }
 
-/* ============================================================
-   🚀 ROBUST STARTUP — 3 different triggers
-   ============================================================ */
 let __evStarted = false;
 function __evStart() {
   if (__evStarted) return;
   __evStarted = true;
-  Promise.resolve()
-    .then(initApp)
-    .catch(err => {
-      console.error('❌ Init failed:', err);
-      const l = document.getElementById('pageLoader');
-      if (l) { l.classList.add('loader-hidden'); setTimeout(() => { try { l.remove(); } catch(_){} }, 500); }
-    });
+  Promise.resolve().then(initApp).catch(err => {
+    console.error('❌ Init failed:', err);
+    const l = document.getElementById('pageLoader');
+    if (l) { l.classList.add('loader-hidden'); setTimeout(() => { try { l.remove(); } catch(_){} }, 500); }
+  });
 }
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', __evStart);
-} else {
-  // DOM already ready
-  __evStart();
-}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', __evStart);
+else __evStart();
 window.addEventListener('load', __evStart);
-// Ultimate fallback
 setTimeout(__evStart, 2500);
 
-/* ============================================================
-   HERO ROTATOR (counter-based to avoid drift)
-   ============================================================ */
-function updateHeroCar() {
+function buildHeroDots() {
+  const dots = document.getElementById('heroDots');
+  if (!dots || !Array.isArray(carsData)) return;
+  dots.innerHTML = carsData.map((_, i) =>
+    `<span class="hero-dot ${i === heroIndex % carsData.length ? 'active' : ''}" data-hero="${i}"></span>`
+  ).join('');
+  dots.querySelectorAll('[data-hero]').forEach(dot => {
+    dot.addEventListener('click', () => {
+      heroIndex = Number(dot.dataset.hero);
+      updateHeroCar(true);
+    });
+  });
+}
+
+function updateHeroCar(keepIndex = false) {
   if (!Array.isArray(carsData) || !carsData.length) return;
+  if (!keepIndex) heroIndex = (heroIndex + 1) % carsData.length;
   const car = carsData[heroIndex % carsData.length];
-  heroIndex = (heroIndex + 1) % carsData.length;
 
   const img = document.getElementById('heroCarImg');
   if (img) {
     img.style.opacity = '0';
     setTimeout(() => {
-      try {
-        img.src = carImage(car, 'side');
-        img.style.transition = 'opacity .6s';
-        img.style.opacity = '1';
-      } catch(_) {}
+      try { img.src = carImage(car, 'side'); img.style.transition = 'opacity .6s'; img.style.opacity = '1'; } catch(_) {}
     }, 200);
   }
   const nameEl = document.getElementById('heroCarName');
@@ -1769,11 +1540,11 @@ function updateHeroCar() {
   if (rangeEl) rangeEl.textContent = car.range + ' km';
   if (seatsEl) seatsEl.textContent = car.seats + ' seats';
   if (speedEl) speedEl.textContent = car.speed + ' km/h';
+
+  const dots = document.querySelectorAll('#heroDots .hero-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === heroIndex % carsData.length));
 }
 
-/* ============================================================
-   LEAFLET MAP
-   ============================================================ */
 function setupLeafletMap() {
   const mapEl = document.getElementById('evMap');
   if (!mapEl || typeof L === 'undefined') return;
@@ -1791,38 +1562,44 @@ function setupLeafletMap() {
   } catch (err) { console.warn('Leaflet failed:', err); }
 }
 
-/* ============================================================
-   RENDER CAR CARDS
-   ============================================================ */
 function createCard(car) {
   const el = document.createElement('article');
-  el.className = 'fade-up group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl';
+  el.className = 'fade-up group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-2xl hover:shadow-emerald-100/50';
   const stockLabel = t(STOCK_KEY[car.stock] || 'stock_in');
   const stockClass = STOCK_CLASS[car.stock] || 'stock-in';
   const isOut = car.stock === 'out_of_stock';
   const photoCount = car.photos && car.photos.length ? car.photos.length : 0;
 
   el.innerHTML = `
-    <div class="relative overflow-hidden">
-      <img src="${carImage(car, 'side')}" alt="${escapeHtml(car.name)}" loading="lazy" decoding="async" class="h-52 w-full object-cover transition duration-500 group-hover:scale-105">
-      <span class="absolute left-3 top-3 rounded-full bg-slate-900/85 px-3 py-1 text-xs font-bold text-white backdrop-blur"><i class="fa-solid fa-users mr-1 text-emerald-400"></i>${car.seats}</span>
-      ${car.tag ? `<span class="absolute right-3 top-3 rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow">${escapeHtml(car.tag)}</span>` : ''}
-      <span class="absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold ${stockClass}">${stockLabel}</span>
+    <div class="relative overflow-hidden bg-slate-100">
+      <img src="${carImage(car, 'side')}" alt="${escapeHtml(car.name)}" loading="lazy" decoding="async"
+           class="h-52 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-56">
+      ${car.tag ? `<span class="absolute right-3 top-3 rounded-full bg-emerald-600 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">${escapeHtml(car.tag)}</span>` : ''}
+      <span class="absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${stockClass} shadow">${stockLabel}</span>
       ${photoCount > 1 ? `<span class="absolute bottom-3 right-3 rounded-full bg-slate-900/85 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur"><i class="fa-solid fa-images mr-1 text-emerald-400"></i>${photoCount}</span>` : ''}
     </div>
     <div class="flex flex-1 flex-col p-5">
-      <h3 class="text-lg font-bold leading-snug text-slate-900">${escapeHtml(car.name)}</h3>
-      <p class="mt-2 text-2xl font-black text-emerald-600">${formatPrice(car.price)} <span class="text-sm font-bold text-slate-400">ETB</span></p>
-      <p class="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">VAT ተካቷል</p>
-      <dl class="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-        <div class="flex items-center gap-1.5"><i class="fa-solid fa-battery-half text-emerald-500"></i><span>${escapeHtml(car.battery || '—')}</span></div>
-        <div class="flex items-center gap-1.5"><i class="fa-solid fa-bolt text-emerald-500"></i><span>${car.range || '—'} km</span></div>
-        <div class="flex items-center gap-1.5"><i class="fa-solid fa-gauge-high text-emerald-500"></i><span>${car.speed || '—'} km/h</span></div>
-        <div class="flex items-center gap-1.5"><i class="fa-solid fa-plug-circle-bolt text-emerald-500"></i><span>${escapeHtml(car.charge || '—')}</span></div>
-      </dl>
-      <div class="mt-5 grid grid-cols-2 gap-2">
-        <button type="button" data-detail="${car.id}" class="rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"><i class="fa-solid fa-circle-info mr-1"></i>${t('card_details')}</button>
-        <button type="button" data-order="${car.id}" ${isOut ? 'disabled' : ''} class="rounded-xl ${isOut ? 'bg-slate-300 cursor-not-allowed' : 'bg-slate-900 hover:bg-emerald-600'} py-3 text-sm font-semibold text-white transition"><i class="fa-solid fa-cart-shopping mr-1"></i>${isOut ? t('stock_out') : t('card_order')}</button>
+      <h3 class="line-clamp-2 text-base font-bold leading-snug text-slate-900">${escapeHtml(car.name)}</h3>
+      <div class="mt-3">
+        <p class="text-3xl font-black tracking-tight text-emerald-600">${formatPrice(car.price)}</p>
+        <p class="text-xs font-bold text-slate-400">ETB · <span class="text-emerald-600">VAT ተካቷል</span></p>
+      </div>
+      <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold text-slate-600">
+        <span class="inline-flex items-center gap-1"><i class="fa-solid fa-users text-emerald-500"></i>${car.seats} Seats</span>
+        <span class="text-slate-300">·</span>
+        <span class="inline-flex items-center gap-1"><i class="fa-solid fa-road text-emerald-500"></i>${car.range} km</span>
+        <span class="text-slate-300">·</span>
+        <span class="inline-flex items-center gap-1"><i class="fa-solid fa-gauge-high text-emerald-500"></i>${car.speed} km/h</span>
+      </div>
+      <div class="mt-auto grid grid-cols-5 gap-2 pt-5">
+        <button type="button" data-detail="${car.id}"
+                class="col-span-2 rounded-xl border border-slate-200 py-3 text-xs font-bold text-slate-700 transition hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700">
+          <i class="fa-solid fa-circle-info mr-1"></i>${t('card_details')}
+        </button>
+        <button type="button" data-order="${car.id}" ${isOut ? 'disabled' : ''}
+                class="col-span-3 rounded-xl ${isOut ? 'bg-slate-300 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/25'} py-3 text-xs font-black uppercase tracking-wide text-white transition">
+          <i class="fa-solid fa-cart-shopping mr-1"></i>${isOut ? t('stock_out') : t('card_order')}
+        </button>
       </div>
     </div>
   `;
@@ -1834,7 +1611,7 @@ function renderCars(list) {
   if (!grid) return;
   grid.innerHTML = '';
   const empty = document.getElementById('emptyState');
-  if (list.length === 0) {
+  if (!list || list.length === 0) {
     if (empty) empty.classList.remove('hidden');
     grid.classList.add('hidden');
   } else {
@@ -1848,62 +1625,6 @@ function renderCars(list) {
   if (rc) rc.textContent = list.length;
 }
 
-function getFilteredCars() {
-  const seatEl = document.getElementById('seatFilter');
-  const priceEl = document.getElementById('priceFilter');
-  const sortEl = document.getElementById('sortFilter');
-  const seatVal = seatEl ? seatEl.value : 'all';
-  const priceVal = priceEl ? priceEl.value : 'all';
-  const sortVal = sortEl ? sortEl.value : 'default';
-
-  let list = carsData.filter(car => {
-    const matchSeat = seatVal === 'all' || String(car.seats) === seatVal;
-    let matchPrice = true;
-    if (priceVal !== 'all') {
-      const [min, max] = priceVal.split('-').map(Number);
-      matchPrice = car.price >= min && car.price <= max;
-    }
-    return matchSeat && matchPrice;
-  });
-  if (sortVal === 'low') list.sort((a,b) => a.price - b.price);
-  else if (sortVal === 'high') list.sort((a,b) => b.price - a.price);
-  else if (sortVal === 'seats') list.sort((a,b) => a.seats - b.seats);
-  return list;
-}
-
-function applyFilters() { renderCars(getFilteredCars()); }
-
-function resetFilters() {
-  const s = document.getElementById('seatFilter'); if (s) s.value = 'all';
-  const p = document.getElementById('priceFilter'); if (p) p.value = 'all';
-  const so = document.getElementById('sortFilter'); if (so) so.value = 'default';
-  applyFilters();
-  updateFilterBadge();
-}
-
-function updateFilterBadge() {
-  const seat = document.getElementById('seatFilter');
-  const price = document.getElementById('priceFilter');
-  const sort = document.getElementById('sortFilter');
-  const badge = document.getElementById('activeFilterBadge');
-  if (!badge) return;
-  const active =
-    (seat && seat.value !== 'all' ? 1 : 0) +
-    (price && price.value !== 'all' ? 1 : 0) +
-    (sort && sort.value !== 'default' ? 1 : 0);
-  if (active > 0) {
-    badge.textContent = active;
-    badge.classList.remove('hidden');
-    badge.classList.add('inline-flex');
-  } else {
-    badge.classList.add('hidden');
-    badge.classList.remove('inline-flex');
-  }
-}
-
-/* ============================================================
-   CAR DETAIL MODAL
-   ============================================================ */
 function openDetail(id) {
   const car = carsData.find(c => c.id === id);
   if (!car) return;
@@ -1935,9 +1656,7 @@ function openDetail(id) {
             ${gallery.map((item, i) => {
               const isVid = typeof item === 'object' && item.type === 'video';
               const isFirstActive = i === 0;
-              if (isVid) {
-                return `<button type="button" data-thumb="${i}" class="gallery-thumb ${isFirstActive?'active':''} relative overflow-hidden rounded-lg border-2 ${isFirstActive?'border-emerald-500':'border-transparent'} transition hover:border-emerald-400"><div class="flex h-14 w-full items-center justify-center bg-slate-800 text-white"><i class="fa-solid fa-play text-lg text-emerald-400"></i></div></button>`;
-              }
+              if (isVid) return `<button type="button" data-thumb="${i}" class="gallery-thumb ${isFirstActive?'active':''} relative overflow-hidden rounded-lg border-2 ${isFirstActive?'border-emerald-500':'border-transparent'} transition hover:border-emerald-400"><div class="flex h-14 w-full items-center justify-center bg-slate-800 text-white"><i class="fa-solid fa-play text-lg text-emerald-400"></i></div></button>`;
               return `<button type="button" data-thumb="${i}" class="gallery-thumb ${isFirstActive?'active':''} overflow-hidden rounded-lg border-2 ${isFirstActive?'border-emerald-500':'border-transparent'} transition hover:border-emerald-400"><img src="${item}" alt="view ${i+1}" class="h-14 w-full object-cover"></button>`;
             }).join('')}
           </div>` : ''}
@@ -1974,8 +1693,6 @@ function openDetail(id) {
   if (dm) { dm.classList.remove('hidden'); dm.classList.add('flex'); }
   document.body.classList.add('no-scroll');
   window._detailGallery = gallery;
-
-  // Attach thumbnail click handlers
   document.querySelectorAll('#detailContent [data-thumb]').forEach(btn => {
     btn.addEventListener('click', () => switchDetailItem(Number(btn.dataset.thumb)));
   });
@@ -2008,9 +1725,6 @@ function closeDetail() {
   if (lastFocused && lastFocused.focus) { try { lastFocused.focus(); } catch(_){} }
 }
 
-/* ============================================================
-   ORDER MODAL (3 STEPS)
-   ============================================================ */
 function openModal(carId) {
   const car = carsData.find(c => c.id === carId);
   if (!car) return;
@@ -2018,6 +1732,7 @@ function openModal(carId) {
   activeCar = car;
   lastFocused = document.activeElement;
   uploadedFiles = { id: null, guarantee: null, receipt: null };
+  selectedPayMethod = null;   // ⭐ reset
   track('begin_checkout', { item_id: car.id, item_name: car.name, value: car.price, currency: 'ETB' });
 
   const nameEl = document.getElementById('modalCarName');
@@ -2057,6 +1772,7 @@ function closeModal() {
   uploadedFiles = { id: null, guarantee: null, receipt: null };
   activeCar = null;
   orderStep = 1;
+  selectedPayMethod = null;
   if (lastFocused && lastFocused.focus) { try { lastFocused.focus(); } catch(_){} }
 }
 
@@ -2073,8 +1789,13 @@ function goToStep(n) {
       else if (i === n) dot.className = 'step-indicator step-active';
       else dot.className = 'step-indicator step-inactive';
     }
+    const label = document.getElementById('step' + i + 'Label');
+    if (label) {
+      label.classList.toggle('text-slate-900', i <= n);
+      label.classList.toggle('text-slate-400', i > n);
+    }
   }
-  if (n === 3) updateSummary();
+  if (n === 3) updateStep3Amounts();
 }
 
 function validateStep1() {
@@ -2115,59 +1836,147 @@ function showErr(id, msg) {
   el.classList.remove('hidden');
 }
 
-function updateSummary() {
+/* ============================================================
+   STEP 3 — AMOUNT DISPLAY
+   ============================================================ */
+function updateStep3Amounts() {
   if (!activeCar) return;
   const total = activeCar.price;
   const depositPct = (settings.order && settings.order.depositPercent) || 10;
   const deposit = total * (depositPct / 100);
-  const carEl = document.getElementById('sumCar');
-  const totEl = document.getElementById('sumTotal');
-  const depEl = document.getElementById('sumDeposit');
-  if (carEl) carEl.textContent = activeCar.name;
-  if (totEl) totEl.textContent = `${formatPrice(total)} ETB`;
-  if (depEl) depEl.textContent = `${formatPrice(deposit)} ETB`;
+  const remaining = total - deposit;
+
+  // Hero amounts
+  const el1 = document.getElementById('payNowAmount');
+  const el2 = document.getElementById('remainingAmount');
+  const el3 = document.getElementById('totalAmount');
+  if (el1) el1.textContent = formatPrice(deposit);
+  if (el2) el2.textContent = formatPrice(remaining);
+  if (el3) el3.textContent = formatPrice(total);
+
+  // Order summary rows
+  const el4 = document.getElementById('sumCar');
+  const el5 = document.getElementById('sumTotal');
+  if (el4) el4.textContent = activeCar.name;
+  if (el5) el5.textContent = `${formatPrice(total)} ETB`;
 }
 
+/* ============================================================
+   STEP 3 — PAYMENT METHOD CHIPS + DETAILS
+   ============================================================ */
 function renderPaymentMethods() {
-  const list = document.getElementById('paymentMethodsList');
-  if (!list) return;
+  const chips = document.getElementById('paymentChips');
+  const details = document.getElementById('paymentDetails');
+  if (!chips || !details) return;
+
   const methods = [];
   Object.entries(settings.payment || {}).forEach(([key, m]) => {
     if (!m.enabled) return;
     let icon = 'fa-credit-card';
-    if (key === 'telebirr') icon = 'fa-mobile-screen';
-    else if (key === 'cbe') icon = 'fa-building-columns';
-    else if (key === 'chapa') icon = 'fa-globe';
-    else if (key === 'bankTransfer') icon = 'fa-money-bill-transfer';
+    let brand = '#059669';
+    if (key === 'telebirr') { icon = 'fa-mobile-screen'; brand = '#00a651'; }
+    else if (key === 'cbe') { icon = 'fa-building-columns'; brand = '#5b2c8d'; }
+    else if (key === 'chapa') { icon = 'fa-globe'; brand = '#1e88e5'; }
+    else if (key === 'bankTransfer') { icon = 'fa-money-bill-transfer'; brand = '#0f172a'; }
+    methods.push({ key, icon, brand, ...m });
+  });
 
-    methods.push(`
-      <div class="pay-account rounded-xl p-3.5">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-sm text-white"><i class="fa-solid ${icon}"></i></div>
-            <p class="text-sm font-bold text-slate-800">${escapeHtml(m.label || key)}</p>
-          </div>
-          <button type="button" class="copy-btn flex items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow" data-copy="${escapeHtml(m.account || '')}">
-            <i class="fa-solid fa-copy"></i> <span>Copy</span>
-          </button>
+  if (!methods.length) {
+    chips.innerHTML = '<p class="col-span-full text-xs text-slate-400">ምንም አማራጭ አልተዘጋጀም</p>';
+    details.innerHTML = '';
+    return;
+  }
+
+  // Default select first
+  if (!selectedPayMethod || !methods.find(m => m.key === selectedPayMethod)) {
+    selectedPayMethod = methods[0].key;
+  }
+
+  chips.innerHTML = methods.map(m => {
+    const isSel = selectedPayMethod === m.key;
+    return `
+      <button type="button" data-pay="${m.key}" 
+        class="pay-chip ${isSel ? 'is-selected border-2 border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-100' : 'border-2 border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/50'} relative flex flex-col items-center gap-1.5 rounded-xl p-3 text-center transition-all">
+        ${isSel ? '<span class="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow pulse-ring"><i class="fa-solid fa-check text-[10px]"></i></span>' : ''}
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg transition-all" style="background:${isSel ? m.brand : '#f1f5f9'};color:${isSel ? '#fff' : '#64748b'}">
+          <i class="fa-solid ${m.icon}"></i>
         </div>
-        ${m.account ? `<div class="mt-2.5 flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 shadow-sm">
-          <div class="min-w-0 flex-1">
-            <p class="text-[9px] font-bold uppercase tracking-wider text-slate-500">Account</p>
-            <p class="account-number">${escapeHtml(m.account)}</p>
-          </div>
-        </div>` : ''}
-        ${m.name ? `<p class="mt-1.5 text-[11px] text-slate-700"><span class="font-bold">Name:</span> ${escapeHtml(m.name)}</p>` : ''}
-        ${m.bank ? `<p class="text-[11px] text-slate-700"><span class="font-bold">Bank:</span> ${escapeHtml(m.bank)}</p>` : ''}
-      </div>
-    `);
-  });
-  list.innerHTML = methods.length ? methods.join('') : '<p class="text-xs text-slate-400">ምንም የመክፈያ አማራጭ አልተዘጋጀም</p>';
+        <span class="text-[11px] font-bold ${isSel ? 'text-emerald-700' : 'text-slate-600'}">${escapeHtml(m.label || m.key)}</span>
+      </button>
+    `;
+  }).join('');
 
-  // Attach copy handlers (event delegation)
-  list.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', () => copyText(btn.dataset.copy || '', btn));
+  // Bind chip clicks
+  chips.querySelectorAll('[data-pay]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedPayMethod = btn.dataset.pay;
+      renderPaymentMethods();
+    });
   });
+
+  // Details panel for selected method
+  const sel = methods.find(m => m.key === selectedPayMethod);
+  if (sel) {
+    details.innerHTML = `
+      <div class="bounce-in relative overflow-hidden rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-50 p-4 shadow-md">
+        <div class="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-300/40 blur-2xl"></div>
+        <div class="pointer-events-none absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-teal-300/30 blur-2xl"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-2.5">
+              <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-lg" style="background:${sel.brand}">
+                <i class="fa-solid ${sel.icon}"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="truncate text-sm font-black text-slate-800">${escapeHtml(sel.label)}</p>
+                <p class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600">
+                  <i class="fa-solid fa-circle-check text-[9px]"></i>
+                  <span data-i18n="selected_label">${t('selected_label')}</span>
+                </p>
+              </div>
+            </div>
+            <button type="button" class="copy-btn-main flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white shadow-lg transition hover:bg-emerald-500 active:scale-95" data-copy="${escapeHtml(sel.account || '')}">
+              <i class="fa-solid fa-copy"></i> <span>Copy</span>
+            </button>
+          </div>
+
+          ${sel.account ? `
+            <div class="mt-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-emerald-100">
+              <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">${t('account_label')}</p>
+              <p class="account-number mt-1">${escapeHtml(sel.account)}</p>
+            </div>
+          ` : ''}
+
+          ${(sel.name || sel.bank) ? `
+            <div class="mt-2 grid grid-cols-2 gap-2">
+              ${sel.name ? `
+                <div class="rounded-lg bg-white/80 p-2 ring-1 ring-emerald-100">
+                  <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">${t('name_label')}</p>
+                  <p class="truncate text-xs font-bold text-slate-800">${escapeHtml(sel.name)}</p>
+                </div>
+              ` : ''}
+              ${sel.bank ? `
+                <div class="rounded-lg bg-white/80 p-2 ring-1 ring-emerald-100">
+                  <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">${t('bank_label')}</p>
+                  <p class="truncate text-xs font-bold text-slate-800">${escapeHtml(sel.bank)}</p>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
+          <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2.5">
+            <p class="flex items-start gap-1.5 text-[11px] font-semibold leading-snug text-amber-900">
+              <i class="fa-solid fa-circle-info mt-0.5 shrink-0 text-amber-500"></i>
+              <span>${t('transfer_note')}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+    details.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', () => copyText(btn.dataset.copy || '', btn));
+    });
+  }
 }
 
 function setupUpload(inputId, wrapId, textId, prevId, prevImgId, key) {
@@ -2181,6 +1990,7 @@ function setupUpload(inputId, wrapId, textId, prevId, prevImgId, key) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { showToast('እባክዎ ምስል ብቻ ይጫኑ', 'error'); return; }
+    if (file.size > 8 * 1024 * 1024) { showToast('እባክዎ ከ 8MB በታች ምስል ይጫኑ', 'error'); return; }
     try {
       const compressed = await compressImage(file);
       uploadedFiles[key] = compressed;
@@ -2209,16 +2019,9 @@ async function handleOrderSubmit(e) {
   if (!uploadedFiles.receipt) { showErr('formError3', t('err_receipt')); return; }
   const errEl = document.getElementById('formError3');
   if (errEl) errEl.classList.add('hidden');
-
   if (!activeCar) { showErr('formError3', t('toast_error')); return; }
 
-  // 🛡️ Capture car data BEFORE closeModal nulls it
-  const carSnapshot = {
-    id: activeCar.id,
-    name: activeCar.name,
-    price: activeCar.price
-  };
-
+  const carSnapshot = { id: activeCar.id, name: activeCar.name, price: activeCar.price };
   const total = carSnapshot.price;
   const depositPct = (settings.order && settings.order.depositPercent) || 10;
   const deposit = total * (depositPct / 100);
@@ -2240,6 +2043,7 @@ async function handleOrderSubmit(e) {
       ref: generateRef(),
       car: carSnapshot.name, carId: carSnapshot.id,
       total, depositPct, deposit,
+      paymentMethod: selectedPayMethod || '',
       name: form.elements.fullName.value.trim(),
       phone: form.elements.phone.value.trim(),
       region: form.elements.region.value,
@@ -2249,14 +2053,11 @@ async function handleOrderSubmit(e) {
       address: form.elements.address.value.trim(),
       note: form.elements.note.value.trim(),
       idPhoto: idUrl, guaranteePhoto: guarUrl, receiptPhoto: receiptUrl,
-      status: 'pending',
-      lang: currentLang,
-      ts: new Date().toISOString()
+      status: 'pending', lang: currentLang, ts: new Date().toISOString()
     };
 
     const saved = await saveOrder(payload);
     if (saved && saved.id) payload.id = saved.id;
-
     await notifyTelegram(payload);
 
     const refEl = document.getElementById('orderRef');
@@ -2271,11 +2072,8 @@ async function handleOrderSubmit(e) {
     document.body.classList.add('no-scroll');
     showToast(t('toast_order'));
 
-    // ✅ Use the snapshot, not the (now null) activeCar
     track('purchase', {
-      transaction_id: payload.ref,
-      value: payload.total,
-      currency: 'ETB',
+      transaction_id: payload.ref, value: payload.total, currency: 'ETB',
       items: [{ item_id: carSnapshot.id, item_name: carSnapshot.name, price: total }]
     });
   } catch (err) {
@@ -2285,7 +2083,7 @@ async function handleOrderSubmit(e) {
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<i class="fa-solid fa-check mr-2"></i>${t('form_submit')}`;
+      submitBtn.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i>${t('form_submit')}`;
     }
   }
 }
@@ -2296,9 +2094,6 @@ function closeConfirm() {
   document.body.classList.remove('no-scroll');
 }
 
-/* ============================================================
-   POLICY
-   ============================================================ */
 function openPolicy(type) {
   const content = type === 'privacy' ? `
     <h2 class="text-2xl font-extrabold text-slate-900">የግላዊነት መመሪያ</h2>
@@ -2324,9 +2119,6 @@ function closePolicy() {
   document.body.classList.remove('no-scroll');
 }
 
-/* ============================================================
-   TOAST
-   ============================================================ */
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
   if (!container) { console.warn('Toast:', message); return; }
@@ -2339,24 +2131,15 @@ function showToast(message, type = 'success') {
   setTimeout(() => { el.classList.add('opacity-0', 'translate-y-3'); setTimeout(() => el.remove(), 320); }, 3500);
 }
 
-/* ============================================================
-   LANGUAGE
-   ============================================================ */
 function applyLanguage(lang) {
   if (!I18N[lang]) lang = 'am';
   currentLang = lang;
   document.documentElement.lang = lang;
   safeStorage.set('ev_lang', lang);
-
   $$('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const val = t(key);
     if (val) el.textContent = val;
-  });
-  $$('[data-i18n-placeholder]').forEach(el => {
-    const key = el.getAttribute('data-i18n-placeholder');
-    const val = t(key);
-    if (val) el.placeholder = val;
   });
   $$('.lang-btn').forEach(btn => {
     const active = btn.dataset.lang === lang;
@@ -2364,12 +2147,9 @@ function applyLanguage(lang) {
     btn.classList.toggle('text-white', active);
     btn.classList.toggle('text-slate-300', !active);
   });
-  try { applyFilters(); } catch(_){}
+  try { if (carsData && carsData.length) { renderCars(carsData); buildHeroDots(); } } catch(_){}
 }
 
-/* ============================================================
-   APPLY SETTINGS TO UI
-   ============================================================ */
 function applySettings() {
   const c = settings.contact || {};
   const setVis = (el, visible, href) => {
@@ -2404,627 +2184,8 @@ function applySettings() {
 }
 
 /* ============================================================
-   ADMIN
-   ============================================================ */
-function openAdminGate(e) {
-  if (e) e.preventDefault();
-  if (safeSession.get('ev_admin') === '1') { openAdminDashboard(); return; }
-  const gate = document.getElementById('adminGate');
-  if (gate) { gate.classList.remove('hidden'); gate.classList.add('flex'); }
-  const err = document.getElementById('adminError'); if (err) err.classList.add('hidden');
-  setTimeout(() => {
-    const p = document.getElementById('adminPass');
-    if (p) { try { p.focus(); } catch(_){} }
-  }, 60);
-}
-function closeAdminGate() {
-  const gate = document.getElementById('adminGate');
-  if (gate) { gate.classList.add('hidden'); gate.classList.remove('flex'); }
-  const p = document.getElementById('adminPass'); if (p) p.value = '';
-}
-function logoutAdmin() {
-  safeSession.remove('ev_admin');
-  const d = document.getElementById('adminDashboard');
-  if (d) { d.classList.add('hidden'); d.classList.remove('flex'); }
-  document.body.classList.remove('no-scroll');
-}
-async function openAdminDashboard() {
-  const d = document.getElementById('adminDashboard');
-  if (d) { d.classList.remove('hidden'); d.classList.add('flex'); }
-  document.body.classList.add('no-scroll');
-  try { orders = await fetchOrders(); } catch(_){}
-  try { carsData = await fetchCars(); } catch(_){}
-  renderAdminOrders();
-  renderAdminCars();
-  renderAdminCustomers();
-  renderAdminSettings();
-  renderAdminStats();
-}
-
-const adminGateForm = document.getElementById('adminGateForm');
-if (adminGateForm) {
-  adminGateForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const passEl = document.getElementById('adminPass');
-    const pass = passEl ? passEl.value : '';
-    if (pass === CONFIG.adminPassword) {
-      safeSession.set('ev_admin', '1');
-      closeAdminGate();
-      openAdminDashboard();
-    } else {
-      const err = document.getElementById('adminError'); if (err) err.classList.remove('hidden');
-      if (passEl) { passEl.value = ''; try { passEl.focus(); } catch(_){} }
-    }
-  });
-}
-
-$$('.admin-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    const name = tab.dataset.admintab;
-    $$('.admin-tab').forEach(t => {
-      const active = t.dataset.admintab === name;
-      t.classList.toggle('border-emerald-600', active);
-      t.classList.toggle('text-emerald-600', active);
-      t.classList.toggle('border-transparent', !active);
-      t.classList.toggle('text-slate-500', !active);
-    });
-    $$('.admin-tab-content').forEach(c => c.classList.add('hidden'));
-    const map = { orders:'adminTabOrders', cars:'adminTabCars', customers:'adminTabCustomers', settings:'adminTabSettings', stats:'adminTabStats' };
-    const target = document.getElementById(map[name]);
-    if (target) target.classList.remove('hidden');
-  });
-});
-
-function renderAdminOrders() {
-  const filterEl = document.getElementById('orderStatusFilter');
-  const searchEl = document.getElementById('orderSearch');
-  const filter = filterEl ? filterEl.value : 'all';
-  const q = (searchEl ? searchEl.value : '').toLowerCase();
-  let list = orders.filter(o => {
-    const matchStatus = filter === 'all' || o.status === filter;
-    const matchQ = !q || (o.name||'').toLowerCase().includes(q) || (o.phone||'').includes(q) || (o.ref||'').toLowerCase().includes(q);
-    return matchStatus && matchQ;
-  });
-  const container = document.getElementById('adminOrdersList');
-  if (!container) return;
-  if (list.length === 0) {
-    container.innerHTML = `<div class="rounded-xl bg-white p-8 text-center text-slate-500 shadow-sm"><i class="fa-solid fa-inbox mb-3 text-3xl text-slate-300"></i><p>ምንም Orders የለም</p></div>`;
-    return;
-  }
-  container.innerHTML = list.map(o => {
-    const ref = escapeHtml(o.ref || '');
-    const status = escapeHtml(o.status || 'pending');
-    return `
-    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2">
-            <span class="font-mono text-xs font-bold text-slate-500">${ref}</span>
-            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold status-${status}">${status.toUpperCase()}</span>
-          </div>
-          <h4 class="mt-1 font-bold text-slate-900">${escapeHtml(o.car||'')}</h4>
-          <p class="mt-1 text-xs text-slate-500">${new Date(o.ts).toLocaleString()}</p>
-        </div>
-        <div class="text-right">
-          <p class="text-lg font-black text-emerald-600">${formatPrice(o.total)} ETB</p>
-          <p class="text-xs font-bold text-amber-600">Deposit: ${formatPrice(o.deposit)} ETB (${o.depositPct}%)</p>
-          <select onchange="updateOrderStatus('${ref}', this.value)" class="mt-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-semibold outline-none">
-            <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
-            <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmed</option>
-            <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
-            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option>
-          </select>
-        </div>
-      </div>
-      <div class="mt-3 grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600 sm:grid-cols-2">
-        <p><i class="fa-solid fa-user mr-1 text-emerald-500"></i>${escapeHtml(o.name||'')}</p>
-        <p><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>${escapeHtml(o.phone||'')}</p>
-        <p class="sm:col-span-2"><i class="fa-solid fa-location-dot mr-1 text-emerald-500"></i>${escapeHtml(o.region||'')} / ${escapeHtml(o.zone||'')} / ${escapeHtml(o.woreda||'')} / ${escapeHtml(o.city||'')}</p>
-        ${o.address ? `<p class="sm:col-span-2"><i class="fa-solid fa-house mr-1 text-emerald-500"></i>${escapeHtml(o.address)}</p>` : ''}
-        ${o.note ? `<p class="sm:col-span-2"><i class="fa-solid fa-note-sticky mr-1 text-emerald-500"></i>${escapeHtml(o.note)}</p>` : ''}
-      </div>
-      <div class="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3">
-        <div class="text-center"><p class="text-[10px] font-bold uppercase text-slate-400">ID</p>${o.idPhoto ? `<img src="${o.idPhoto}" onclick="viewAdminImage('${o.idPhoto}','ID')" class="mt-1 mx-auto h-16 w-full cursor-pointer rounded-lg object-cover hover:ring-2 hover:ring-emerald-500">` : '<p class="text-xs text-slate-400">—</p>'}</div>
-        <div class="text-center"><p class="text-[10px] font-bold uppercase text-slate-400">Guarantee</p>${o.guaranteePhoto ? `<img src="${o.guaranteePhoto}" onclick="viewAdminImage('${o.guaranteePhoto}','Guarantee')" class="mt-1 mx-auto h-16 w-full cursor-pointer rounded-lg object-cover hover:ring-2 hover:ring-emerald-500">` : '<p class="text-xs text-slate-400">—</p>'}</div>
-        <div class="text-center"><p class="text-[10px] font-bold uppercase text-slate-400">Receipt</p>${o.receiptPhoto ? `<img src="${o.receiptPhoto}" onclick="viewAdminImage('${o.receiptPhoto}','Receipt')" class="mt-1 mx-auto h-16 w-full cursor-pointer rounded-lg object-cover hover:ring-2 hover:ring-emerald-500">` : '<p class="text-xs text-slate-400">—</p>'}</div>
-      </div>
-      <div class="mt-3 flex gap-2 border-t border-slate-100 pt-3">
-        <a href="tel:${escapeHtml(o.phone||'')}" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200"><i class="fa-solid fa-phone mr-1"></i>Call</a>
-        <a href="https://wa.me/${(o.phone||'').replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hello ' + (o.name||'') + ' — order ' + (o.ref||''))}" target="_blank" class="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-bold text-green-700 hover:bg-green-200"><i class="fa-brands fa-whatsapp mr-1"></i>WhatsApp</a>
-        <button type="button" onclick="deleteOrder('${ref}')" class="ml-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100"><i class="fa-solid fa-trash mr-1"></i>Delete</button>
-      </div>
-    </div>
-    `;
-  }).join('');
-}
-
-function viewAdminImage(src, title) {
-  try {
-    const w = window.open('', '_blank');
-    if (!w) return;
-    w.document.write(`<html><head><title>${title}</title><style>body{margin:0;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#fff;padding:20px}img{max-width:100%;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}</style></head><body><img src="${src}"></body></html>`);
-  } catch (_) {}
-}
-
-async function updateOrderStatus(ref, status) {
-  const idx = orders.findIndex(o => o.ref === ref);
-  if (idx < 0) return;
-  try {
-    // Only try DB update if we have an id (Supabase-managed order)
-    if (orders[idx].id) {
-      await updateOrderStatusDB(orders[idx].id, status);
-    }
-    orders[idx].status = status;
-    // Persist to localStorage too (for hybrid mode)
-    safeStorage.set('ev_orders_v8', JSON.stringify(orders));
-    showToast(t('toast_order_updated'));
-  } catch (err) {
-    console.warn(err);
-    showToast('ስህተት', 'error');
-  }
-}
-
-async function deleteOrder(ref) {
-  if (!confirm('ማጥፋት ይፈልጋሉ?')) return;
-  const order = orders.find(o => o.ref === ref);
-  if (!order) return;
-  try {
-    if (order.id) await deleteOrderDB(order.id);
-    orders = orders.filter(o => o.ref !== ref);
-    safeStorage.set('ev_orders_v8', JSON.stringify(orders));
-    renderAdminOrders();
-    renderAdminStats();
-  } catch (err) { showToast('ስህተት', 'error'); }
-}
-
-function renderAdminCars() {
-  const container = document.getElementById('adminCarsList');
-  if (!container) return;
-  container.innerHTML = carsData.map(c => {
-    const stockLabel = t(STOCK_KEY[c.stock] || 'stock_in');
-    const stockClass = STOCK_CLASS[c.stock] || 'stock-in';
-    const photoCount = c.photos ? c.photos.length : 0;
-    return `
-    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div class="flex flex-wrap items-center gap-4">
-        <img src="${carImage(c, 'side')}" alt="${escapeHtml(c.name)}" class="h-16 w-24 rounded-lg object-cover">
-        <div class="flex-1 min-w-0">
-          <div class="flex flex-wrap items-center gap-2">
-            <h4 class="font-bold text-slate-900">${escapeHtml(c.name)}</h4>
-            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold ${stockClass}">${stockLabel}</span>
-            ${photoCount > 0 ? `<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700"><i class="fa-solid fa-images mr-1"></i>${photoCount}</span>` : ''}
-          </div>
-          <p class="mt-1 text-xs text-slate-500">${c.seats} seats · ${c.range} km · ${escapeHtml(c.battery||'')}</p>
-          <p class="mt-1 text-sm font-black text-emerald-600">${formatPrice(c.price)} ETB</p>
-        </div>
-        <div class="flex gap-2">
-          <button type="button" onclick="openCarForm(${c.id})" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200"><i class="fa-solid fa-pen mr-1"></i>Edit</button>
-          <button type="button" onclick="deleteCar(${c.id})" class="rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-100"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      </div>
-    </div>
-  `}).join('');
-}
-
-function renderCarFormPhotos() {
-  const grid = document.getElementById('carPhotoGrid');
-  const count = document.getElementById('photoCount');
-  if (!grid) return;
-  if (count) count.textContent = carFormPhotos.length;
-  if (carFormPhotos.length === 0) {
-    grid.innerHTML = '';
-    grid.classList.add('hidden');
-    return;
-  }
-  grid.classList.remove('hidden');
-  grid.innerHTML = carFormPhotos.map((p, i) => `
-    <div class="photo-tile">
-      <img src="${p}" alt="photo ${i+1}">
-      ${i === 0 ? '<span class="primary-badge">ዋና</span>' : ''}
-      <button type="button" class="del-btn" data-remove-photo="${i}" aria-label="Remove">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-  `).join('');
-  grid.querySelectorAll('[data-remove-photo]').forEach(b => {
-    b.addEventListener('click', () => removeCarFormPhoto(Number(b.dataset.removePhoto)));
-  });
-}
-
-function removeCarFormPhoto(i) {
-  if (i < 0 || i >= carFormPhotos.length) return;
-  carFormPhotos.splice(i, 1);
-  renderCarFormPhotos();
-  showToast(t('toast_photo_removed'), 'error');
-}
-
-function openCarForm(id) {
-  const modal = document.getElementById('carFormModal');
-  if (!modal) return;
-  carFormPhotos = [];
-
-  if (id) {
-    const car = carsData.find(c => c.id === id);
-    if (!car) return;
-    document.getElementById('carFormTitle').textContent = 'Edit Car';
-    document.getElementById('carFormId').value = car.id;
-    document.getElementById('carFormName').value = car.name;
-    document.getElementById('carFormSeats').value = car.seats;
-    document.getElementById('carFormPrice').value = car.price;
-    document.getElementById('carFormBattery').value = car.battery || '';
-    document.getElementById('carFormBatteryKwh').value = car.batteryKwh || '';
-    document.getElementById('carFormMotorPower').value = car.motorPower || '';
-    document.getElementById('carFormRange').value = car.range || '';
-    document.getElementById('carFormSpeed').value = car.speed || '';
-    document.getElementById('carFormCharge').value = car.charge || '';
-    document.getElementById('carFormLength').value = (car.dimensions && car.dimensions.length) || '';
-    document.getElementById('carFormWidth').value = (car.dimensions && car.dimensions.width) || '';
-    document.getElementById('carFormHeight').value = (car.dimensions && car.dimensions.height) || '';
-    document.getElementById('carFormCargo').value = car.cargo || '';
-    document.getElementById('carFormStock').value = car.stock || 'in_stock';
-    document.getElementById('carFormVideo').value = car.video || '';
-    document.getElementById('carFormTag').value = car.tag || '';
-    document.getElementById('carFormDesc').value = car.desc || '';
-    if (Array.isArray(car.photos) && car.photos.length) {
-      carFormPhotos = [...car.photos];
-    }
-  } else {
-    document.getElementById('carFormTitle').textContent = 'አዲስ መኪና';
-    const f = document.getElementById('carForm'); if (f) f.reset();
-    document.getElementById('carFormId').value = '';
-  }
-
-  const fileInput = document.getElementById('carPhotoFile'); if (fileInput) fileInput.value = '';
-  const wrap = document.getElementById('carPhotoWrap'); if (wrap) wrap.classList.remove('has-file');
-  renderCarFormPhotos();
-
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-}
-
-function closeCarForm() {
-  const modal = document.getElementById('carFormModal');
-  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-  carFormPhotos = [];
-}
-
-/* Event listeners for admin forms — attach defensively */
-const carPhotoFileEl = document.getElementById('carPhotoFile');
-if (carPhotoFileEl) {
-  carPhotoFileEl.addEventListener('change', async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    let added = 0;
-    for (const file of files) {
-      if (!file.type.startsWith('image/')) continue;
-      try {
-        const compressed = await compressImage(file, 900, 0.75);
-        const url = await uploadToStorage(compressed, 'cars');
-        carFormPhotos.push(url);
-        added++;
-      } catch (err) { console.warn(err); }
-    }
-    if (added > 0) {
-      const wrap = document.getElementById('carPhotoWrap'); if (wrap) wrap.classList.add('has-file');
-      renderCarFormPhotos();
-      showToast(`📸 ${added} ${t('toast_photo_added')}`);
-    } else {
-      showToast('እባክዎ ምስል ብቻ ይጫኑ', 'error');
-    }
-    e.target.value = '';
-  });
-}
-
-const cloudinaryBtn = document.getElementById('cloudinaryBtn');
-if (cloudinaryBtn) {
-  cloudinaryBtn.addEventListener('click', () => {
-    if (!CONFIG.cloudinary.enabled || typeof cloudinary === 'undefined') {
-      showToast('Cloudinary አልተዋቀረም', 'error');
-      return;
-    }
-    if (!cloudinaryWidget) {
-      try {
-        cloudinaryWidget = cloudinary.createUploadWidget({
-          cloudName: CONFIG.cloudinary.cloudName,
-          uploadPreset: CONFIG.cloudinary.uploadPreset,
-          folder: 'ev-golf/cars',
-          sources: ['local', 'camera', 'url'],
-          multiple: true,
-          maxFiles: 10,
-          clientAllowedFormats: ['jpg','jpeg','png','webp'],
-          maxFileSize: 5000000,
-          styles: { palette: {
-            window: '#0f172a', windowBorder: '#10b981', tabIcon: '#10b981',
-            textDark: '#f8fafc', textLight: '#94a3b8', link: '#34d399',
-            action: '#059669', inProgress: '#34d399', complete: '#10b981', sourceBg: '#1e293b'
-          }}
-        }, (error, result) => {
-          if (error) { console.error(error); return; }
-          if (result.event === 'success') {
-            carFormPhotos.push(result.info.secure_url);
-            renderCarFormPhotos();
-            showToast('☁️ ፎቶ ከCloudinary ተጨምሯል');
-          }
-        });
-      } catch (err) { console.error(err); showToast('Cloudinary ስህተት', 'error'); return; }
-    }
-    cloudinaryWidget.open();
-  });
-}
-
-const carFormEl = document.getElementById('carForm');
-if (carFormEl) {
-  carFormEl.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('carFormId').value;
-    const nameVal = document.getElementById('carFormName').value.trim();
-    const seatsVal = parseInt(document.getElementById('carFormSeats').value) || 0;
-    const priceVal = parseInt(document.getElementById('carFormPrice').value) || 0;
-
-    if (!nameVal) { showToast(t('err_name_required'), 'error'); return; }
-    if (seatsVal < 1) { showToast(t('err_seats_required'), 'error'); return; }
-    if (priceVal < 0) { showToast(t('err_price_required'), 'error'); return; }
-
-    const data = {
-      name: nameVal, seats: seatsVal, price: priceVal,
-      battery: document.getElementById('carFormBattery').value.trim(),
-      batteryKwh: parseFloat(document.getElementById('carFormBatteryKwh').value) || 0,
-      motorPower: parseFloat(document.getElementById('carFormMotorPower').value) || 0,
-      range: parseInt(document.getElementById('carFormRange').value) || 0,
-      speed: parseInt(document.getElementById('carFormSpeed').value) || 0,
-      charge: document.getElementById('carFormCharge').value.trim(),
-      dimensions: {
-        length: parseInt(document.getElementById('carFormLength').value) || 0,
-        width: parseInt(document.getElementById('carFormWidth').value) || 0,
-        height: parseInt(document.getElementById('carFormHeight').value) || 0
-      },
-      cargo: document.getElementById('carFormCargo').value.trim(),
-      stock: document.getElementById('carFormStock').value,
-      video: document.getElementById('carFormVideo').value.trim(),
-      tag: document.getElementById('carFormTag').value.trim(),
-      desc: document.getElementById('carFormDesc').value.trim(),
-      photos: [...carFormPhotos]
-    };
-
-    try {
-      if (id) {
-        const car = carsData.find(c => c.id === Number(id));
-        await saveCar({ ...data, id: Number(id), accent: car?.accent });
-        if (car) Object.assign(car, data);
-        saveCarsLocal();
-      } else {
-        const newId = await saveCar(data);
-        const accents = ['#10b981','#0ea5e9','#f59e0b','#8b5cf6','#ef4444'];
-        const newCar = { id: newId || (Math.max(0, ...carsData.map(c => c.id)) + 1), accent: accents[carsData.length % accents.length], ...data };
-        carsData.push(newCar);
-        saveCarsLocal();
-      }
-      renderAdminCars();
-      applyFilters();
-      closeCarForm();
-      showToast(t('toast_car_saved'));
-    } catch (err) {
-      console.error(err);
-      showToast('ማስቀመጥ አልተቻለም: ' + (err.message || ''), 'error');
-    }
-  });
-}
-
-async function deleteCar(id) {
-  if (!confirm('መኪናውን ማጥፋት ይፈልጋሉ?')) return;
-  try {
-    await deleteCarById(id);
-    renderAdminCars();
-    applyFilters();
-    showToast(t('toast_car_deleted'));
-  } catch (err) { showToast('ስህተት', 'error'); }
-}
-
-function renderAdminCustomers() {
-  const map = {};
-  orders.forEach(o => {
-    const key = o.phone || o.name;
-    if (!map[key]) map[key] = { name:o.name, phone:o.phone, region:o.region, city:o.city, orders:0, spent:0, deposit:0 };
-    map[key].orders++;
-    map[key].spent += o.total || 0;
-    map[key].deposit += o.deposit || 0;
-  });
-  const list = Object.values(map).sort((a,b) => b.spent - a.spent);
-  const container = document.getElementById('adminCustomersList');
-  if (!container) return;
-  if (list.length === 0) {
-    container.innerHTML = `<div class="rounded-xl bg-white p-8 text-center text-slate-500 shadow-sm"><i class="fa-solid fa-users mb-3 text-3xl text-slate-300"></i><p>ምንም ደንበኞች የለም</p></div>`;
-    return;
-  }
-  container.innerHTML = list.map(c => `
-    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h4 class="font-bold text-slate-900">${escapeHtml(c.name||'')}</h4>
-          <p class="mt-1 text-xs text-slate-500"><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>${escapeHtml(c.phone || '—')}</p>
-          ${c.region ? `<p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1 text-emerald-500"></i>${escapeHtml(c.region)}${c.city ? ', ' + escapeHtml(c.city) : ''}</p>` : ''}
-        </div>
-        <div class="text-right">
-          <p class="text-sm font-bold text-slate-700">${c.orders} orders</p>
-          <p class="text-lg font-black text-emerald-600">${formatPrice(c.spent)} ETB</p>
-          <p class="text-[10px] font-bold text-amber-600">Deposit: ${formatPrice(c.deposit)} ETB</p>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderAdminSettings() {
-  const c = settings.contact || {};
-  const p = settings.payment || {};
-  const container = document.getElementById('adminSettings');
-  if (!container) return;
-  container.innerHTML = `
-    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-      <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-slate-900"><i class="fa-solid fa-address-book text-emerald-600"></i> የመገኛ መረጃ</h3>
-      <div class="space-y-4">
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>ስልክ ቁጥር</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setPhoneVisible" ${c.phoneVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="text" id="setPhone" value="${escapeHtml(c.phone||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-whatsapp mr-1 text-green-500"></i>WhatsApp</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setWhatsappVisible" ${c.whatsappVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="text" id="setWhatsapp" value="${escapeHtml(c.whatsapp||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-telegram mr-1 text-sky-500"></i>Telegram</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setTelegramVisible" ${c.telegramVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="text" id="setTelegram" value="${escapeHtml(c.telegram||'')}" placeholder="evgolfethiopia" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-solid fa-envelope mr-1 text-emerald-500"></i>ኢሜይል</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setEmailVisible" ${c.emailVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="email" id="setEmail" value="${escapeHtml(c.email||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-facebook mr-1 text-blue-500"></i>Facebook</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setFacebookVisible" ${c.facebookVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="url" id="setFacebook" value="${escapeHtml(c.facebook||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-          <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-tiktok mr-1 text-slate-800"></i>TikTok</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setTiktokVisible" ${c.tiktokVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="url" id="setTiktok" value="${escapeHtml(c.tiktok||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
-        </div>
-      </div>
-    </div>
-
-    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-      <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-slate-900"><i class="fa-solid fa-file-invoice-dollar text-emerald-600"></i> የትዕዛዝ ቅንብሮች</h3>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div><label class="mb-1 block text-xs font-bold text-slate-600">ቅድሚያ ክፍያ (%)</label><input type="number" id="setDeposit" min="1" max="100" value="${settings.order.depositPercent}" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500"></div>
-        <div><label class="mb-1 block text-xs font-bold text-slate-600">VAT (%)</label><input type="number" id="setVat" min="0" max="50" step="0.5" value="${(settings.order.vatRate*100).toFixed(1)}" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500"></div>
-      </div>
-    </div>
-
-    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-      <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-slate-900"><i class="fa-solid fa-credit-card text-emerald-600"></i> የመክፈያ አካውንቶች</h3>
-      <div class="space-y-3">
-        ${['telebirr','cbe','chapa','bankTransfer'].map(key => {
-          const m = p[key] || {};
-          return `
-          <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-            <div class="flex items-center justify-between gap-2">
-              <label class="text-sm font-bold text-slate-700">${escapeHtml(m.label || key)}</label>
-              <label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" data-pay="${key}" ${m.enabled?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600 pay-toggle"><span class="font-semibold text-slate-600">አሳይ</span></label>
-            </div>
-            <input type="text" data-payfield="${key}-label" value="${escapeHtml(m.label||'')}" placeholder="Label" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs outline-none focus:border-emerald-500">
-            <input type="text" data-payfield="${key}-account" value="${escapeHtml(m.account||'')}" placeholder="Account number" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs outline-none focus:border-emerald-500">
-            <input type="text" data-payfield="${key}-name" value="${escapeHtml(m.name||'')}" placeholder="Account name" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs outline-none focus:border-emerald-500">
-            ${key === 'bankTransfer' ? `<input type="text" data-payfield="${key}-bank" value="${escapeHtml(m.bank||'')}" placeholder="Bank name" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs outline-none focus:border-emerald-500">` : ''}
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <div class="flex justify-end gap-2">
-      <button type="button" onclick="resetSettings()" class="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-rotate-left mr-1"></i>ዳግም</button>
-      <button type="button" onclick="saveAdminSettings()" class="rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-emerald-500"><i class="fa-solid fa-save mr-1"></i>አስቀምጥ</button>
-    </div>
-  `;
-}
-
-async function saveAdminSettings() {
-  const newSettings = {
-    contact: {
-      phone: (document.getElementById('setPhone')?.value || '').trim(),
-      phoneVisible: document.getElementById('setPhoneVisible')?.checked || false,
-      whatsapp: (document.getElementById('setWhatsapp')?.value || '').trim(),
-      whatsappVisible: document.getElementById('setWhatsappVisible')?.checked || false,
-      telegram: (document.getElementById('setTelegram')?.value || '').trim(),
-      telegramVisible: document.getElementById('setTelegramVisible')?.checked || false,
-      email: (document.getElementById('setEmail')?.value || '').trim(),
-      emailVisible: document.getElementById('setEmailVisible')?.checked || false,
-      facebook: (document.getElementById('setFacebook')?.value || '').trim(),
-      facebookVisible: document.getElementById('setFacebookVisible')?.checked || false,
-      tiktok: (document.getElementById('setTiktok')?.value || '').trim(),
-      tiktokVisible: document.getElementById('setTiktokVisible')?.checked || false
-    },
-    payment: {},
-    order: {
-      depositPercent: parseFloat(document.getElementById('setDeposit')?.value) || 10,
-      vatRate: (parseFloat(document.getElementById('setVat')?.value) || 15) / 100
-    }
-  };
-  ['telebirr','cbe','chapa','bankTransfer'].forEach(key => {
-    const toggle = document.querySelector(`[data-pay="${key}"]`);
-    const labelEl = document.querySelector(`[data-payfield="${key}-label"]`);
-    const accEl = document.querySelector(`[data-payfield="${key}-account"]`);
-    const nameEl = document.querySelector(`[data-payfield="${key}-name"]`);
-    const bankEl = document.querySelector(`[data-payfield="${key}-bank"]`);
-    newSettings.payment[key] = {
-      enabled: toggle ? toggle.checked : false,
-      label: labelEl ? labelEl.value.trim() : '',
-      account: accEl ? accEl.value.trim() : '',
-      name: nameEl ? nameEl.value.trim() : '',
-      bank: bankEl ? bankEl.value.trim() : ''
-    };
-  });
-  try {
-    await saveSettingsDB(newSettings);
-    settings = newSettings;
-    applySettings();
-    showToast(t('toast_settings_saved'));
-  } catch (err) { showToast('ማስቀምጥ አልተቻለም', 'error'); }
-}
-
-async function resetSettings() {
-  if (!confirm('ሁሉንም ቅንብሮች ወደ ነባሪ መመለስ ይፈልጋሉ?')) return;
-  settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-  try { await saveSettingsDB(settings); } catch(_){}
-  applySettings();
-  renderAdminSettings();
-  showToast('ተመልሷል');
-}
-
-function renderAdminStats() {
-  const total = orders.length;
-  const pending = orders.filter(o => o.status === 'pending').length;
-  const delivered = orders.filter(o => o.status === 'delivered').length;
-  const revenue = orders.filter(o => o.status !== 'cancelled').reduce((s,o) => s + (o.total||0), 0);
-  const depositTotal = orders.filter(o => o.status !== 'cancelled').reduce((s,o) => s + (o.deposit||0), 0);
-  const container = document.getElementById('adminStats');
-  if (!container) return;
-  container.innerHTML = `
-    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Total Orders</p><p class="mt-2 text-2xl font-black text-slate-900">${total}</p></div>
-    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Pending</p><p class="mt-2 text-2xl font-black text-amber-600">${pending}</p></div>
-    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Delivered</p><p class="mt-2 text-2xl font-black text-emerald-600">${delivered}</p></div>
-    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Total Revenue</p><p class="mt-2 text-xl font-black text-slate-900">${formatPrice(revenue)} <span class="text-xs font-bold text-slate-400">ETB</span></p><p class="mt-1 text-[10px] font-bold text-amber-600">Deposits: ${formatPrice(depositTotal)} ETB</p></div>
-  `;
-}
-
-function exportOrders() {
-  if (orders.length === 0) { showToast('ምንም orders የለም', 'error'); return; }
-  const headers = ['Ref','Date','Car','Total','Deposit %','Deposit','Status','Name','Phone','Region','Zone','Woreda','City','Address','Note'];
-  const rows = orders.map(o => [o.ref,o.ts,o.car,o.total,o.depositPct,o.deposit,o.status,o.name,o.phone,o.region,o.zone,o.woreda,o.city,o.address,o.note].map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(','));
-  const csv = [headers.join(','), ...rows].join('\n');
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `ev-orders-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-/* ============================================================
    EVENT LISTENERS
    ============================================================ */
-document.getElementById('seatFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
-document.getElementById('priceFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
-document.getElementById('sortFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
-document.getElementById('resetBtn')?.addEventListener('click', resetFilters);
-
-document.getElementById('toggleFilters')?.addEventListener('click', (e) => {
-  const panel = document.getElementById('filterPanel');
-  const btn = e.currentTarget;
-  if (!panel) return;
-  const isOpen = !panel.classList.contains('hidden');
-  panel.classList.toggle('hidden');
-  btn.setAttribute('aria-expanded', String(!isOpen));
-});
-
 document.getElementById('carsGrid')?.addEventListener('click', (e) => {
   const orderBtn = e.target.closest('[data-order]');
   if (orderBtn && !orderBtn.disabled) { openModal(Number(orderBtn.dataset.order)); return; }
@@ -3038,10 +2199,7 @@ document.getElementById('orderModal')?.addEventListener('click', (e) => { if (e.
 document.getElementById('confirmModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('confirmModal')) closeConfirm(); });
 document.getElementById('detailModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('detailModal')) closeDetail(); });
 document.getElementById('policyModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('policyModal')) closePolicy(); });
-document.getElementById('adminGate')?.addEventListener('click', (e) => { if (e.target === document.getElementById('adminGate')) closeAdminGate(); });
-document.getElementById('carFormModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('carFormModal')) closeCarForm(); });
 
-// Setup upload handlers after DOM is ready
 setupUpload('idFile', 'idUploadWrap', 'idUploadText', 'idPreview', 'idPreviewImg', 'id');
 setupUpload('gFile', 'gUploadWrap', 'gUploadText', 'gPreview', 'gPreviewImg', 'guarantee');
 setupUpload('rFile', 'rUploadWrap', 'rUploadText', 'rPreview', 'rPreviewImg', 'receipt');
@@ -3052,18 +2210,10 @@ document.addEventListener('keydown', (e) => {
     const om = document.getElementById('orderModal');
     const cm = document.getElementById('confirmModal');
     const pm = document.getElementById('policyModal');
-    const ag = document.getElementById('adminGate');
-    const cf = document.getElementById('carFormModal');
     if (om && !om.classList.contains('hidden')) closeModal();
     if (cm && !cm.classList.contains('hidden')) closeConfirm();
     if (dm && !dm.classList.contains('hidden')) closeDetail();
     if (pm && !pm.classList.contains('hidden')) closePolicy();
-    if (ag && !ag.classList.contains('hidden')) closeAdminGate();
-    if (cf && !cf.classList.contains('hidden')) closeCarForm();
-  }
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
-    e.preventDefault();
-    openAdminGate();
   }
 });
 
@@ -3109,17 +2259,46 @@ document.getElementById('toTop')?.addEventListener('click', () => window.scrollT
 
 $$('.lang-btn').forEach(btn => btn.addEventListener('click', () => {
   applyLanguage(btn.dataset.lang);
+  try { if (orderStep === 3) renderPaymentMethods(); } catch(_){}
   track('language_switch', { language: btn.dataset.lang });
 }));
 
-// Admin hash
-if (location.hash === '#admin') {
-  setTimeout(() => openAdminGate(), 800);
-}
+let fabOpen = false;
+document.getElementById('fabMain')?.addEventListener('click', () => {
+  fabOpen = !fabOpen;
+  const sec = document.getElementById('fabSecondary');
+  const icon = document.getElementById('fabIcon');
+  if (sec) {
+    sec.classList.toggle('translate-y-2', !fabOpen);
+    sec.classList.toggle('opacity-0', !fabOpen);
+    sec.classList.toggle('pointer-events-none', !fabOpen);
+  }
+  if (icon) icon.className = fabOpen
+    ? 'fa-solid fa-xmark transition-transform duration-300 rotate-90'
+    : 'fa-solid fa-comment-dots transition-transform duration-300';
+});
 
-/* ============================================================
-   GLOBAL ERROR HANDLERS — keep loader from sticking forever
-   ============================================================ */
+document.addEventListener('click', (e) => {
+  if (!fabOpen) return;
+  const wrap = document.getElementById('floatingButtons');
+  if (wrap && !wrap.contains(e.target)) {
+    fabOpen = false;
+    const sec = document.getElementById('fabSecondary');
+    const icon = document.getElementById('fabIcon');
+    sec?.classList.add('translate-y-2', 'opacity-0', 'pointer-events-none');
+    if (icon) icon.className = 'fa-solid fa-comment-dots transition-transform duration-300';
+  }
+});
+
+// Expose helpers used by inline handlers
+window.openPolicy = openPolicy;
+window.closePolicy = closePolicy;
+window.closeDetail = closeDetail;
+window.closeModal = closeModal;
+window.closeConfirm = closeConfirm;
+window.openModal = openModal;
+window.goToStep = goToStep;
+
 window.addEventListener('error', () => {
   const l = document.getElementById('pageLoader');
   if (l && !l.classList.contains('loader-hidden')) {
