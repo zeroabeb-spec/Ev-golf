@@ -11,19 +11,69 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 
-<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- Leaflet (Free Map) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Cloudinary -->
 <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+
+<!-- 🛡️ EARLY SAFETY NET — JS ሙሉ ቢሰበርም loader ከ 8 ሰከንድ በኋላ ይጠፋል -->
+<script>
+  (function () {
+    function killLoader() {
+      try {
+        var l = document.getElementById('pageLoader');
+        if (l && !l.classList.contains('loader-hidden')) {
+          l.classList.add('loader-hidden');
+          setTimeout(function () { try { l.remove(); } catch (_) {} }, 500);
+        }
+      } catch (_) {}
+    }
+    // ሁለት ደረጃ የደህንነት መረብ
+    setTimeout(killLoader, 6000);
+    setTimeout(killLoader, 10000);
+  })();
+</script>
+
+<script>
+/* ==================================================================
+   🛡️ SAFE STORAGE WRAPPER
+   localStorage/sessionStorage በ sandboxed iframe ውስጥ ሲነካ
+   SecurityError ይጥላል — ይህ ደግሞ ሙሉ script ያቆማል።
+   ስለዚህ ሁሉንም ጥሪዎች በ try/catch እንጠብቃለን።
+   ================================================================== */
+const safeStorage = {
+  get(key, fallback = null) {
+    try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
+    catch (_) { return fallback; }
+  },
+  set(key, val) {
+    try { localStorage.setItem(key, val); return true; }
+    catch (_) { return false; }
+  },
+  remove(key) {
+    try { localStorage.removeItem(key); return true; }
+    catch (_) { return false; }
+  }
+};
+const safeSession = {
+  get(key, fallback = null) {
+    try { const v = sessionStorage.getItem(key); return v === null ? fallback : v; }
+    catch (_) { return fallback; }
+  },
+  set(key, val) {
+    try { sessionStorage.setItem(key, val); return true; }
+    catch (_) { return false; }
+  },
+  remove(key) {
+    try { sessionStorage.removeItem(key); return true; }
+    catch (_) { return false; }
+  }
+};
+</script>
 
 <script>
 tailwind.config = { theme: { extend: {
@@ -35,51 +85,47 @@ tailwind.config = { theme: { extend: {
 }}}
 
 /* ==================================================================
-   ⚙️ CONFIGURATION — የእርስዎ መረጃዎች ተሞልተዋል
+   ⚙️ CONFIGURATION
    ================================================================== */
 const CONFIG = {
-  // 🗄️ Supabase
   supabase: {
     url: 'https://gifccgwxfuirhrngabbv.supabase.co',
     anonKey: 'sb_publishable_4k7Hj6TuMbCubUZInT--Gg_uGy7Xrye',
     storageBucket: 'ev-golf',
     enabled: true
   },
-
-  // ☁️ Cloudinary
   cloudinary: {
     cloudName: 'azdf4lwt',
     uploadPreset: 'ev_golf_unsigned',
     enabled: true
   },
-
-  // ✈️ Telegram Bot
   telegram: {
     botToken: '8934767624:AAHpvF2GDL04SmGM8FctJSfJxSitsrbmhXQ',
     chatIds: ['586949881366288', '8266834331'],
     enabled: true
   },
-
-  // 📊 Google Analytics (optional)
   analytics: {
     measurementId: 'G-XXXXXXXXXX',
     enabled: false
   },
-
-  // 🔐 Admin Password
   adminPassword: 'admin123'
 };
 
-// Supabase Client
-let supabase = null;
-if (CONFIG.supabase.enabled && CONFIG.supabase.url && window.supabase) {
-  try {
-    supabase = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+// Supabase Client (defensive — window.supabase ላይሆን ይችላል)
+// ⚠️ 'sbClient' እንጠቀማለን — 'supabase' ቢሆን CDN global ጋር ይጋጫል
+var sbClient = null;
+try {
+  if (CONFIG.supabase.enabled && CONFIG.supabase.url && typeof window !== 'undefined' && window.supabase) {
+    sbClient = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+    window.supabase = sbClient; // 🎯 SDK namespace በ client እንተካው
     console.log('✅ Supabase connected');
-  } catch (err) {
-    console.error('❌ Supabase init failed:', err);
+  } else if (CONFIG.supabase.enabled) {
+    console.warn('⚠️ Supabase SDK not loaded — falling back to localStorage');
     CONFIG.supabase.enabled = false;
   }
+} catch (err) {
+  console.error('❌ Supabase init failed:', err);
+  CONFIG.supabase.enabled = false;
 }
 </script>
 
@@ -148,12 +194,24 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
 .photo-tile .del-btn{position:absolute;top:.3rem;right:.3rem;width:1.5rem;height:1.5rem;border-radius:9999px;background:#ef4444;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;box-shadow:0 4px 10px rgba(0,0,0,.2);transition:all .15s}
 .photo-tile .del-btn:hover{background:#dc2626;transform:scale(1.1)}
 .photo-tile .primary-badge{position:absolute;top:.3rem;left:.3rem;background:#059669;color:#fff;font-size:.55rem;font-weight:800;padding:.15rem .4rem;border-radius:9999px;letter-spacing:.05em}
-@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
-.pulse-dot{animation:pulse-dot 1.5s infinite}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+<!-- NOSCRIPT FALLBACK -->
+<noscript>
+  <div style="position:fixed;inset:0;z-index:9999;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif">
+    <div>
+      <div style="font-size:48px;margin-bottom:16px">⚡</div>
+      <h1 style="font-size:20px;font-weight:800;margin:0 0 8px">JavaScript ያስፈልጋል</h1>
+      <p style="color:#94a3b8;font-size:14px;line-height:1.6;max-width:380px">
+        ጣቢያውን ለመጠቀም JavaScript ማብራት ያስፈልጋል።<br>
+        <strong>Please enable JavaScript to use this site.</strong>
+      </p>
+    </div>
+  </div>
+</noscript>
 
 <!-- LOADING -->
 <div id="pageLoader" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900 transition-opacity duration-500">
@@ -894,7 +952,6 @@ details.faq[open] .faq-chevron{transform:rotate(180deg)}
         <input id="carFormName" required type="text" class="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500">
       </div>
 
-      <!-- MULTIPLE PHOTOS -->
       <div>
         <div class="mb-1 flex items-center justify-between">
           <label class="block text-xs font-bold text-slate-600">
@@ -1047,13 +1104,15 @@ const DEFAULT_CARS = [
 let carsData = [];
 let orders = [];
 let settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-let currentLang = localStorage.getItem('ev_lang') || 'am';
+let currentLang = safeStorage.get('ev_lang', 'am') || 'am';
 let activeCar = null;
 let lastFocused = null;
 let orderStep = 1;
 let uploadedFiles = { id: null, guarantee: null, receipt: null };
 let carFormPhotos = [];
 let cloudinaryWidget = null;
+let heroIndex = 0;
+let heroInterval = null;
 
 /* ============================================================
    HELPERS
@@ -1074,13 +1133,15 @@ function compressImage(file, maxDim = 900, quality = 0.75) {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let w = img.width, h = img.height;
-        if (w > h && w > maxDim) { h = h * maxDim / w; w = maxDim; }
-        else if (h > maxDim) { w = w * maxDim / h; h = maxDim; }
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        try {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > h && w > maxDim) { h = h * maxDim / w; w = maxDim; }
+          else if (h > maxDim) { w = w * maxDim / h; h = maxDim; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch (err) { reject(err); }
       };
       img.onerror = reject;
       img.src = e.target.result;
@@ -1092,31 +1153,40 @@ function compressImage(file, maxDim = 900, quality = 0.75) {
 
 function dataURLtoFile(dataUrl, filename) {
   if (!dataUrl || dataUrl.startsWith('http')) return null;
-  const [meta, b64] = dataUrl.split(',');
-  const mime = meta.match(/:(.*?);/)[1];
-  const bin = atob(b64);
-  const arr = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-  return new File([arr], filename, { type: mime });
+  try {
+    const [meta, b64] = dataUrl.split(',');
+    const mime = meta.match(/:(.*?);/)[1];
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new File([arr], filename, { type: mime });
+  } catch (_) { return null; }
 }
 
 async function copyText(text, btn) {
   try {
-    await navigator.clipboard.writeText(text);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
     showToast('📋 ተቀድቷል!');
     if (btn) {
       btn.classList.add('copied');
       const orig = btn.innerHTML;
       btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Copied</span>';
-      setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+      setTimeout(() => { try { btn.innerHTML = orig; btn.classList.remove('copied'); } catch(_){} }, 1500);
     }
   } catch (err) {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); showToast('📋 ተቀድቷል!'); } catch(_) { showToast('ማስቀደል አልተቻለም', 'error'); }
-    ta.remove();
+    console.warn('Copy failed:', err);
+    showToast('ማስቀደል አልተቻለም', 'error');
   }
 }
 
@@ -1128,20 +1198,23 @@ async function fetchCars() {
     try {
       const { data, error } = await supabase.from('cars').select('*').order('id');
       if (error) throw error;
-      return data.map(c => ({
-        id: c.id, name: c.name, seats: c.seats, price: c.price,
-        battery: c.battery, batteryKwh: c.battery_kwh, motorPower: c.motor_power,
-        range: c.range_km, charge: c.charge_time, speed: c.speed_max,
-        dimensions: { length: c.dim_length, width: c.dim_width, height: c.dim_height },
-        cargo: c.cargo, stock: c.stock, video: c.video_url, tag: c.tag,
-        desc: c.description, photos: c.photos || [], accent: c.accent
-      }));
+      if (Array.isArray(data) && data.length) {
+        return data.map(c => ({
+          id: c.id, name: c.name, seats: c.seats, price: c.price,
+          battery: c.battery, batteryKwh: c.battery_kwh, motorPower: c.motor_power,
+          range: c.range_km, charge: c.charge_time, speed: c.speed_max,
+          dimensions: { length: c.dim_length, width: c.dim_width, height: c.dim_height },
+          cargo: c.cargo, stock: c.stock, video: c.video_url, tag: c.tag,
+          desc: c.description, photos: c.photos || [], accent: c.accent
+        }));
+      }
     } catch (err) { console.warn('Supabase cars failed:', err); }
   }
   try {
-    const s = localStorage.getItem('ev_cars_v8');
+    const s = safeStorage.get('ev_cars_v8');
     if (!s) return JSON.parse(JSON.stringify(DEFAULT_CARS));
-    return JSON.parse(s);
+    const parsed = JSON.parse(s);
+    return Array.isArray(parsed) && parsed.length ? parsed : JSON.parse(JSON.stringify(DEFAULT_CARS));
   } catch { return JSON.parse(JSON.stringify(DEFAULT_CARS)); }
 }
 
@@ -1178,7 +1251,7 @@ async function deleteCarById(id) {
 }
 
 function saveCarsLocal() {
-  try { localStorage.setItem('ev_cars_v8', JSON.stringify(carsData)); } catch(_){}
+  safeStorage.set('ev_cars_v8', JSON.stringify(carsData));
 }
 
 async function fetchOrders() {
@@ -1186,17 +1259,22 @@ async function fetchOrders() {
     try {
       const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
       if (error) throw error;
-      return data.map(o => ({
-        id: o.id, ref: o.ref, carId: o.car_id, car: o.car_name,
-        total: o.total, depositPct: o.deposit_pct, deposit: o.deposit,
-        name: o.full_name, phone: o.phone, region: o.region, zone: o.zone,
-        woreda: o.woreda, city: o.city, address: o.address, note: o.note,
-        idPhoto: o.id_photo_url, guaranteePhoto: o.guarantee_url, receiptPhoto: o.receipt_url,
-        status: o.status, lang: o.lang, ts: o.created_at
-      }));
+      if (Array.isArray(data)) {
+        return data.map(o => ({
+          id: o.id, ref: o.ref, carId: o.car_id, car: o.car_name,
+          total: o.total, depositPct: o.deposit_pct, deposit: o.deposit,
+          name: o.full_name, phone: o.phone, region: o.region, zone: o.zone,
+          woreda: o.woreda, city: o.city, address: o.address, note: o.note,
+          idPhoto: o.id_photo_url, guaranteePhoto: o.guarantee_url, receiptPhoto: o.receipt_url,
+          status: o.status, lang: o.lang, ts: o.created_at
+        }));
+      }
     } catch (err) { console.warn('Supabase orders failed:', err); }
   }
-  try { return JSON.parse(localStorage.getItem('ev_orders_v8') || '[]'); } catch { return []; }
+  try {
+    const raw = safeStorage.get('ev_orders_v8');
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
 }
 
 async function saveOrder(order) {
@@ -1215,7 +1293,7 @@ async function saveOrder(order) {
     return data;
   }
   orders.unshift(order);
-  try { localStorage.setItem('ev_orders_v8', JSON.stringify(orders)); } catch(_){}
+  safeStorage.set('ev_orders_v8', JSON.stringify(orders));
   return order;
 }
 
@@ -1238,11 +1316,11 @@ async function fetchSettings() {
     try {
       const { data, error } = await supabase.from('settings').select('data').eq('id', 1).single();
       if (error) throw error;
-      return data.data;
+      if (data && data.data) return data.data;
     } catch (err) { console.warn('Supabase settings failed:', err); }
   }
   try {
-    const s = localStorage.getItem('ev_settings');
+    const s = safeStorage.get('ev_settings');
     if (s) {
       const parsed = JSON.parse(s);
       return {
@@ -1260,7 +1338,7 @@ async function saveSettingsDB(newSettings) {
     const { error } = await supabase.from('settings').update({ data: newSettings, updated_at: new Date().toISOString() }).eq('id', 1);
     if (error) throw error;
   }
-  try { localStorage.setItem('ev_settings', JSON.stringify(newSettings)); } catch(_){}
+  safeStorage.set('ev_settings', JSON.stringify(newSettings));
 }
 
 async function uploadToStorage(dataUrlOrFile, folder) {
@@ -1276,7 +1354,7 @@ async function uploadToStorage(dataUrlOrFile, folder) {
       }
       if (!file) return dataUrlOrFile;
 
-      const ext = file.name.split('.').pop() || 'jpg';
+      const ext = (file.name && file.name.split('.').pop()) || 'jpg';
       const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from(CONFIG.supabase.storageBucket).upload(filename, file, { cacheControl: '3600', upsert: false });
       if (error) throw error;
@@ -1337,7 +1415,7 @@ ${order.note ? `<b>📝 ማስታወሻ:</b>\n${order.note}` : ''}
         { url: order.receiptPhoto, caption: '🧾 Receipt' }
       ];
       for (const p of photos) {
-        if (!p.url) continue;
+        if (!p.url || !/^https?:\/\//.test(p.url)) continue;
         await fetch(`https://api.telegram.org/bot${CONFIG.telegram.botToken}/sendPhoto`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1355,9 +1433,11 @@ ${order.note ? `<b>📝 ማስታወሻ:</b>\n${order.note}` : ''}
    Analytics
    ============================================================ */
 function track(event, params = {}) {
-  if (CONFIG.analytics.enabled && typeof gtag === 'function') {
-    gtag('event', event, params);
-  }
+  try {
+    if (CONFIG.analytics.enabled && typeof window.gtag === 'function') {
+      window.gtag('event', event, params);
+    }
+  } catch (_) {}
 }
 
 /* ============================================================
@@ -1531,6 +1611,7 @@ function carImage(car, angle = 'side') {
   if (primary) return primary;
 
   const c = car.accent || '#10b981';
+  const safeName = String(car.name || '').replace(/[<>&"']/g, '');
   const base = (extra) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420">
   <defs>
     <linearGradient id="bg${car.id}${angle}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0f172a"/><stop offset="100%" stop-color="#1e293b"/></linearGradient>
@@ -1597,26 +1678,38 @@ function getGallery(car) {
    INIT
    ============================================================ */
 async function initApp() {
-  const status = $('#loaderStatus');
+  const status = document.getElementById('loaderStatus');
   if (status) status.textContent = 'ዳታ በመጫን ላይ...';
 
   try {
     settings = await fetchSettings();
+  } catch (err) {
+    console.warn('Settings load failed:', err);
+  }
+  try {
     carsData = await fetchCars();
+  } catch (err) {
+    console.warn('Cars load failed:', err);
+    if (!carsData || !carsData.length) carsData = JSON.parse(JSON.stringify(DEFAULT_CARS));
+  }
+  try {
     orders = await fetchOrders();
   } catch (err) {
-    console.warn('Init error:', err);
-    if (!carsData || !carsData.length) carsData = JSON.parse(JSON.stringify(DEFAULT_CARS));
-    showToast('ዳታ ማምጣት አልተቻለም', 'error');
+    console.warn('Orders load failed:', err);
+    orders = [];
   }
 
-  try { $('#year').textContent = new Date().getFullYear(); } catch(_){}
-  try { applyLanguage(currentLang); } catch(_){}
-  try { applySettings(); } catch(_){}
-  try { updateHeroCar(); } catch(_){}
+  try { document.getElementById('year').textContent = new Date().getFullYear(); } catch(_){}
+  try { applyLanguage(currentLang); } catch(err){ console.warn('applyLanguage:', err); }
+  try { applySettings(); } catch(err){ console.warn('applySettings:', err); }
+  try { updateHeroCar(); } catch(err){ console.warn('updateHeroCar:', err); }
   try { onScroll(); } catch(_){}
   try { updateFilterBadge(); } catch(_){}
-  try { setupLeafletMap(); } catch(_){}
+  try { setupLeafletMap(); } catch(err){ console.warn('Leaflet:', err); }
+
+  // Start hero rotator
+  if (heroInterval) clearInterval(heroInterval);
+  heroInterval = setInterval(updateHeroCar, 6000);
 
   setTimeout(() => {
     const l = document.getElementById('pageLoader');
@@ -1624,55 +1717,59 @@ async function initApp() {
   }, 400);
 }
 
-// Safety: hide loader no matter what after 4s
-setTimeout(() => {
-  const l = document.getElementById('pageLoader');
-  if (l && !l.classList.contains('loader-hidden')) {
-    console.warn('⚠️ Force-hiding loader');
-    l.classList.add('loader-hidden');
-    setTimeout(() => l.remove(), 500);
-  }
-}, 4000);
-
-window.addEventListener('error', () => {
-  const l = document.getElementById('pageLoader');
-  if (l && !l.classList.contains('loader-hidden')) {
-    l.classList.add('loader-hidden');
-    setTimeout(() => l.remove(), 500);
-  }
-});
-window.addEventListener('unhandledrejection', () => {
-  const l = document.getElementById('pageLoader');
-  if (l && !l.classList.contains('loader-hidden')) {
-    l.classList.add('loader-hidden');
-    setTimeout(() => l.remove(), 500);
-  }
-});
-
-window.addEventListener('load', initApp);
+/* ============================================================
+   🚀 ROBUST STARTUP — 3 different triggers
+   ============================================================ */
+let __evStarted = false;
+function __evStart() {
+  if (__evStarted) return;
+  __evStarted = true;
+  Promise.resolve()
+    .then(initApp)
+    .catch(err => {
+      console.error('❌ Init failed:', err);
+      const l = document.getElementById('pageLoader');
+      if (l) { l.classList.add('loader-hidden'); setTimeout(() => { try { l.remove(); } catch(_){} }, 500); }
+    });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', __evStart);
+} else {
+  // DOM already ready
+  __evStart();
+}
+window.addEventListener('load', __evStart);
+// Ultimate fallback
+setTimeout(__evStart, 2500);
 
 /* ============================================================
-   HERO ROTATOR
+   HERO ROTATOR (counter-based to avoid drift)
    ============================================================ */
 function updateHeroCar() {
-  if (!carsData.length) return;
-  const idx = Math.floor(Date.now() / 6000) % carsData.length;
-  const car = carsData[idx];
-  const img = $('#heroCarImg');
+  if (!Array.isArray(carsData) || !carsData.length) return;
+  const car = carsData[heroIndex % carsData.length];
+  heroIndex = (heroIndex + 1) % carsData.length;
+
+  const img = document.getElementById('heroCarImg');
   if (img) {
     img.style.opacity = '0';
     setTimeout(() => {
-      img.src = carImage(car, 'side');
-      img.style.transition = 'opacity .6s';
-      img.style.opacity = '1';
+      try {
+        img.src = carImage(car, 'side');
+        img.style.transition = 'opacity .6s';
+        img.style.opacity = '1';
+      } catch(_) {}
     }, 200);
   }
-  $('#heroCarName').textContent = car.name;
-  $('#heroCarRange').textContent = car.range + ' km';
-  $('#heroCarSeats').textContent = car.seats + ' seats';
-  $('#heroCarSpeed').textContent = car.speed + ' km/h';
+  const nameEl = document.getElementById('heroCarName');
+  const rangeEl = document.getElementById('heroCarRange');
+  const seatsEl = document.getElementById('heroCarSeats');
+  const speedEl = document.getElementById('heroCarSpeed');
+  if (nameEl) nameEl.textContent = car.name;
+  if (rangeEl) rangeEl.textContent = car.range + ' km';
+  if (seatsEl) seatsEl.textContent = car.seats + ' seats';
+  if (speedEl) speedEl.textContent = car.speed + ' km/h';
 }
-setInterval(updateHeroCar, 6000);
 
 /* ============================================================
    LEAFLET MAP
@@ -1680,6 +1777,7 @@ setInterval(updateHeroCar, 6000);
 function setupLeafletMap() {
   const mapEl = document.getElementById('evMap');
   if (!mapEl || typeof L === 'undefined') return;
+  if (mapEl._leaflet_id) return;
   try {
     const lat = 9.005401, lng = 38.763611;
     const map = L.map('evMap', { zoomControl: true, scrollWheelZoom: false, attributionControl: false }).setView([lat, lng], 14);
@@ -1694,7 +1792,7 @@ function setupLeafletMap() {
 }
 
 /* ============================================================
-   RENDER CARDS
+   RENDER CAR CARDS
    ============================================================ */
 function createCard(car) {
   const el = document.createElement('article');
@@ -1732,26 +1830,32 @@ function createCard(car) {
 }
 
 function renderCars(list) {
-  const grid = $('#carsGrid');
+  const grid = document.getElementById('carsGrid');
   if (!grid) return;
   grid.innerHTML = '';
+  const empty = document.getElementById('emptyState');
   if (list.length === 0) {
-    $('#emptyState').classList.remove('hidden');
+    if (empty) empty.classList.remove('hidden');
     grid.classList.add('hidden');
   } else {
-    $('#emptyState').classList.add('hidden');
+    if (empty) empty.classList.add('hidden');
     grid.classList.remove('hidden');
     const frag = document.createDocumentFragment();
     list.forEach(car => frag.appendChild(createCard(car)));
     grid.appendChild(frag);
   }
-  $('#resultCount').textContent = list.length;
+  const rc = document.getElementById('resultCount');
+  if (rc) rc.textContent = list.length;
 }
 
 function getFilteredCars() {
-  const seatVal = $('#seatFilter').value;
-  const priceVal = $('#priceFilter').value;
-  const sortVal = $('#sortFilter').value;
+  const seatEl = document.getElementById('seatFilter');
+  const priceEl = document.getElementById('priceFilter');
+  const sortEl = document.getElementById('sortFilter');
+  const seatVal = seatEl ? seatEl.value : 'all';
+  const priceVal = priceEl ? priceEl.value : 'all';
+  const sortVal = sortEl ? sortEl.value : 'default';
+
   let list = carsData.filter(car => {
     const matchSeat = seatVal === 'all' || String(car.seats) === seatVal;
     let matchPrice = true;
@@ -1770,40 +1874,31 @@ function getFilteredCars() {
 function applyFilters() { renderCars(getFilteredCars()); }
 
 function resetFilters() {
-  $('#seatFilter').value = 'all';
-  $('#priceFilter').value = 'all';
-  $('#sortFilter').value = 'default';
+  const s = document.getElementById('seatFilter'); if (s) s.value = 'all';
+  const p = document.getElementById('priceFilter'); if (p) p.value = 'all';
+  const so = document.getElementById('sortFilter'); if (so) so.value = 'default';
   applyFilters();
   updateFilterBadge();
 }
 
-const filterPanel = $('#filterPanel');
-const toggleBtn = $('#toggleFilters');
-const filterBadge = $('#activeFilterBadge');
-
 function updateFilterBadge() {
+  const seat = document.getElementById('seatFilter');
+  const price = document.getElementById('priceFilter');
+  const sort = document.getElementById('sortFilter');
+  const badge = document.getElementById('activeFilterBadge');
+  if (!badge) return;
   const active =
-    ($('#seatFilter').value !== 'all' ? 1 : 0) +
-    ($('#priceFilter').value !== 'all' ? 1 : 0) +
-    ($('#sortFilter').value !== 'default' ? 1 : 0);
-  if (filterBadge) {
-    if (active > 0) {
-      filterBadge.textContent = active;
-      filterBadge.classList.remove('hidden');
-      filterBadge.classList.add('inline-flex');
-    } else {
-      filterBadge.classList.add('hidden');
-      filterBadge.classList.remove('inline-flex');
-    }
+    (seat && seat.value !== 'all' ? 1 : 0) +
+    (price && price.value !== 'all' ? 1 : 0) +
+    (sort && sort.value !== 'default' ? 1 : 0);
+  if (active > 0) {
+    badge.textContent = active;
+    badge.classList.remove('hidden');
+    badge.classList.add('inline-flex');
+  } else {
+    badge.classList.add('hidden');
+    badge.classList.remove('inline-flex');
   }
-}
-
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', () => {
-    const isOpen = !filterPanel.classList.contains('hidden');
-    filterPanel.classList.toggle('hidden');
-    toggleBtn.setAttribute('aria-expanded', String(!isOpen));
-  });
 }
 
 /* ============================================================
@@ -1838,10 +1933,12 @@ function openDetail(id) {
           ${gallery.length > 1 ? `
           <div class="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-6">
             ${gallery.map((item, i) => {
-              if (typeof item === 'object' && item.type === 'video') {
-                return `<button type="button" onclick="switchDetailItem(${i})" class="gallery-thumb relative overflow-hidden rounded-lg border-2 border-transparent transition hover:border-emerald-400"><div class="flex h-14 w-full items-center justify-center bg-slate-800 text-white"><i class="fa-solid fa-play text-lg text-emerald-400"></i></div></button>`;
+              const isVid = typeof item === 'object' && item.type === 'video';
+              const isFirstActive = i === 0;
+              if (isVid) {
+                return `<button type="button" data-thumb="${i}" class="gallery-thumb ${isFirstActive?'active':''} relative overflow-hidden rounded-lg border-2 ${isFirstActive?'border-emerald-500':'border-transparent'} transition hover:border-emerald-400"><div class="flex h-14 w-full items-center justify-center bg-slate-800 text-white"><i class="fa-solid fa-play text-lg text-emerald-400"></i></div></button>`;
               }
-              return `<button type="button" onclick="switchDetailItem(${i})" class="gallery-thumb ${i===0?'active':''} overflow-hidden rounded-lg border-2 border-transparent transition hover:border-emerald-400"><img src="${item}" alt="view ${i+1}" class="h-14 w-full object-cover"></button>`;
+              return `<button type="button" data-thumb="${i}" class="gallery-thumb ${isFirstActive?'active':''} overflow-hidden rounded-lg border-2 ${isFirstActive?'border-emerald-500':'border-transparent'} transition hover:border-emerald-400"><img src="${item}" alt="view ${i+1}" class="h-14 w-full object-cover"></button>`;
             }).join('')}
           </div>` : ''}
         </div>
@@ -1871,36 +1968,44 @@ function openDetail(id) {
         </div>
       </div>
     </div>`;
-  $('#detailContent').innerHTML = content;
-  $('#detailModal').classList.remove('hidden');
-  $('#detailModal').classList.add('flex');
+  const dc = document.getElementById('detailContent');
+  if (dc) dc.innerHTML = content;
+  const dm = document.getElementById('detailModal');
+  if (dm) { dm.classList.remove('hidden'); dm.classList.add('flex'); }
   document.body.classList.add('no-scroll');
   window._detailGallery = gallery;
+
+  // Attach thumbnail click handlers
+  document.querySelectorAll('#detailContent [data-thumb]').forEach(btn => {
+    btn.addEventListener('click', () => switchDetailItem(Number(btn.dataset.thumb)));
+  });
 }
 
 function switchDetailItem(i) {
   const gallery = window._detailGallery;
   if (!gallery || !gallery[i]) return;
   const item = gallery[i];
-  const wrap = $('#detailMainWrap');
+  const wrap = document.getElementById('detailMainWrap');
+  if (!wrap) return;
   if (typeof item === 'object' && item.type === 'video') {
     wrap.innerHTML = `<iframe id="detailMainVideo" src="${escapeHtml(item.url)}" class="h-72 w-full sm:h-96" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
   } else {
     wrap.innerHTML = `<img id="detailMainImg" src="${item}" alt="view" class="h-72 w-full object-cover sm:h-96">`;
   }
-  const thumbs = document.querySelectorAll('.gallery-thumb');
+  const thumbs = document.querySelectorAll('#detailContent .gallery-thumb');
   thumbs.forEach((b, idx) => {
-    b.classList.toggle('active', idx === i);
-    b.classList.toggle('border-emerald-500', idx === i);
-    b.classList.toggle('border-transparent', idx !== i);
+    const isActive = idx === i;
+    b.classList.toggle('active', isActive);
+    b.classList.toggle('border-emerald-500', isActive);
+    b.classList.toggle('border-transparent', !isActive);
   });
 }
 
 function closeDetail() {
-  $('#detailModal').classList.add('hidden');
-  $('#detailModal').classList.remove('flex');
+  const dm = document.getElementById('detailModal');
+  if (dm) { dm.classList.add('hidden'); dm.classList.remove('flex'); }
   document.body.classList.remove('no-scroll');
-  if (lastFocused) lastFocused.focus();
+  if (lastFocused && lastFocused.focus) { try { lastFocused.focus(); } catch(_){} }
 }
 
 /* ============================================================
@@ -1915,33 +2020,44 @@ function openModal(carId) {
   uploadedFiles = { id: null, guarantee: null, receipt: null };
   track('begin_checkout', { item_id: car.id, item_name: car.name, value: car.price, currency: 'ETB' });
 
-  $('#modalCarName').textContent = car.name;
-  $('#modalCarMeta').textContent = `${car.seats} መቀመጫ · ${car.range} km · ${car.battery} · ${formatPrice(car.price)} ETB`;
-  ['formError','formError2','formError3'].forEach(id => $('#'+id)?.classList.add('hidden'));
+  const nameEl = document.getElementById('modalCarName');
+  const metaEl = document.getElementById('modalCarMeta');
+  if (nameEl) nameEl.textContent = car.name;
+  if (metaEl) metaEl.textContent = `${car.seats} መቀመጫ · ${car.range} km · ${car.battery} · ${formatPrice(car.price)} ETB`;
+
+  ['formError','formError2','formError3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
   ['id','g','r'].forEach(p => {
-    const prev = $(`#${p}Preview`); const txt = $(`#${p}UploadText`);
+    const prev = document.getElementById(`${p}Preview`);
+    const txt = document.getElementById(`${p}UploadText`);
     if (prev) prev.classList.add('hidden');
     if (txt) txt.classList.remove('hidden');
-    const wrap = $(`#${p}UploadWrap`);
+    const wrap = document.getElementById(`${p}UploadWrap`);
     if (wrap) wrap.classList.remove('has-file');
   });
   goToStep(1);
   renderPaymentMethods();
-  $('#orderModal').classList.remove('hidden');
-  $('#orderModal').classList.add('flex');
+  const om = document.getElementById('orderModal');
+  if (om) { om.classList.remove('hidden'); om.classList.add('flex'); }
   document.body.classList.add('no-scroll');
-  setTimeout(() => $('#fullName').focus(), 60);
+  setTimeout(() => {
+    const fn = document.getElementById('fullName');
+    if (fn) { try { fn.focus(); } catch(_){} }
+  }, 60);
 }
 
 function closeModal() {
-  $('#orderModal').classList.add('hidden');
-  $('#orderModal').classList.remove('flex');
+  const om = document.getElementById('orderModal');
+  if (om) { om.classList.add('hidden'); om.classList.remove('flex'); }
   document.body.classList.remove('no-scroll');
-  $('#orderForm').reset();
+  const form = document.getElementById('orderForm');
+  if (form) form.reset();
   uploadedFiles = { id: null, guarantee: null, receipt: null };
   activeCar = null;
   orderStep = 1;
-  if (lastFocused) lastFocused.focus();
+  if (lastFocused && lastFocused.focus) { try { lastFocused.focus(); } catch(_){} }
 }
 
 function goToStep(n) {
@@ -1949,42 +2065,51 @@ function goToStep(n) {
   if (n === 3 && !validateStep2()) return;
   orderStep = n;
   for (let i = 1; i <= 3; i++) {
-    $('#orderStep' + i).classList.toggle('hidden', i !== n);
-    const dot = $('#step' + i + 'Dot');
-    if (i < n) dot.className = 'step-indicator step-done';
-    else if (i === n) dot.className = 'step-indicator step-active';
-    else dot.className = 'step-indicator step-inactive';
+    const step = document.getElementById('orderStep' + i);
+    if (step) step.classList.toggle('hidden', i !== n);
+    const dot = document.getElementById('step' + i + 'Dot');
+    if (dot) {
+      if (i < n) dot.className = 'step-indicator step-done';
+      else if (i === n) dot.className = 'step-indicator step-active';
+      else dot.className = 'step-indicator step-inactive';
+    }
   }
   if (n === 3) updateSummary();
 }
 
 function validateStep1() {
-  const name = $('#fullName').value.trim();
-  const phone = $('#phone').value.trim();
+  const nameEl = document.getElementById('fullName');
+  const phoneEl = document.getElementById('phone');
+  const name = nameEl ? nameEl.value.trim() : '';
+  const phone = phoneEl ? phoneEl.value.trim() : '';
   const phoneOk = /^(\+251|0)[0-9]{9}$/.test(phone);
-  if (!name || name.length < 3) { showErr('formError', t('err_name')); $('#fullName').focus(); return false; }
-  if (!phoneOk) { showErr('formError', t('err_phone')); $('#phone').focus(); return false; }
+  if (!name || name.length < 3) { showErr('formError', t('err_name')); if (nameEl) nameEl.focus(); return false; }
+  if (!phoneOk) { showErr('formError', t('err_phone')); if (phoneEl) phoneEl.focus(); return false; }
   if (!uploadedFiles.id) { showErr('formError', t('err_id')); return false; }
   if (!uploadedFiles.guarantee) { showErr('formError', t('err_g')); return false; }
-  $('#formError').classList.add('hidden');
+  const el = document.getElementById('formError'); if (el) el.classList.add('hidden');
   return true;
 }
 
 function validateStep2() {
-  const region = $('#region').value;
-  const zone = $('#zone').value.trim();
-  const woreda = $('#woreda').value.trim();
-  const city = $('#city').value.trim();
-  if (!region) { showErr('formError2', t('err_region')); $('#region').focus(); return false; }
-  if (!zone) { showErr('formError2', t('err_zone')); $('#zone').focus(); return false; }
-  if (!woreda) { showErr('formError2', t('err_woreda')); $('#woreda').focus(); return false; }
-  if (!city) { showErr('formError2', t('err_city')); $('#city').focus(); return false; }
-  $('#formError2').classList.add('hidden');
+  const regionEl = document.getElementById('region');
+  const zoneEl = document.getElementById('zone');
+  const woredaEl = document.getElementById('woreda');
+  const cityEl = document.getElementById('city');
+  const region = regionEl ? regionEl.value : '';
+  const zone = zoneEl ? zoneEl.value.trim() : '';
+  const woreda = woredaEl ? woredaEl.value.trim() : '';
+  const city = cityEl ? cityEl.value.trim() : '';
+  if (!region) { showErr('formError2', t('err_region')); if (regionEl) regionEl.focus(); return false; }
+  if (!zone) { showErr('formError2', t('err_zone')); if (zoneEl) zoneEl.focus(); return false; }
+  if (!woreda) { showErr('formError2', t('err_woreda')); if (woredaEl) woredaEl.focus(); return false; }
+  if (!city) { showErr('formError2', t('err_city')); if (cityEl) cityEl.focus(); return false; }
+  const el = document.getElementById('formError2'); if (el) el.classList.add('hidden');
   return true;
 }
 
 function showErr(id, msg) {
-  const el = $('#' + id);
+  const el = document.getElementById(id);
   if (!el) return;
   el.textContent = msg;
   el.classList.remove('hidden');
@@ -1993,17 +2118,21 @@ function showErr(id, msg) {
 function updateSummary() {
   if (!activeCar) return;
   const total = activeCar.price;
-  const depositPct = settings.order.depositPercent || 10;
+  const depositPct = (settings.order && settings.order.depositPercent) || 10;
   const deposit = total * (depositPct / 100);
-  $('#sumCar').textContent = activeCar.name;
-  $('#sumTotal').textContent = `${formatPrice(total)} ETB`;
-  $('#sumDeposit').textContent = `${formatPrice(deposit)} ETB`;
+  const carEl = document.getElementById('sumCar');
+  const totEl = document.getElementById('sumTotal');
+  const depEl = document.getElementById('sumDeposit');
+  if (carEl) carEl.textContent = activeCar.name;
+  if (totEl) totEl.textContent = `${formatPrice(total)} ETB`;
+  if (depEl) depEl.textContent = `${formatPrice(deposit)} ETB`;
 }
 
 function renderPaymentMethods() {
-  const list = $('#paymentMethodsList');
+  const list = document.getElementById('paymentMethodsList');
+  if (!list) return;
   const methods = [];
-  Object.entries(settings.payment).forEach(([key, m]) => {
+  Object.entries(settings.payment || {}).forEach(([key, m]) => {
     if (!m.enabled) return;
     let icon = 'fa-credit-card';
     if (key === 'telebirr') icon = 'fa-mobile-screen';
@@ -2018,8 +2147,7 @@ function renderPaymentMethods() {
             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-sm text-white"><i class="fa-solid ${icon}"></i></div>
             <p class="text-sm font-bold text-slate-800">${escapeHtml(m.label || key)}</p>
           </div>
-          <button type="button" class="copy-btn flex items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow"
-                  onclick="copyText('${escapeHtml(m.account)}', this)">
+          <button type="button" class="copy-btn flex items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow" data-copy="${escapeHtml(m.account || '')}">
             <i class="fa-solid fa-copy"></i> <span>Copy</span>
           </button>
         </div>
@@ -2035,33 +2163,34 @@ function renderPaymentMethods() {
     `);
   });
   list.innerHTML = methods.length ? methods.join('') : '<p class="text-xs text-slate-400">ምንም የመክፈያ አማራጭ አልተዘጋጀም</p>';
+
+  // Attach copy handlers (event delegation)
+  list.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => copyText(btn.dataset.copy || '', btn));
+  });
 }
 
 function setupUpload(inputId, wrapId, textId, prevId, prevImgId, key) {
-  const input = $(`#${inputId}`);
-  const wrap = $(`#${wrapId}`);
-  const text = $(`#${textId}`);
-  const prev = $(`#${prevId}`);
-  const prevImg = $(`#${prevImgId}`);
+  const input = document.getElementById(inputId);
+  const wrap = document.getElementById(wrapId);
+  const text = document.getElementById(textId);
+  const prev = document.getElementById(prevId);
+  const prevImg = document.getElementById(prevImgId);
   if (!input) return;
   input.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { showToast('እባክዎ ምስል ብቻ ይጫኑ', 'error'); return; }
     try {
       const compressed = await compressImage(file);
       uploadedFiles[key] = compressed;
-      prevImg.src = compressed;
-      text.classList.add('hidden');
-      prev.classList.remove('hidden');
-      wrap.classList.add('has-file');
+      if (prevImg) prevImg.src = compressed;
+      if (text) text.classList.add('hidden');
+      if (prev) prev.classList.remove('hidden');
+      if (wrap) wrap.classList.add('has-file');
     } catch (err) { showToast('ምስሉን መጫን አልተቻለም', 'error'); }
   });
 }
-
-setupUpload('idFile', 'idUploadWrap', 'idUploadText', 'idPreview', 'idPreviewImg', 'id');
-setupUpload('gFile', 'gUploadWrap', 'gUploadText', 'gPreview', 'gPreviewImg', 'guarantee');
-setupUpload('rFile', 'rUploadWrap', 'rUploadText', 'rPreview', 'rPreviewImg', 'receipt');
 
 function generateRef() {
   const d = new Date();
@@ -2073,17 +2202,32 @@ function generateRef() {
 async function handleOrderSubmit(e) {
   e.preventDefault();
   const form = e.target;
-  if (form.elements.website.value) return;
-  if (!$('#agreeCheck').checked) { showErr('formError3', t('err_agree')); return; }
-  if (!uploadedFiles.receipt) { showErr('formError3', t('err_receipt')); return; }
-  $('#formError3').classList.add('hidden');
+  if (form.elements.website && form.elements.website.value) return;
 
-  const total = activeCar.price;
-  const depositPct = settings.order.depositPercent || 10;
+  const agreeEl = document.getElementById('agreeCheck');
+  if (!agreeEl || !agreeEl.checked) { showErr('formError3', t('err_agree')); return; }
+  if (!uploadedFiles.receipt) { showErr('formError3', t('err_receipt')); return; }
+  const errEl = document.getElementById('formError3');
+  if (errEl) errEl.classList.add('hidden');
+
+  if (!activeCar) { showErr('formError3', t('toast_error')); return; }
+
+  // 🛡️ Capture car data BEFORE closeModal nulls it
+  const carSnapshot = {
+    id: activeCar.id,
+    name: activeCar.name,
+    price: activeCar.price
+  };
+
+  const total = carSnapshot.price;
+  const depositPct = (settings.order && settings.order.depositPercent) || 10;
   const deposit = total * (depositPct / 100);
 
-  $('#submitBtn').disabled = true;
-  $('#submitBtn').innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>${t('toast_sending')}`;
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>${t('toast_sending')}`;
+  }
 
   try {
     const [idUrl, guarUrl, receiptUrl] = await Promise.all([
@@ -2094,7 +2238,7 @@ async function handleOrderSubmit(e) {
 
     const payload = {
       ref: generateRef(),
-      car: activeCar.name, carId: activeCar.id,
+      car: carSnapshot.name, carId: carSnapshot.id,
       total, depositPct, deposit,
       name: form.elements.fullName.value.trim(),
       phone: form.elements.phone.value.trim(),
@@ -2115,30 +2259,40 @@ async function handleOrderSubmit(e) {
 
     await notifyTelegram(payload);
 
-    $('#orderRef').textContent = payload.ref;
+    const refEl = document.getElementById('orderRef');
+    if (refEl) refEl.textContent = payload.ref;
     const waMsg = encodeURIComponent(`Hello! Order ref: ${payload.ref} — ${payload.car} — Deposit: ${formatPrice(payload.deposit)} ETB`);
-    $('#waLink').href = `https://wa.me/${settings.contact.whatsapp}?text=${waMsg}`;
+    const waLink = document.getElementById('waLink');
+    if (waLink) waLink.href = `https://wa.me/${(settings.contact && settings.contact.whatsapp) || ''}?text=${waMsg}`;
 
     closeModal();
-    $('#confirmModal').classList.remove('hidden');
-    $('#confirmModal').classList.add('flex');
+    const cm = document.getElementById('confirmModal');
+    if (cm) { cm.classList.remove('hidden'); cm.classList.add('flex'); }
     document.body.classList.add('no-scroll');
     showToast(t('toast_order'));
 
-    track('purchase', { transaction_id: payload.ref, value: payload.total, currency: 'ETB', items: [{ item_id: activeCar.id, item_name: activeCar.name, price: total }] });
+    // ✅ Use the snapshot, not the (now null) activeCar
+    track('purchase', {
+      transaction_id: payload.ref,
+      value: payload.total,
+      currency: 'ETB',
+      items: [{ item_id: carSnapshot.id, item_name: carSnapshot.name, price: total }]
+    });
   } catch (err) {
     console.error(err);
     showErr('formError3', t('toast_error'));
     showToast(t('toast_error'), 'error');
   } finally {
-    $('#submitBtn').disabled = false;
-    $('#submitBtn').innerHTML = `<i class="fa-solid fa-check mr-2"></i>${t('form_submit')}`;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i class="fa-solid fa-check mr-2"></i>${t('form_submit')}`;
+    }
   }
 }
 
 function closeConfirm() {
-  $('#confirmModal').classList.add('hidden');
-  $('#confirmModal').classList.remove('flex');
+  const cm = document.getElementById('confirmModal');
+  if (cm) { cm.classList.add('hidden'); cm.classList.remove('flex'); }
   document.body.classList.remove('no-scroll');
 }
 
@@ -2158,14 +2312,15 @@ function openPolicy(type) {
       <p>ሁሉም ዋጋዎች VAT (15%) ተካተው ናቸው።</p>
       <p>የባትሪ ዋስትና 5 ዓመት / 60,000 ኪሜ። ሞተር 2 ዓመት።</p>
     </div>`;
-  $('#policyContent').innerHTML = content;
-  $('#policyModal').classList.remove('hidden');
-  $('#policyModal').classList.add('flex');
+  const pc = document.getElementById('policyContent');
+  if (pc) pc.innerHTML = content;
+  const pm = document.getElementById('policyModal');
+  if (pm) { pm.classList.remove('hidden'); pm.classList.add('flex'); }
   document.body.classList.add('no-scroll');
 }
 function closePolicy() {
-  $('#policyModal').classList.add('hidden');
-  $('#policyModal').classList.remove('flex');
+  const pm = document.getElementById('policyModal');
+  if (pm) { pm.classList.add('hidden'); pm.classList.remove('flex'); }
   document.body.classList.remove('no-scroll');
 }
 
@@ -2173,11 +2328,13 @@ function closePolicy() {
    TOAST
    ============================================================ */
 function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) { console.warn('Toast:', message); return; }
   const el = document.createElement('div');
   const isError = type === 'error';
   el.className = `pointer-events-auto flex w-full items-start gap-3 rounded-xl border-l-4 ${isError ? 'border-red-500' : 'border-emerald-500'} bg-slate-900 px-5 py-4 text-white shadow-2xl transition-all duration-300 opacity-0 translate-y-3`;
   el.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation text-red-400' : 'fa-circle-check text-emerald-400'} mt-0.5"></i><span class="text-sm font-medium leading-snug">${escapeHtml(message)}</span>`;
-  $('#toastContainer').appendChild(el);
+  container.appendChild(el);
   requestAnimationFrame(() => el.classList.remove('opacity-0', 'translate-y-3'));
   setTimeout(() => { el.classList.add('opacity-0', 'translate-y-3'); setTimeout(() => el.remove(), 320); }, 3500);
 }
@@ -2189,7 +2346,8 @@ function applyLanguage(lang) {
   if (!I18N[lang]) lang = 'am';
   currentLang = lang;
   document.documentElement.lang = lang;
-  try { localStorage.setItem('ev_lang', lang); } catch(_){}
+  safeStorage.set('ev_lang', lang);
+
   $$('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const val = t(key);
@@ -2206,33 +2364,43 @@ function applyLanguage(lang) {
     btn.classList.toggle('text-white', active);
     btn.classList.toggle('text-slate-300', !active);
   });
-  applyFilters();
-  updateHeroCar();
+  try { applyFilters(); } catch(_){}
 }
 
 /* ============================================================
    APPLY SETTINGS TO UI
    ============================================================ */
 function applySettings() {
-  const c = settings.contact;
-  const ft = $('#footTelegram');
-  if (ft) { if (c.telegramVisible && c.telegram) { ft.style.display=''; ft.href=`https://t.me/${c.telegram}`; } else ft.style.display='none'; }
-  const ff = $('#footFacebook');
-  if (ff) { if (c.facebookVisible && c.facebook) { ff.style.display=''; ff.href=c.facebook; } else ff.style.display='none'; }
-  const ftt = $('#footTiktok');
-  if (ftt) { if (c.tiktokVisible && c.tiktok) { ftt.style.display=''; ftt.href=c.tiktok; } else ftt.style.display='none'; }
-  const fw = $('#footWhatsapp');
-  if (fw) { if (c.whatsappVisible && c.whatsapp) { fw.style.display=''; fw.href=`https://wa.me/${c.whatsapp}`; } else fw.style.display='none'; }
-  const fpLi = $('#footPhoneLi');
-  if (fpLi) { if (c.phoneVisible && c.phone) { fpLi.style.display=''; $('#footPhoneText').textContent=c.phone; $('#footPhone').href=`tel:${c.phone.replace(/\s/g,'')}`; } else fpLi.style.display='none'; }
-  const feLi = $('#footEmailLi');
-  if (feLi) { if (c.emailVisible && c.email) { feLi.style.display=''; $('#footEmailText').textContent=c.email; $('#footEmail').href=`mailto:${c.email}`; } else feLi.style.display='none'; }
-  const fph = $('#floatPhone');
-  if (fph) { if (c.phoneVisible && c.phone) { fph.style.display=''; fph.href=`tel:${c.phone.replace(/\s/g,'')}`; } else fph.style.display='none'; }
-  const ftg = $('#floatTelegram');
-  if (ftg) { if (c.telegramVisible && c.telegram) { ftg.style.display=''; ftg.href=`https://t.me/${c.telegram}`; } else ftg.style.display='none'; }
-  const fwa = $('#floatWhatsapp');
-  if (fwa) { if (c.whatsappVisible && c.whatsapp) { fwa.style.display=''; fwa.href=`https://wa.me/${c.whatsapp}?text=Hello%20EV-Golf%20Ethiopia`; } else fwa.style.display='none'; }
+  const c = settings.contact || {};
+  const setVis = (el, visible, href) => {
+    if (!el) return;
+    if (visible && href) { el.style.display = ''; el.href = href; }
+    else el.style.display = 'none';
+  };
+  setVis(document.getElementById('footTelegram'), c.telegramVisible && c.telegram, `https://t.me/${c.telegram}`);
+  setVis(document.getElementById('footFacebook'), c.facebookVisible && c.facebook, c.facebook);
+  setVis(document.getElementById('footTiktok'), c.tiktokVisible && c.tiktok, c.tiktok);
+  setVis(document.getElementById('footWhatsapp'), c.whatsappVisible && c.whatsapp, `https://wa.me/${c.whatsapp}`);
+  setVis(document.getElementById('floatPhone'), c.phoneVisible && c.phone, `tel:${(c.phone||'').replace(/\s/g,'')}`);
+  setVis(document.getElementById('floatTelegram'), c.telegramVisible && c.telegram, `https://t.me/${c.telegram}`);
+  setVis(document.getElementById('floatWhatsapp'), c.whatsappVisible && c.whatsapp, `https://wa.me/${c.whatsapp}?text=Hello%20EV-Golf%20Ethiopia`);
+
+  const fpLi = document.getElementById('footPhoneLi');
+  if (fpLi) {
+    if (c.phoneVisible && c.phone) {
+      fpLi.style.display = '';
+      const t1 = document.getElementById('footPhoneText'); if (t1) t1.textContent = c.phone;
+      const a1 = document.getElementById('footPhone'); if (a1) a1.href = `tel:${c.phone.replace(/\s/g,'')}`;
+    } else fpLi.style.display = 'none';
+  }
+  const feLi = document.getElementById('footEmailLi');
+  if (feLi) {
+    if (c.emailVisible && c.email) {
+      feLi.style.display = '';
+      const t1 = document.getElementById('footEmailText'); if (t1) t1.textContent = c.email;
+      const a1 = document.getElementById('footEmail'); if (a1) a1.href = `mailto:${c.email}`;
+    } else feLi.style.display = 'none';
+  }
 }
 
 /* ============================================================
@@ -2240,29 +2408,32 @@ function applySettings() {
    ============================================================ */
 function openAdminGate(e) {
   if (e) e.preventDefault();
-  if (sessionStorage.getItem('ev_admin') === '1') { openAdminDashboard(); return; }
-  $('#adminGate').classList.remove('hidden');
-  $('#adminGate').classList.add('flex');
-  $('#adminError').classList.add('hidden');
-  setTimeout(() => $('#adminPass').focus(), 60);
+  if (safeSession.get('ev_admin') === '1') { openAdminDashboard(); return; }
+  const gate = document.getElementById('adminGate');
+  if (gate) { gate.classList.remove('hidden'); gate.classList.add('flex'); }
+  const err = document.getElementById('adminError'); if (err) err.classList.add('hidden');
+  setTimeout(() => {
+    const p = document.getElementById('adminPass');
+    if (p) { try { p.focus(); } catch(_){} }
+  }, 60);
 }
 function closeAdminGate() {
-  $('#adminGate').classList.add('hidden');
-  $('#adminGate').classList.remove('flex');
-  $('#adminPass').value = '';
+  const gate = document.getElementById('adminGate');
+  if (gate) { gate.classList.add('hidden'); gate.classList.remove('flex'); }
+  const p = document.getElementById('adminPass'); if (p) p.value = '';
 }
 function logoutAdmin() {
-  sessionStorage.removeItem('ev_admin');
-  $('#adminDashboard').classList.add('hidden');
-  $('#adminDashboard').classList.remove('flex');
+  safeSession.remove('ev_admin');
+  const d = document.getElementById('adminDashboard');
+  if (d) { d.classList.add('hidden'); d.classList.remove('flex'); }
   document.body.classList.remove('no-scroll');
 }
 async function openAdminDashboard() {
-  $('#adminDashboard').classList.remove('hidden');
-  $('#adminDashboard').classList.add('flex');
+  const d = document.getElementById('adminDashboard');
+  if (d) { d.classList.remove('hidden'); d.classList.add('flex'); }
   document.body.classList.add('no-scroll');
-  orders = await fetchOrders();
-  carsData = await fetchCars();
+  try { orders = await fetchOrders(); } catch(_){}
+  try { carsData = await fetchCars(); } catch(_){}
   renderAdminOrders();
   renderAdminCars();
   renderAdminCustomers();
@@ -2270,19 +2441,22 @@ async function openAdminDashboard() {
   renderAdminStats();
 }
 
-$('#adminGateForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const pass = $('#adminPass').value;
-  if (pass === CONFIG.adminPassword) {
-    sessionStorage.setItem('ev_admin', '1');
-    closeAdminGate();
-    openAdminDashboard();
-  } else {
-    $('#adminError').classList.remove('hidden');
-    $('#adminPass').value = '';
-    $('#adminPass').focus();
-  }
-});
+const adminGateForm = document.getElementById('adminGateForm');
+if (adminGateForm) {
+  adminGateForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const passEl = document.getElementById('adminPass');
+    const pass = passEl ? passEl.value : '';
+    if (pass === CONFIG.adminPassword) {
+      safeSession.set('ev_admin', '1');
+      closeAdminGate();
+      openAdminDashboard();
+    } else {
+      const err = document.getElementById('adminError'); if (err) err.classList.remove('hidden');
+      if (passEl) { passEl.value = ''; try { passEl.focus(); } catch(_){} }
+    }
+  });
+}
 
 $$('.admin-tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -2296,38 +2470,45 @@ $$('.admin-tab').forEach(tab => {
     });
     $$('.admin-tab-content').forEach(c => c.classList.add('hidden'));
     const map = { orders:'adminTabOrders', cars:'adminTabCars', customers:'adminTabCustomers', settings:'adminTabSettings', stats:'adminTabStats' };
-    $('#' + map[name]).classList.remove('hidden');
+    const target = document.getElementById(map[name]);
+    if (target) target.classList.remove('hidden');
   });
 });
 
 function renderAdminOrders() {
-  const filter = $('#orderStatusFilter')?.value || 'all';
-  const q = ($('#orderSearch')?.value || '').toLowerCase();
+  const filterEl = document.getElementById('orderStatusFilter');
+  const searchEl = document.getElementById('orderSearch');
+  const filter = filterEl ? filterEl.value : 'all';
+  const q = (searchEl ? searchEl.value : '').toLowerCase();
   let list = orders.filter(o => {
     const matchStatus = filter === 'all' || o.status === filter;
     const matchQ = !q || (o.name||'').toLowerCase().includes(q) || (o.phone||'').includes(q) || (o.ref||'').toLowerCase().includes(q);
     return matchStatus && matchQ;
   });
-  const container = $('#adminOrdersList');
+  const container = document.getElementById('adminOrdersList');
+  if (!container) return;
   if (list.length === 0) {
     container.innerHTML = `<div class="rounded-xl bg-white p-8 text-center text-slate-500 shadow-sm"><i class="fa-solid fa-inbox mb-3 text-3xl text-slate-300"></i><p>ምንም Orders የለም</p></div>`;
     return;
   }
-  container.innerHTML = list.map(o => `
+  container.innerHTML = list.map(o => {
+    const ref = escapeHtml(o.ref || '');
+    const status = escapeHtml(o.status || 'pending');
+    return `
     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <span class="font-mono text-xs font-bold text-slate-500">${escapeHtml(o.ref)}</span>
-            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold status-${o.status}">${o.status.toUpperCase()}</span>
+            <span class="font-mono text-xs font-bold text-slate-500">${ref}</span>
+            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold status-${status}">${status.toUpperCase()}</span>
           </div>
-          <h4 class="mt-1 font-bold text-slate-900">${escapeHtml(o.car)}</h4>
+          <h4 class="mt-1 font-bold text-slate-900">${escapeHtml(o.car||'')}</h4>
           <p class="mt-1 text-xs text-slate-500">${new Date(o.ts).toLocaleString()}</p>
         </div>
         <div class="text-right">
           <p class="text-lg font-black text-emerald-600">${formatPrice(o.total)} ETB</p>
           <p class="text-xs font-bold text-amber-600">Deposit: ${formatPrice(o.deposit)} ETB (${o.depositPct}%)</p>
-          <select onchange="updateOrderStatus('${o.ref}', this.value)" class="mt-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-semibold outline-none">
+          <select onchange="updateOrderStatus('${ref}', this.value)" class="mt-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-semibold outline-none">
             <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
             <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmed</option>
             <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
@@ -2336,8 +2517,8 @@ function renderAdminOrders() {
         </div>
       </div>
       <div class="mt-3 grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600 sm:grid-cols-2">
-        <p><i class="fa-solid fa-user mr-1 text-emerald-500"></i>${escapeHtml(o.name)}</p>
-        <p><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>${escapeHtml(o.phone)}</p>
+        <p><i class="fa-solid fa-user mr-1 text-emerald-500"></i>${escapeHtml(o.name||'')}</p>
+        <p><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>${escapeHtml(o.phone||'')}</p>
         <p class="sm:col-span-2"><i class="fa-solid fa-location-dot mr-1 text-emerald-500"></i>${escapeHtml(o.region||'')} / ${escapeHtml(o.zone||'')} / ${escapeHtml(o.woreda||'')} / ${escapeHtml(o.city||'')}</p>
         ${o.address ? `<p class="sm:col-span-2"><i class="fa-solid fa-house mr-1 text-emerald-500"></i>${escapeHtml(o.address)}</p>` : ''}
         ${o.note ? `<p class="sm:col-span-2"><i class="fa-solid fa-note-sticky mr-1 text-emerald-500"></i>${escapeHtml(o.note)}</p>` : ''}
@@ -2348,27 +2529,39 @@ function renderAdminOrders() {
         <div class="text-center"><p class="text-[10px] font-bold uppercase text-slate-400">Receipt</p>${o.receiptPhoto ? `<img src="${o.receiptPhoto}" onclick="viewAdminImage('${o.receiptPhoto}','Receipt')" class="mt-1 mx-auto h-16 w-full cursor-pointer rounded-lg object-cover hover:ring-2 hover:ring-emerald-500">` : '<p class="text-xs text-slate-400">—</p>'}</div>
       </div>
       <div class="mt-3 flex gap-2 border-t border-slate-100 pt-3">
-        <a href="tel:${escapeHtml(o.phone)}" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200"><i class="fa-solid fa-phone mr-1"></i>Call</a>
-        <a href="https://wa.me/${(o.phone||'').replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hello ' + o.name + ' — order ' + o.ref)}" target="_blank" class="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-bold text-green-700 hover:bg-green-200"><i class="fa-brands fa-whatsapp mr-1"></i>WhatsApp</a>
-        <button type="button" onclick="deleteOrder('${o.ref}')" class="ml-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100"><i class="fa-solid fa-trash mr-1"></i>Delete</button>
+        <a href="tel:${escapeHtml(o.phone||'')}" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200"><i class="fa-solid fa-phone mr-1"></i>Call</a>
+        <a href="https://wa.me/${(o.phone||'').replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hello ' + (o.name||'') + ' — order ' + (o.ref||''))}" target="_blank" class="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-bold text-green-700 hover:bg-green-200"><i class="fa-brands fa-whatsapp mr-1"></i>WhatsApp</a>
+        <button type="button" onclick="deleteOrder('${ref}')" class="ml-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100"><i class="fa-solid fa-trash mr-1"></i>Delete</button>
       </div>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function viewAdminImage(src, title) {
-  const w = window.open('', '_blank');
-  w.document.write(`<html><head><title>${title}</title><style>body{margin:0;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#fff;padding:20px}img{max-width:100%;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}</style></head><body><img src="${src}"></body></html>`);
+  try {
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(`<html><head><title>${title}</title><style>body{margin:0;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#fff;padding:20px}img{max-width:100%;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}</style></head><body><img src="${src}"></body></html>`);
+  } catch (_) {}
 }
 
 async function updateOrderStatus(ref, status) {
   const idx = orders.findIndex(o => o.ref === ref);
   if (idx < 0) return;
   try {
-    await updateOrderStatusDB(orders[idx].id, status);
+    // Only try DB update if we have an id (Supabase-managed order)
+    if (orders[idx].id) {
+      await updateOrderStatusDB(orders[idx].id, status);
+    }
     orders[idx].status = status;
+    // Persist to localStorage too (for hybrid mode)
+    safeStorage.set('ev_orders_v8', JSON.stringify(orders));
     showToast(t('toast_order_updated'));
-  } catch (err) { showToast('ስህተት', 'error'); }
+  } catch (err) {
+    console.warn(err);
+    showToast('ስህተት', 'error');
+  }
 }
 
 async function deleteOrder(ref) {
@@ -2376,15 +2569,17 @@ async function deleteOrder(ref) {
   const order = orders.find(o => o.ref === ref);
   if (!order) return;
   try {
-    await deleteOrderDB(order.id);
+    if (order.id) await deleteOrderDB(order.id);
     orders = orders.filter(o => o.ref !== ref);
+    safeStorage.set('ev_orders_v8', JSON.stringify(orders));
     renderAdminOrders();
     renderAdminStats();
   } catch (err) { showToast('ስህተት', 'error'); }
 }
 
 function renderAdminCars() {
-  const container = $('#adminCarsList');
+  const container = document.getElementById('adminCarsList');
+  if (!container) return;
   container.innerHTML = carsData.map(c => {
     const stockLabel = t(STOCK_KEY[c.stock] || 'stock_in');
     const stockClass = STOCK_CLASS[c.stock] || 'stock-in';
@@ -2411,12 +2606,9 @@ function renderAdminCars() {
   `}).join('');
 }
 
-/* ============================================================
-   CAR FORM PHOTOS (MULTIPLE)
-   ============================================================ */
 function renderCarFormPhotos() {
-  const grid = $('#carPhotoGrid');
-  const count = $('#photoCount');
+  const grid = document.getElementById('carPhotoGrid');
+  const count = document.getElementById('photoCount');
   if (!grid) return;
   if (count) count.textContent = carFormPhotos.length;
   if (carFormPhotos.length === 0) {
@@ -2429,11 +2621,14 @@ function renderCarFormPhotos() {
     <div class="photo-tile">
       <img src="${p}" alt="photo ${i+1}">
       ${i === 0 ? '<span class="primary-badge">ዋና</span>' : ''}
-      <button type="button" class="del-btn" onclick="removeCarFormPhoto(${i})" aria-label="Remove">
+      <button type="button" class="del-btn" data-remove-photo="${i}" aria-label="Remove">
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
   `).join('');
+  grid.querySelectorAll('[data-remove-photo]').forEach(b => {
+    b.addEventListener('click', () => removeCarFormPhoto(Number(b.dataset.removePhoto)));
+  });
 }
 
 function removeCarFormPhoto(i) {
@@ -2444,42 +2639,43 @@ function removeCarFormPhoto(i) {
 }
 
 function openCarForm(id) {
-  const modal = $('#carFormModal');
+  const modal = document.getElementById('carFormModal');
+  if (!modal) return;
   carFormPhotos = [];
 
   if (id) {
     const car = carsData.find(c => c.id === id);
     if (!car) return;
-    $('#carFormTitle').textContent = 'Edit Car';
-    $('#carFormId').value = car.id;
-    $('#carFormName').value = car.name;
-    $('#carFormSeats').value = car.seats;
-    $('#carFormPrice').value = car.price;
-    $('#carFormBattery').value = car.battery || '';
-    $('#carFormBatteryKwh').value = car.batteryKwh || '';
-    $('#carFormMotorPower').value = car.motorPower || '';
-    $('#carFormRange').value = car.range || '';
-    $('#carFormSpeed').value = car.speed || '';
-    $('#carFormCharge').value = car.charge || '';
-    $('#carFormLength').value = (car.dimensions && car.dimensions.length) || '';
-    $('#carFormWidth').value = (car.dimensions && car.dimensions.width) || '';
-    $('#carFormHeight').value = (car.dimensions && car.dimensions.height) || '';
-    $('#carFormCargo').value = car.cargo || '';
-    $('#carFormStock').value = car.stock || 'in_stock';
-    $('#carFormVideo').value = car.video || '';
-    $('#carFormTag').value = car.tag || '';
-    $('#carFormDesc').value = car.desc || '';
+    document.getElementById('carFormTitle').textContent = 'Edit Car';
+    document.getElementById('carFormId').value = car.id;
+    document.getElementById('carFormName').value = car.name;
+    document.getElementById('carFormSeats').value = car.seats;
+    document.getElementById('carFormPrice').value = car.price;
+    document.getElementById('carFormBattery').value = car.battery || '';
+    document.getElementById('carFormBatteryKwh').value = car.batteryKwh || '';
+    document.getElementById('carFormMotorPower').value = car.motorPower || '';
+    document.getElementById('carFormRange').value = car.range || '';
+    document.getElementById('carFormSpeed').value = car.speed || '';
+    document.getElementById('carFormCharge').value = car.charge || '';
+    document.getElementById('carFormLength').value = (car.dimensions && car.dimensions.length) || '';
+    document.getElementById('carFormWidth').value = (car.dimensions && car.dimensions.width) || '';
+    document.getElementById('carFormHeight').value = (car.dimensions && car.dimensions.height) || '';
+    document.getElementById('carFormCargo').value = car.cargo || '';
+    document.getElementById('carFormStock').value = car.stock || 'in_stock';
+    document.getElementById('carFormVideo').value = car.video || '';
+    document.getElementById('carFormTag').value = car.tag || '';
+    document.getElementById('carFormDesc').value = car.desc || '';
     if (Array.isArray(car.photos) && car.photos.length) {
       carFormPhotos = [...car.photos];
     }
   } else {
-    $('#carFormTitle').textContent = 'አዲስ መኪና';
-    $('#carForm').reset();
-    $('#carFormId').value = '';
+    document.getElementById('carFormTitle').textContent = 'አዲስ መኪና';
+    const f = document.getElementById('carForm'); if (f) f.reset();
+    document.getElementById('carFormId').value = '';
   }
 
-  $('#carPhotoFile').value = '';
-  $('#carPhotoWrap').classList.remove('has-file');
+  const fileInput = document.getElementById('carPhotoFile'); if (fileInput) fileInput.value = '';
+  const wrap = document.getElementById('carPhotoWrap'); if (wrap) wrap.classList.remove('has-file');
   renderCarFormPhotos();
 
   modal.classList.remove('hidden');
@@ -2487,123 +2683,132 @@ function openCarForm(id) {
 }
 
 function closeCarForm() {
-  $('#carFormModal').classList.add('hidden');
-  $('#carFormModal').classList.remove('flex');
+  const modal = document.getElementById('carFormModal');
+  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
   carFormPhotos = [];
 }
 
-/* File input — MULTIPLE */
-$('#carPhotoFile').addEventListener('change', async (e) => {
-  const files = Array.from(e.target.files || []);
-  if (!files.length) return;
-  let added = 0;
-  for (const file of files) {
-    if (!file.type.startsWith('image/')) continue;
-    try {
-      const compressed = await compressImage(file, 900, 0.75);
-      const url = await uploadToStorage(compressed, 'cars');
-      carFormPhotos.push(url);
-      added++;
-    } catch (err) { console.warn(err); }
-  }
-  if (added > 0) {
-    $('#carPhotoWrap').classList.add('has-file');
-    renderCarFormPhotos();
-    showToast(`📸 ${added} ${t('toast_photo_added')}`);
-  } else {
-    showToast('እባክዎ ምስል ብቻ ይጫኑ', 'error');
-  }
-  e.target.value = '';
-});
-
-/* Cloudinary Widget */
-$('#cloudinaryBtn').addEventListener('click', () => {
-  if (!CONFIG.cloudinary.enabled || typeof cloudinary === 'undefined') {
-    showToast('Cloudinary አልተዋቀረም', 'error');
-    return;
-  }
-  if (!cloudinaryWidget) {
-    cloudinaryWidget = cloudinary.createUploadWidget({
-      cloudName: CONFIG.cloudinary.cloudName,
-      uploadPreset: CONFIG.cloudinary.uploadPreset,
-      folder: 'ev-golf/cars',
-      sources: ['local', 'camera', 'url'],
-      multiple: true,
-      maxFiles: 10,
-      clientAllowedFormats: ['jpg','jpeg','png','webp'],
-      maxFileSize: 5000000,
-      styles: { palette: {
-        window: '#0f172a', windowBorder: '#10b981', tabIcon: '#10b981',
-        textDark: '#f8fafc', textLight: '#94a3b8', link: '#34d399',
-        action: '#059669', inProgress: '#34d399', complete: '#10b981', sourceBg: '#1e293b'
-      }}
-    }, (error, result) => {
-      if (error) { console.error(error); return; }
-      if (result.event === 'success') {
-        carFormPhotos.push(result.info.secure_url);
-        renderCarFormPhotos();
-        showToast('☁️ ፎቶ ከCloudinary ተጨምሯል');
-      }
-    });
-  }
-  cloudinaryWidget.open();
-});
-
-$('#carForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const id = $('#carFormId').value;
-  const nameVal = $('#carFormName').value.trim();
-  const seatsVal = parseInt($('#carFormSeats').value) || 0;
-  const priceVal = parseInt($('#carFormPrice').value) || 0;
-
-  if (!nameVal) { showToast(t('err_name_required'), 'error'); return; }
-  if (seatsVal < 1) { showToast(t('err_seats_required'), 'error'); return; }
-  if (priceVal < 0) { showToast(t('err_price_required'), 'error'); return; }
-
-  const data = {
-    name: nameVal, seats: seatsVal, price: priceVal,
-    battery: $('#carFormBattery').value.trim(),
-    batteryKwh: parseFloat($('#carFormBatteryKwh').value) || 0,
-    motorPower: parseFloat($('#carFormMotorPower').value) || 0,
-    range: parseInt($('#carFormRange').value) || 0,
-    speed: parseInt($('#carFormSpeed').value) || 0,
-    charge: $('#carFormCharge').value.trim(),
-    dimensions: {
-      length: parseInt($('#carFormLength').value) || 0,
-      width: parseInt($('#carFormWidth').value) || 0,
-      height: parseInt($('#carFormHeight').value) || 0
-    },
-    cargo: $('#carFormCargo').value.trim(),
-    stock: $('#carFormStock').value,
-    video: $('#carFormVideo').value.trim(),
-    tag: $('#carFormTag').value.trim(),
-    desc: $('#carFormDesc').value.trim(),
-    photos: [...carFormPhotos]
-  };
-
-  try {
-    if (id) {
-      const car = carsData.find(c => c.id === Number(id));
-      await saveCar({ ...data, id: Number(id), accent: car?.accent });
-      if (car) Object.assign(car, data);
-      saveCarsLocal();
-    } else {
-      const newId = await saveCar(data);
-      const accents = ['#10b981','#0ea5e9','#f59e0b','#8b5cf6','#ef4444'];
-      const newCar = { id: newId || (Math.max(0, ...carsData.map(c => c.id)) + 1), accent: accents[carsData.length % accents.length], ...data };
-      carsData.push(newCar);
-      saveCarsLocal();
+/* Event listeners for admin forms — attach defensively */
+const carPhotoFileEl = document.getElementById('carPhotoFile');
+if (carPhotoFileEl) {
+  carPhotoFileEl.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    let added = 0;
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      try {
+        const compressed = await compressImage(file, 900, 0.75);
+        const url = await uploadToStorage(compressed, 'cars');
+        carFormPhotos.push(url);
+        added++;
+      } catch (err) { console.warn(err); }
     }
-    renderAdminCars();
-    applyFilters();
-    updateHeroCar();
-    closeCarForm();
-    showToast(t('toast_car_saved'));
-  } catch (err) {
-    console.error(err);
-    showToast('ማስቀመጥ አልተቻለም: ' + (err.message || ''), 'error');
-  }
-});
+    if (added > 0) {
+      const wrap = document.getElementById('carPhotoWrap'); if (wrap) wrap.classList.add('has-file');
+      renderCarFormPhotos();
+      showToast(`📸 ${added} ${t('toast_photo_added')}`);
+    } else {
+      showToast('እባክዎ ምስል ብቻ ይጫኑ', 'error');
+    }
+    e.target.value = '';
+  });
+}
+
+const cloudinaryBtn = document.getElementById('cloudinaryBtn');
+if (cloudinaryBtn) {
+  cloudinaryBtn.addEventListener('click', () => {
+    if (!CONFIG.cloudinary.enabled || typeof cloudinary === 'undefined') {
+      showToast('Cloudinary አልተዋቀረም', 'error');
+      return;
+    }
+    if (!cloudinaryWidget) {
+      try {
+        cloudinaryWidget = cloudinary.createUploadWidget({
+          cloudName: CONFIG.cloudinary.cloudName,
+          uploadPreset: CONFIG.cloudinary.uploadPreset,
+          folder: 'ev-golf/cars',
+          sources: ['local', 'camera', 'url'],
+          multiple: true,
+          maxFiles: 10,
+          clientAllowedFormats: ['jpg','jpeg','png','webp'],
+          maxFileSize: 5000000,
+          styles: { palette: {
+            window: '#0f172a', windowBorder: '#10b981', tabIcon: '#10b981',
+            textDark: '#f8fafc', textLight: '#94a3b8', link: '#34d399',
+            action: '#059669', inProgress: '#34d399', complete: '#10b981', sourceBg: '#1e293b'
+          }}
+        }, (error, result) => {
+          if (error) { console.error(error); return; }
+          if (result.event === 'success') {
+            carFormPhotos.push(result.info.secure_url);
+            renderCarFormPhotos();
+            showToast('☁️ ፎቶ ከCloudinary ተጨምሯል');
+          }
+        });
+      } catch (err) { console.error(err); showToast('Cloudinary ስህተት', 'error'); return; }
+    }
+    cloudinaryWidget.open();
+  });
+}
+
+const carFormEl = document.getElementById('carForm');
+if (carFormEl) {
+  carFormEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('carFormId').value;
+    const nameVal = document.getElementById('carFormName').value.trim();
+    const seatsVal = parseInt(document.getElementById('carFormSeats').value) || 0;
+    const priceVal = parseInt(document.getElementById('carFormPrice').value) || 0;
+
+    if (!nameVal) { showToast(t('err_name_required'), 'error'); return; }
+    if (seatsVal < 1) { showToast(t('err_seats_required'), 'error'); return; }
+    if (priceVal < 0) { showToast(t('err_price_required'), 'error'); return; }
+
+    const data = {
+      name: nameVal, seats: seatsVal, price: priceVal,
+      battery: document.getElementById('carFormBattery').value.trim(),
+      batteryKwh: parseFloat(document.getElementById('carFormBatteryKwh').value) || 0,
+      motorPower: parseFloat(document.getElementById('carFormMotorPower').value) || 0,
+      range: parseInt(document.getElementById('carFormRange').value) || 0,
+      speed: parseInt(document.getElementById('carFormSpeed').value) || 0,
+      charge: document.getElementById('carFormCharge').value.trim(),
+      dimensions: {
+        length: parseInt(document.getElementById('carFormLength').value) || 0,
+        width: parseInt(document.getElementById('carFormWidth').value) || 0,
+        height: parseInt(document.getElementById('carFormHeight').value) || 0
+      },
+      cargo: document.getElementById('carFormCargo').value.trim(),
+      stock: document.getElementById('carFormStock').value,
+      video: document.getElementById('carFormVideo').value.trim(),
+      tag: document.getElementById('carFormTag').value.trim(),
+      desc: document.getElementById('carFormDesc').value.trim(),
+      photos: [...carFormPhotos]
+    };
+
+    try {
+      if (id) {
+        const car = carsData.find(c => c.id === Number(id));
+        await saveCar({ ...data, id: Number(id), accent: car?.accent });
+        if (car) Object.assign(car, data);
+        saveCarsLocal();
+      } else {
+        const newId = await saveCar(data);
+        const accents = ['#10b981','#0ea5e9','#f59e0b','#8b5cf6','#ef4444'];
+        const newCar = { id: newId || (Math.max(0, ...carsData.map(c => c.id)) + 1), accent: accents[carsData.length % accents.length], ...data };
+        carsData.push(newCar);
+        saveCarsLocal();
+      }
+      renderAdminCars();
+      applyFilters();
+      closeCarForm();
+      showToast(t('toast_car_saved'));
+    } catch (err) {
+      console.error(err);
+      showToast('ማስቀመጥ አልተቻለም: ' + (err.message || ''), 'error');
+    }
+  });
+}
 
 async function deleteCar(id) {
   if (!confirm('መኪናውን ማጥፋት ይፈልጋሉ?')) return;
@@ -2611,14 +2816,10 @@ async function deleteCar(id) {
     await deleteCarById(id);
     renderAdminCars();
     applyFilters();
-    updateHeroCar();
     showToast(t('toast_car_deleted'));
   } catch (err) { showToast('ስህተት', 'error'); }
 }
 
-/* ============================================================
-   ADMIN CUSTOMERS
-   ============================================================ */
 function renderAdminCustomers() {
   const map = {};
   orders.forEach(o => {
@@ -2629,7 +2830,8 @@ function renderAdminCustomers() {
     map[key].deposit += o.deposit || 0;
   });
   const list = Object.values(map).sort((a,b) => b.spent - a.spent);
-  const container = $('#adminCustomersList');
+  const container = document.getElementById('adminCustomersList');
+  if (!container) return;
   if (list.length === 0) {
     container.innerHTML = `<div class="rounded-xl bg-white p-8 text-center text-slate-500 shadow-sm"><i class="fa-solid fa-users mb-3 text-3xl text-slate-300"></i><p>ምንም ደንበኞች የለም</p></div>`;
     return;
@@ -2638,7 +2840,7 @@ function renderAdminCustomers() {
     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h4 class="font-bold text-slate-900">${escapeHtml(c.name)}</h4>
+          <h4 class="font-bold text-slate-900">${escapeHtml(c.name||'')}</h4>
           <p class="mt-1 text-xs text-slate-500"><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>${escapeHtml(c.phone || '—')}</p>
           ${c.region ? `<p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1 text-emerald-500"></i>${escapeHtml(c.region)}${c.city ? ', ' + escapeHtml(c.city) : ''}</p>` : ''}
         </div>
@@ -2652,40 +2854,38 @@ function renderAdminCustomers() {
   `).join('');
 }
 
-/* ============================================================
-   ADMIN SETTINGS
-   ============================================================ */
 function renderAdminSettings() {
-  const c = settings.contact;
-  const p = settings.payment;
-  const container = $('#adminSettings');
+  const c = settings.contact || {};
+  const p = settings.payment || {};
+  const container = document.getElementById('adminSettings');
+  if (!container) return;
   container.innerHTML = `
     <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
       <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-slate-900"><i class="fa-solid fa-address-book text-emerald-600"></i> የመገኛ መረጃ</h3>
       <div class="space-y-4">
         <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
           <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-solid fa-phone mr-1 text-emerald-500"></i>ስልክ ቁጥር</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setPhoneVisible" ${c.phoneVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="text" id="setPhone" value="${escapeHtml(c.phone)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+          <input type="text" id="setPhone" value="${escapeHtml(c.phone||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
         </div>
         <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
           <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-whatsapp mr-1 text-green-500"></i>WhatsApp</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setWhatsappVisible" ${c.whatsappVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="text" id="setWhatsapp" value="${escapeHtml(c.whatsapp)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+          <input type="text" id="setWhatsapp" value="${escapeHtml(c.whatsapp||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
         </div>
         <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
           <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-telegram mr-1 text-sky-500"></i>Telegram</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setTelegramVisible" ${c.telegramVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="text" id="setTelegram" value="${escapeHtml(c.telegram)}" placeholder="evgolfethiopia" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+          <input type="text" id="setTelegram" value="${escapeHtml(c.telegram||'')}" placeholder="evgolfethiopia" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
         </div>
         <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
           <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-solid fa-envelope mr-1 text-emerald-500"></i>ኢሜይል</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setEmailVisible" ${c.emailVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="email" id="setEmail" value="${escapeHtml(c.email)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+          <input type="email" id="setEmail" value="${escapeHtml(c.email||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
         </div>
         <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
           <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-facebook mr-1 text-blue-500"></i>Facebook</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setFacebookVisible" ${c.facebookVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="url" id="setFacebook" value="${escapeHtml(c.facebook)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+          <input type="url" id="setFacebook" value="${escapeHtml(c.facebook||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
         </div>
         <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
           <div class="flex items-center justify-between gap-2"><label class="text-sm font-bold text-slate-700"><i class="fa-brands fa-tiktok mr-1 text-slate-800"></i>TikTok</label><label class="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" id="setTiktokVisible" ${c.tiktokVisible?'checked':''} class="h-4 w-4 rounded border-slate-300 text-emerald-600"><span class="font-semibold text-slate-600">አሳይ</span></label></div>
-          <input type="url" id="setTiktok" value="${escapeHtml(c.tiktok)}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
+          <input type="url" id="setTiktok" value="${escapeHtml(c.tiktok||'')}" class="mt-2 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-emerald-500">
         </div>
       </div>
     </div>
@@ -2728,26 +2928,37 @@ function renderAdminSettings() {
 async function saveAdminSettings() {
   const newSettings = {
     contact: {
-      phone: $('#setPhone').value.trim(), phoneVisible: $('#setPhoneVisible').checked,
-      whatsapp: $('#setWhatsapp').value.trim(), whatsappVisible: $('#setWhatsappVisible').checked,
-      telegram: $('#setTelegram').value.trim(), telegramVisible: $('#setTelegramVisible').checked,
-      email: $('#setEmail').value.trim(), emailVisible: $('#setEmailVisible').checked,
-      facebook: $('#setFacebook').value.trim(), facebookVisible: $('#setFacebookVisible').checked,
-      tiktok: $('#setTiktok').value.trim(), tiktokVisible: $('#setTiktokVisible').checked
+      phone: (document.getElementById('setPhone')?.value || '').trim(),
+      phoneVisible: document.getElementById('setPhoneVisible')?.checked || false,
+      whatsapp: (document.getElementById('setWhatsapp')?.value || '').trim(),
+      whatsappVisible: document.getElementById('setWhatsappVisible')?.checked || false,
+      telegram: (document.getElementById('setTelegram')?.value || '').trim(),
+      telegramVisible: document.getElementById('setTelegramVisible')?.checked || false,
+      email: (document.getElementById('setEmail')?.value || '').trim(),
+      emailVisible: document.getElementById('setEmailVisible')?.checked || false,
+      facebook: (document.getElementById('setFacebook')?.value || '').trim(),
+      facebookVisible: document.getElementById('setFacebookVisible')?.checked || false,
+      tiktok: (document.getElementById('setTiktok')?.value || '').trim(),
+      tiktokVisible: document.getElementById('setTiktokVisible')?.checked || false
     },
     payment: {},
     order: {
-      depositPercent: parseFloat($('#setDeposit').value) || 10,
-      vatRate: (parseFloat($('#setVat').value) || 15) / 100
+      depositPercent: parseFloat(document.getElementById('setDeposit')?.value) || 10,
+      vatRate: (parseFloat(document.getElementById('setVat')?.value) || 15) / 100
     }
   };
   ['telebirr','cbe','chapa','bankTransfer'].forEach(key => {
+    const toggle = document.querySelector(`[data-pay="${key}"]`);
+    const labelEl = document.querySelector(`[data-payfield="${key}-label"]`);
+    const accEl = document.querySelector(`[data-payfield="${key}-account"]`);
+    const nameEl = document.querySelector(`[data-payfield="${key}-name"]`);
+    const bankEl = document.querySelector(`[data-payfield="${key}-bank"]`);
     newSettings.payment[key] = {
-      enabled: document.querySelector(`[data-pay="${key}"]`).checked,
-      label: document.querySelector(`[data-payfield="${key}-label"]`).value.trim(),
-      account: document.querySelector(`[data-payfield="${key}-account"]`).value.trim(),
-      name: document.querySelector(`[data-payfield="${key}-name"]`).value.trim(),
-      bank: document.querySelector(`[data-payfield="${key}-bank"]`)?.value.trim() || ''
+      enabled: toggle ? toggle.checked : false,
+      label: labelEl ? labelEl.value.trim() : '',
+      account: accEl ? accEl.value.trim() : '',
+      name: nameEl ? nameEl.value.trim() : '',
+      bank: bankEl ? bankEl.value.trim() : ''
     };
   });
   try {
@@ -2761,7 +2972,7 @@ async function saveAdminSettings() {
 async function resetSettings() {
   if (!confirm('ሁሉንም ቅንብሮች ወደ ነባሪ መመለስ ይፈልጋሉ?')) return;
   settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-  await saveSettingsDB(settings);
+  try { await saveSettingsDB(settings); } catch(_){}
   applySettings();
   renderAdminSettings();
   showToast('ተመልሷል');
@@ -2773,7 +2984,9 @@ function renderAdminStats() {
   const delivered = orders.filter(o => o.status === 'delivered').length;
   const revenue = orders.filter(o => o.status !== 'cancelled').reduce((s,o) => s + (o.total||0), 0);
   const depositTotal = orders.filter(o => o.status !== 'cancelled').reduce((s,o) => s + (o.deposit||0), 0);
-  $('#adminStats').innerHTML = `
+  const container = document.getElementById('adminStats');
+  if (!container) return;
+  container.innerHTML = `
     <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Total Orders</p><p class="mt-2 text-2xl font-black text-slate-900">${total}</p></div>
     <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Pending</p><p class="mt-2 text-2xl font-black text-amber-600">${pending}</p></div>
     <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Delivered</p><p class="mt-2 text-2xl font-black text-emerald-600">${delivered}</p></div>
@@ -2798,35 +3011,55 @@ function exportOrders() {
 /* ============================================================
    EVENT LISTENERS
    ============================================================ */
-$('#seatFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
-$('#priceFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
-$('#sortFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
-$('#resetBtn')?.addEventListener('click', resetFilters);
+document.getElementById('seatFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
+document.getElementById('priceFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
+document.getElementById('sortFilter')?.addEventListener('change', () => { applyFilters(); updateFilterBadge(); });
+document.getElementById('resetBtn')?.addEventListener('click', resetFilters);
 
-$('#carsGrid')?.addEventListener('click', (e) => {
+document.getElementById('toggleFilters')?.addEventListener('click', (e) => {
+  const panel = document.getElementById('filterPanel');
+  const btn = e.currentTarget;
+  if (!panel) return;
+  const isOpen = !panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  btn.setAttribute('aria-expanded', String(!isOpen));
+});
+
+document.getElementById('carsGrid')?.addEventListener('click', (e) => {
   const orderBtn = e.target.closest('[data-order]');
   if (orderBtn && !orderBtn.disabled) { openModal(Number(orderBtn.dataset.order)); return; }
   const detailBtn = e.target.closest('[data-detail]');
   if (detailBtn) { openDetail(Number(detailBtn.dataset.detail)); return; }
 });
 
-$('#orderForm')?.addEventListener('submit', handleOrderSubmit);
+document.getElementById('orderForm')?.addEventListener('submit', handleOrderSubmit);
 
-$('#orderModal')?.addEventListener('click', (e) => { if (e.target === $('#orderModal')) closeModal(); });
-$('#confirmModal')?.addEventListener('click', (e) => { if (e.target === $('#confirmModal')) closeConfirm(); });
-$('#detailModal')?.addEventListener('click', (e) => { if (e.target === $('#detailModal')) closeDetail(); });
-$('#policyModal')?.addEventListener('click', (e) => { if (e.target === $('#policyModal')) closePolicy(); });
-$('#adminGate')?.addEventListener('click', (e) => { if (e.target === $('#adminGate')) closeAdminGate(); });
-$('#carFormModal')?.addEventListener('click', (e) => { if (e.target === $('#carFormModal')) closeCarForm(); });
+document.getElementById('orderModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('orderModal')) closeModal(); });
+document.getElementById('confirmModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('confirmModal')) closeConfirm(); });
+document.getElementById('detailModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('detailModal')) closeDetail(); });
+document.getElementById('policyModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('policyModal')) closePolicy(); });
+document.getElementById('adminGate')?.addEventListener('click', (e) => { if (e.target === document.getElementById('adminGate')) closeAdminGate(); });
+document.getElementById('carFormModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('carFormModal')) closeCarForm(); });
+
+// Setup upload handlers after DOM is ready
+setupUpload('idFile', 'idUploadWrap', 'idUploadText', 'idPreview', 'idPreviewImg', 'id');
+setupUpload('gFile', 'gUploadWrap', 'gUploadText', 'gPreview', 'gPreviewImg', 'guarantee');
+setupUpload('rFile', 'rUploadWrap', 'rUploadText', 'rPreview', 'rPreviewImg', 'receipt');
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    if (!$('#orderModal').classList.contains('hidden')) closeModal();
-    if (!$('#confirmModal').classList.contains('hidden')) closeConfirm();
-    if (!$('#detailModal').classList.contains('hidden')) closeDetail();
-    if (!$('#policyModal').classList.contains('hidden')) closePolicy();
-    if (!$('#adminGate').classList.contains('hidden')) closeAdminGate();
-    if (!$('#carFormModal').classList.contains('hidden')) closeCarForm();
+    const dm = document.getElementById('detailModal');
+    const om = document.getElementById('orderModal');
+    const cm = document.getElementById('confirmModal');
+    const pm = document.getElementById('policyModal');
+    const ag = document.getElementById('adminGate');
+    const cf = document.getElementById('carFormModal');
+    if (om && !om.classList.contains('hidden')) closeModal();
+    if (cm && !cm.classList.contains('hidden')) closeConfirm();
+    if (dm && !dm.classList.contains('hidden')) closeDetail();
+    if (pm && !pm.classList.contains('hidden')) closePolicy();
+    if (ag && !ag.classList.contains('hidden')) closeAdminGate();
+    if (cf && !cf.classList.contains('hidden')) closeCarForm();
   }
   if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
     e.preventDefault();
@@ -2834,17 +3067,24 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-$('#menuBtn')?.addEventListener('click', () => {
-  const isOpen = !$('#mobileMenu').classList.contains('hidden');
-  $('#mobileMenu').classList.toggle('hidden');
-  $('#menuBtn').setAttribute('aria-expanded', String(!isOpen));
-  $('#menuBtn').innerHTML = isOpen ? '<i class="fa-solid fa-bars"></i>' : '<i class="fa-solid fa-xmark"></i>';
+document.getElementById('menuBtn')?.addEventListener('click', () => {
+  const menu = document.getElementById('mobileMenu');
+  const btn = document.getElementById('menuBtn');
+  if (!menu || !btn) return;
+  const isOpen = !menu.classList.contains('hidden');
+  menu.classList.toggle('hidden');
+  btn.setAttribute('aria-expanded', String(!isOpen));
+  btn.innerHTML = isOpen ? '<i class="fa-solid fa-bars"></i>' : '<i class="fa-solid fa-xmark"></i>';
 });
 $$('#mobileMenu a').forEach(link => {
   link.addEventListener('click', () => {
-    $('#mobileMenu').classList.add('hidden');
-    $('#menuBtn').setAttribute('aria-expanded', 'false');
-    $('#menuBtn').innerHTML = '<i class="fa-solid fa-bars"></i>';
+    const menu = document.getElementById('mobileMenu');
+    const btn = document.getElementById('menuBtn');
+    if (menu) menu.classList.add('hidden');
+    if (btn) {
+      btn.setAttribute('aria-expanded', 'false');
+      btn.innerHTML = '<i class="fa-solid fa-bars"></i>';
+    }
   });
 });
 
@@ -2852,7 +3092,7 @@ const navLinks = $$('[data-nav]');
 const sectionIds = ['home', 'cars', 'features', 'warranty', 'faq', 'contact'];
 function onScroll() {
   const y = window.scrollY;
-  const toTop = $('#toTop');
+  const toTop = document.getElementById('toTop');
   if (toTop) {
     toTop.classList.toggle('hidden', y < 400);
     toTop.classList.toggle('flex', y >= 400);
@@ -2865,14 +3105,31 @@ function onScroll() {
   navLinks.forEach(a => a.classList.toggle('is-active', a.dataset.nav === current));
 }
 window.addEventListener('scroll', onScroll, { passive: true });
-$('#toTop')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+document.getElementById('toTop')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 $$('.lang-btn').forEach(btn => btn.addEventListener('click', () => {
   applyLanguage(btn.dataset.lang);
   track('language_switch', { language: btn.dataset.lang });
 }));
 
-if (location.hash === '#admin') setTimeout(() => openAdminGate(), 800);
+// Admin hash
+if (location.hash === '#admin') {
+  setTimeout(() => openAdminGate(), 800);
+}
+
+/* ============================================================
+   GLOBAL ERROR HANDLERS — keep loader from sticking forever
+   ============================================================ */
+window.addEventListener('error', () => {
+  const l = document.getElementById('pageLoader');
+  if (l && !l.classList.contains('loader-hidden')) {
+    l.classList.add('loader-hidden');
+    setTimeout(() => { try { l.remove(); } catch(_){} }, 500);
+  }
+});
+window.addEventListener('unhandledrejection', (ev) => {
+  console.warn('Unhandled rejection:', ev.reason);
+});
 </script>
 </body>
 </html>
