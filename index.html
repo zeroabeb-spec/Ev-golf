@@ -1012,6 +1012,24 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 const formatPrice = (n) => new Intl.NumberFormat('en-US').format(Math.round(n));
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function normalizePhotos(p) {
+  if (Array.isArray(p)) return p.filter(x => typeof x === 'string' && x.length > 0);
+  if (typeof p === 'string') {
+    const s = p.trim();
+    if (!s || s === 'null' || s === 'undefined') return [];
+    if (s.startsWith('[')) {
+      try {
+        const a = JSON.parse(s);
+        if (Array.isArray(a)) return a.filter(x => typeof x === 'string' && x.length > 0);
+      } catch(_) {}
+    }
+    if (s.startsWith('{') && s.endsWith('}')) {
+      return s.slice(1, -1).split(',').map(x => x.trim().replace(/^"(.*)"$/, '$1')).filter(Boolean);
+    }
+    if (/^(https?:|data:)/.test(s)) return [s];
+  }
+  return [];
+}
 const formatSpecs = (v) => v == null || v === '' ? '—' : v;
 const STOCK_KEY = { in_stock:'stock_in', low_stock:'stock_low', out_of_stock:'stock_out' };
 const STOCK_CLASS = { in_stock:'stock-in', low_stock:'stock-low', out_of_stock:'stock-out' };
@@ -1084,7 +1102,7 @@ async function fetchCars() {
           range: c.range_km, charge: c.charge_time, speed: c.speed_max,
           dimensions: { length: c.dim_length, width: c.dim_width, height: c.dim_height },
           cargo: c.cargo, stock: c.stock, video: c.video_url, tag: c.tag,
-          desc: c.description, photos: c.photos || [], accent: c.accent
+          desc: c.description, photos: normalizePhotos(c.photos), accent: c.accent
         }));
       }
     } catch (err) { console.warn('Supabase cars failed:', err); }
