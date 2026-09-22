@@ -103,6 +103,7 @@ html{-webkit-tap-highlight-color:transparent}
 .photo-tile .del-btn{position:absolute;top:.3rem;right:.3rem;width:1.5rem;height:1.5rem;border-radius:9999px;background:#ef4444;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;box-shadow:0 4px 10px rgba(0,0,0,.2);transition:all .15s}
 .photo-tile .del-btn:hover{background:#dc2626;transform:scale(1.1)}
 .photo-tile .primary-badge{position:absolute;top:.3rem;left:.3rem;background:#059669;color:#fff;font-size:.55rem;font-weight:800;padding:.15rem .4rem;border-radius:9999px;letter-spacing:.05em}
+.photo-tile .uploading{position:absolute;inset:0;background:rgba(15,23,42,.75);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:700}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .fade-up{animation:fadeUp .45s ease both}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
@@ -222,7 +223,7 @@ html{-webkit-tap-highlight-color:transparent}
         </label>
 
         <button type="button" id="cloudinaryBtn" class="mt-2 w-full rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
-          <i class="fa-solid fa-cloud mr-1"></i>ወደ Cloudinary ይጫኑ
+          <i class="fa-solid fa-cloud mr-1"></i>ወደ Cloudinary ይጫኑ (Widget)
         </button>
       </div>
 
@@ -306,7 +307,7 @@ html{-webkit-tap-highlight-color:transparent}
         <label class="mb-1 block text-xs font-bold text-slate-600">መግለጫ</label>
         <textarea id="carFormDesc" rows="2" class="w-full resize-none rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500"></textarea>
       </div>
-      <button type="submit" class="w-full rounded-xl bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-500">አስቀምጥ</button>
+      <button type="submit" id="carFormSubmit" class="w-full rounded-xl bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-500 disabled:opacity-60">አስቀምጥ</button>
     </form>
   </div>
 </div>
@@ -364,9 +365,43 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 const formatPrice = (n) => new Intl.NumberFormat('en-US').format(Math.round(n));
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const getPrimaryPhoto = (car) => (car.photos && car.photos.length) ? car.photos[0] : null;
 
-function compressImage(file, maxDim = 900, quality = 0.75) {
+/* ============================================================
+   🆕 NORMALIZE PHOTOS — ሁልጊዜ array አድርጎ ይመልሳል
+   ============================================================ */
+function normalizePhotos(p) {
+  if (Array.isArray(p)) return p.filter(x => typeof x === 'string' && x.length > 0);
+  if (typeof p === 'string') {
+    const s = p.trim();
+    if (!s || s === 'null' || s === 'undefined') return [];
+    // JSON array string: '["url1","url2"]'
+    if (s.startsWith('[')) {
+      try {
+        const a = JSON.parse(s);
+        if (Array.isArray(a)) return a.filter(x => typeof x === 'string' && x.length > 0);
+      } catch(_) {}
+    }
+    // Postgres array string: '{url1,url2}'
+    if (s.startsWith('{') && s.endsWith('}')) {
+      return s.slice(1, -1).split(',')
+        .map(x => x.trim().replace(/^"(.*)"$/, '$1'))
+        .filter(Boolean);
+    }
+    // Single URL
+    if (/^(https?:|data:)/.test(s)) return [s];
+  }
+  return [];
+}
+
+const getPrimaryPhoto = (car) => {
+  const photos = normalizePhotos(car.photos);
+  return photos.length ? photos[0] : null;
+};
+
+/* ============================================================
+   IMAGE COMPRESS
+   ============================================================ */
+function compressImage(file, maxDim = 1200, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -402,6 +437,45 @@ function dataURLtoFile(dataUrl, filename) {
   } catch (_) { return null; }
 }
 
+/* ============================================================
+   🆕 CLOUDINARY UPLOAD (unsigned, direct fetch)
+   ============================================================ */
+async function uploadToCloudinary(fileOrDataUrl, folder = 'cars') {
+  try {
+    let file;
+    if (fileOrDataUrl instanceof File) {
+      file = fileOrDataUrl;
+    } else if (typeof fileOrDataUrl === 'string' && fileOrDataUrl.startsWith('data:')) {
+      file = dataURLtoFile(fileOrDataUrl, 'upload.jpg');
+    } else if (typeof fileOrDataUrl === 'string' && /^https?:/.test(fileOrDataUrl)) {
+      return fileOrDataUrl; // already uploaded
+    }
+    if (!file) throw new Error('Invalid file');
+
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
+    fd.append('folder', `ev-golf/${folder}`);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`,
+      { method: 'POST', body: fd }
+    );
+    const json = await res.json();
+    if (!res.ok || !json.secure_url) {
+      console.error('Cloudinary error:', json);
+      throw new Error(json.error?.message || 'Cloudinary upload failed');
+    }
+    return json.secure_url;
+  } catch (err) {
+    console.error('❌ Cloudinary upload failed:', err);
+    throw err;
+  }
+}
+
+/* ============================================================
+   CAR IMAGE FALLBACK (SVG placeholder)
+   ============================================================ */
 function carImage(car, angle = 'side') {
   const primary = getPrimaryPhoto(car);
   if (primary) return primary;
@@ -448,7 +522,9 @@ async function fetchCars() {
           range: c.range_km, charge: c.charge_time, speed: c.speed_max,
           dimensions: { length: c.dim_length, width: c.dim_width, height: c.dim_height },
           cargo: c.cargo, stock: c.stock, video: c.video_url, tag: c.tag,
-          desc: c.description, photos: c.photos || [], accent: c.accent
+          desc: c.description,
+          photos: normalizePhotos(c.photos),   // ⭐ FIX
+          accent: c.accent
         }));
       }
     } catch (err) { console.warn('Supabase cars failed:', err); }
@@ -457,7 +533,10 @@ async function fetchCars() {
     const s = safeStorage.get('ev_cars_v8');
     if (!s) return JSON.parse(JSON.stringify(DEFAULT_CARS));
     const parsed = JSON.parse(s);
-    return Array.isArray(parsed) && parsed.length ? parsed : JSON.parse(JSON.stringify(DEFAULT_CARS));
+    if (Array.isArray(parsed) && parsed.length) {
+      return parsed.map(c => ({ ...c, photos: normalizePhotos(c.photos) }));
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_CARS));
   } catch { return JSON.parse(JSON.stringify(DEFAULT_CARS)); }
 }
 
@@ -467,17 +546,37 @@ async function saveCar(car) {
       name: car.name, seats: car.seats, price: car.price,
       battery: car.battery, battery_kwh: car.batteryKwh, motor_power: car.motorPower,
       range_km: car.range, charge_time: car.charge, speed_max: car.speed,
-      dim_length: car.dimensions?.length || 0, dim_width: car.dimensions?.width || 0, dim_height: car.dimensions?.height || 0,
+      dim_length: car.dimensions?.length || 0,
+      dim_width:  car.dimensions?.width  || 0,
+      dim_height: car.dimensions?.height || 0,
       cargo: car.cargo, stock: car.stock, video_url: car.video, tag: car.tag,
-      description: car.desc, photos: car.photos || [], accent: car.accent || '#10b981'
+      description: car.desc,
+      photos: normalizePhotos(car.photos),   // ⭐ array መሆኑን አረጋግጥ
+      accent: car.accent || '#10b981'
     };
+
+    // 🛡️ መጠን check (Supabase 1MB row limit)
+    const size = JSON.stringify(row).length;
+    if (size > 950000) {
+      throw new Error(
+        `ፎቶዎቹ በጣም ብዙ ናቸው (${(size/1024).toFixed(0)} KB)። ` +
+        `እባክዎ አንዳንድ ፎቶዎችን ያንሱ።`
+      );
+    }
+
     if (car.id) {
       const { error } = await supabase.from('cars').update(row).eq('id', car.id);
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw new Error(error.message || error.details || 'Update failed');
+      }
       return car.id;
     } else {
       const { data, error } = await supabase.from('cars').insert(row).select().single();
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase insert error:', error);
+        throw new Error(error.message || error.details || 'Insert failed');
+      }
       return data.id;
     }
   }
@@ -560,25 +659,6 @@ async function saveSettingsDB(newSettings) {
     if (error) throw error;
   }
   safeStorage.set('ev_settings', JSON.stringify(newSettings));
-}
-
-async function uploadToStorage(dataUrlOrFile, folder) {
-  if (CONFIG.supabase.enabled && supabase) {
-    try {
-      let file;
-      if (typeof dataUrlOrFile === 'string' && dataUrlOrFile.startsWith('data:')) file = dataURLtoFile(dataUrlOrFile, `upload.jpg`);
-      else if (dataUrlOrFile instanceof File) file = dataUrlOrFile;
-      else return dataUrlOrFile;
-      if (!file) return dataUrlOrFile;
-      const ext = (file.name && file.name.split('.').pop()) || 'jpg';
-      const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from(CONFIG.supabase.storageBucket).upload(filename, file, { cacheControl: '3600', upsert: false });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from(CONFIG.supabase.storageBucket).getPublicUrl(filename);
-      return urlData.publicUrl;
-    } catch (err) { console.warn('Storage upload failed:', err); return dataUrlOrFile; }
-  }
-  return dataUrlOrFile;
 }
 
 /* ===== TOAST ===== */
@@ -762,7 +842,8 @@ function renderAdminCars() {
   container.innerHTML = carsData.map(c => {
     const stockLabel = t(STOCK_KEY[c.stock] || 'stock_in');
     const stockClass = STOCK_CLASS[c.stock] || 'stock-in';
-    const photoCount = c.photos ? c.photos.length : 0;
+    const photos = normalizePhotos(c.photos);
+    const photoCount = photos.length;
     return `
     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
       <div class="flex flex-wrap items-center gap-4">
@@ -798,7 +879,7 @@ function renderCarFormPhotos() {
   grid.classList.remove('hidden');
   grid.innerHTML = carFormPhotos.map((p, i) => `
     <div class="photo-tile">
-      <img src="${p}" alt="photo ${i+1}">
+      <img src="${p}" alt="photo ${i+1}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%23f1f5f9%22/%3E%3Ctext x=%2250%22 y=%2255%22 text-anchor=%22middle%22 font-size=%2232%22%3E⚠%3C/text%3E%3C/svg%3E'">
       ${i === 0 ? '<span class="primary-badge">ዋና</span>' : ''}
       <button type="button" class="del-btn" data-remove-photo="${i}" aria-label="Remove">
         <i class="fa-solid fa-xmark"></i>
@@ -814,7 +895,7 @@ function removeCarFormPhoto(i) {
   if (i < 0 || i >= carFormPhotos.length) return;
   carFormPhotos.splice(i, 1);
   renderCarFormPhotos();
-  showToast('ፎቶ ተወግዷል', 'error');
+  showToast('ፎቶ ተወግዷል');
 }
 
 function openCarForm(id) {
@@ -844,7 +925,8 @@ function openCarForm(id) {
     document.getElementById('carFormVideo').value = car.video || '';
     document.getElementById('carFormTag').value = car.tag || '';
     document.getElementById('carFormDesc').value = car.desc || '';
-    if (Array.isArray(car.photos) && car.photos.length) carFormPhotos = [...car.photos];
+    // ⭐ FIX: normalizePhotos
+    carFormPhotos = normalizePhotos(car.photos);
   } else {
     document.getElementById('carFormTitle').textContent = 'አዲስ መኪና';
     const f = document.getElementById('carForm'); if (f) f.reset();
@@ -852,7 +934,8 @@ function openCarForm(id) {
   }
 
   const fileInput = document.getElementById('carPhotoFile'); if (fileInput) fileInput.value = '';
-  const wrap = document.getElementById('carPhotoWrap'); if (wrap) wrap.classList.remove('has-file');
+  const wrap = document.getElementById('carPhotoWrap');
+  if (wrap) wrap.classList.toggle('has-file', carFormPhotos.length > 0);
   renderCarFormPhotos();
   modal.classList.remove('hidden');
   modal.classList.add('flex');
@@ -864,32 +947,51 @@ function closeCarForm() {
   carFormPhotos = [];
 }
 
+/* ============================================================
+   🆕 FILE UPLOAD HANDLER — DIRECT CLOUDINARY
+   ============================================================ */
 document.getElementById('carPhotoFile')?.addEventListener('change', async (e) => {
   const files = Array.from(e.target.files || []);
   if (!files.length) return;
-  let added = 0;
+
+  const wrap = document.getElementById('carPhotoWrap');
+  wrap?.classList.add('has-file');
+
+  showToast(`⏳ ${files.length} ፎቶ በመጫን ላይ...`);
+
+  let added = 0, failed = 0;
   for (const file of files) {
-    if (!file.type.startsWith('image/')) continue;
+    if (!file.type.startsWith('image/')) { failed++; continue; }
+    if (file.size > 10 * 1024 * 1024) { failed++; continue; }
+
     try {
-      const compressed = await compressImage(file, 900, 0.75);
-      const url = await uploadToStorage(compressed, 'cars');
+      // compress before upload (faster + smaller)
+      const compressed = await compressImage(file, 1200, 0.82);
+      const url = await uploadToCloudinary(compressed, 'cars');
       carFormPhotos.push(url);
       added++;
-    } catch (err) { console.warn(err); }
+      renderCarFormPhotos();   // live update each photo
+    } catch (err) {
+      console.warn('Upload failed:', err);
+      failed++;
+    }
   }
+
   if (added > 0) {
-    document.getElementById('carPhotoWrap')?.classList.add('has-file');
-    renderCarFormPhotos();
-    showToast(`📸 ${added} ፎቶ ተጨምሯል`);
+    showToast(`✅ ${added} ፎቶ ተጭኗል${failed ? ` (${failed} አልተሳካም)` : ''}`);
   } else {
-    showToast('እባክዎ ምስል ብቻ ይጫኑ', 'error');
+    showToast('❌ ፎቶ መጫን አልተቻለም — Cloudinary preset ያረጋግጡ', 'error');
   }
+
   e.target.value = '';
 });
 
+/* ============================================================
+   CLOUDINARY WIDGET (alternative)
+   ============================================================ */
 document.getElementById('cloudinaryBtn')?.addEventListener('click', () => {
   if (!CONFIG.cloudinary.enabled || typeof cloudinary === 'undefined') {
-    showToast('Cloudinary አልተዋቀረም', 'error');
+    showToast('Cloudinary Widget አልተጫነም', 'error');
     return;
   }
   if (!cloudinaryWidget) {
@@ -900,27 +1002,31 @@ document.getElementById('cloudinaryBtn')?.addEventListener('click', () => {
         folder: 'ev-golf/cars',
         sources: ['local', 'camera', 'url'],
         multiple: true,
-        maxFiles: 10,
+        maxFiles: 15,
         clientAllowedFormats: ['jpg','jpeg','png','webp'],
-        maxFileSize: 5000000,
+        maxFileSize: 10000000,
         styles: { palette: {
           window: '#0f172a', windowBorder: '#10b981', tabIcon: '#10b981',
           textDark: '#f8fafc', textLight: '#94a3b8', link: '#34d399',
           action: '#059669', inProgress: '#34d399', complete: '#10b981', sourceBg: '#1e293b'
         }}
       }, (error, result) => {
-        if (error) { console.error(error); return; }
+        if (error) { console.error(error); showToast('Cloudinary error', 'error'); return; }
         if (result.event === 'success') {
           carFormPhotos.push(result.info.secure_url);
           renderCarFormPhotos();
-          showToast('☁️ ፎቶ ከCloudinary ተጨምሯል');
+          document.getElementById('carPhotoWrap')?.classList.add('has-file');
+          showToast('☁️ ፎቶ ተጨምሯል');
         }
       });
-    } catch (err) { console.error(err); showToast('Cloudinary ስህተት', 'error'); return; }
+    } catch (err) { console.error(err); showToast('Cloudinary Widget ስህተት', 'error'); return; }
   }
   cloudinaryWidget.open();
 });
 
+/* ============================================================
+   CAR FORM SUBMIT — with photo validation
+   ============================================================ */
 document.getElementById('carForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('carFormId').value;
@@ -931,6 +1037,13 @@ document.getElementById('carForm')?.addEventListener('submit', async (e) => {
   if (!nameVal) { showToast('የመኪና ስም ያስፈልጋል', 'error'); return; }
   if (seatsVal < 1) { showToast('የመቀመጫ ብዛት ያስፈልጋል', 'error'); return; }
   if (priceVal < 0) { showToast('ዋጋ ያስፈልጋል', 'error'); return; }
+
+  // 🛡️ ፎቶዎቹ ሁሉ http(s) URL መሆናቸውን አረጋግጥ
+  const notUploaded = carFormPhotos.filter(p => !/^https?:\/\//.test(p));
+  if (notUploaded.length) {
+    showToast(`⚠️ ${notUploaded.length} ፎቶ አልተጫነም — እንደገና ይሞክሩ`, 'error');
+    return;
+  }
 
   const data = {
     name: nameVal, seats: seatsVal, price: priceVal,
@@ -950,8 +1063,15 @@ document.getElementById('carForm')?.addEventListener('submit', async (e) => {
     video: document.getElementById('carFormVideo').value.trim(),
     tag: document.getElementById('carFormTag').value.trim(),
     desc: document.getElementById('carFormDesc').value.trim(),
-    photos: [...carFormPhotos]
+    photos: carFormPhotos.slice()   // ⭐ safe copy
   };
+
+  const submitBtn = document.getElementById('carFormSubmit');
+  const originalText = submitBtn?.innerHTML;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>በማስቀመጥ ላይ...';
+  }
 
   try {
     if (id) {
@@ -960,18 +1080,27 @@ document.getElementById('carForm')?.addEventListener('submit', async (e) => {
       if (car) Object.assign(car, data);
       saveCarsLocal();
     } else {
-      const newId = await saveCar(data);
       const accents = ['#10b981','#0ea5e9','#f59e0b','#8b5cf6','#ef4444'];
-      const newCar = { id: newId || (Math.max(0, ...carsData.map(c => c.id)) + 1), accent: accents[carsData.length % accents.length], ...data };
+      const newId = await saveCar(data);
+      const newCar = {
+        id: newId || (Math.max(0, ...carsData.map(c => c.id)) + 1),
+        accent: accents[carsData.length % accents.length],
+        ...data
+      };
       carsData.push(newCar);
       saveCarsLocal();
     }
     renderAdminCars();
     closeCarForm();
-    showToast('ተቀምጧል');
+    showToast('✅ ተቀምጧል');
   } catch (err) {
     console.error(err);
     showToast('ማስቀመጥ አልተቻለም: ' + (err.message || ''), 'error');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText || 'አስቀምጥ';
+    }
   }
 });
 
@@ -1130,7 +1259,7 @@ async function saveAdminSettings() {
   try {
     await saveSettingsDB(newSettings);
     settings = newSettings;
-    showToast('ቅንብሮች ተቀምጠዋል');
+    showToast('✅ ቅንብሮች ተቀምጠዋል');
   } catch (err) { showToast('ማስቀምጥ አልተቻለም', 'error'); }
 }
 
