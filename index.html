@@ -1224,7 +1224,7 @@ function updateHeroCar(keepIndex=false){
   if(!keepIndex)heroIndex=(heroIndex+1)%carsData.length;
   const car=carsData[heroIndex%carsData.length];
   const img=document.getElementById('heroCarImg');
-  if(img){img.style.opacity='0';setTimeout(()=>{try{img.src=carImage(car,'side');img.style.transition='opacity .6s';img.style.opacity='1'}catch(_){}},200)}
+  if(img){img.style.opacity='0';setTimeout(()=>{try{img.src=carImage(car,'side'); img.classList.add('loaded'); img.style.transition='opacity .6s';img.style.opacity='1'}catch(_){}},200)}
   const nameEl=document.getElementById('heroCarName');
   const rangeEl=document.getElementById('heroCarRange');
   const seatsEl=document.getElementById('heroCarSeats');
